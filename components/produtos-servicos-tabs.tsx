@@ -4,6 +4,10 @@ import { cn } from "@/lib/utils";
 
 const tabItems = [
 	{
+		href: "/cadastro/produtos-servicos/categorias",
+		label: "Categorias",
+	},
+	{
 		href: "/cadastro/produtos-servicos/produtos",
 		label: "Produtos",
 	},

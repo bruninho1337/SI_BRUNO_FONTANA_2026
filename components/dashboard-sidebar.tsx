@@ -16,6 +16,10 @@ const navigationItems = [
 
 const produtosServicosItems = [
 	{
+		href: "/cadastro/produtos-servicos/categorias",
+		label: "Categorias",
+	},
+	{
 		href: "/cadastro/produtos-servicos/produtos",
 		label: "Produtos",
 	},
