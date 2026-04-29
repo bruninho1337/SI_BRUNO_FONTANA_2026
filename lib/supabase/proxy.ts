@@ -3,6 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { hasEnvVars } from "../utils";
 
 export async function updateSession(request: NextRequest) {
+  const publicPaths = ["/", "/dashboard/barbeiro"];
+  const publicPathPrefixes = ["/cadastro"];
+  const pathname = request.nextUrl.pathname;
+  const isPublicPath =
+    publicPaths.includes(pathname) ||
+    publicPathPrefixes.some((prefix) => pathname.startsWith(prefix));
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -48,10 +55,10 @@ export async function updateSession(request: NextRequest) {
   const user = data?.claims;
 
   if (
-    request.nextUrl.pathname !== "/" &&
+    !isPublicPath &&
     !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
+    !pathname.startsWith("/login") &&
+    !pathname.startsWith("/auth")
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
