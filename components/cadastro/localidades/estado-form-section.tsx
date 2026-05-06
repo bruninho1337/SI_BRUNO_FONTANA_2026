@@ -38,19 +38,6 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 
 			<form action={createEstadoAction} className="space-y-4">
 				<div className="flex flex-col gap-2">
-					<Label htmlFor="uf-estado" className="text-sm text-neutral-800">
-						UF:
-					</Label>
-					<Input
-						id="uf-estado"
-						name="uf"
-						type="text"
-						placeholder="Ex: SP"
-						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
-					/>
-				</div>
-
-				<div className="flex flex-col gap-2">
 					<Label htmlFor="nome-estado" className="text-sm text-neutral-800">
 						Estado:
 					</Label>
@@ -59,6 +46,19 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 						name="estado"
 						type="text"
 						placeholder="Ex: São Paulo"
+						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
+					/>
+				</div>
+
+				<div className="flex flex-col gap-2">
+					<Label htmlFor="uf-estado" className="text-sm text-neutral-800">
+						UF:
+					</Label>
+					<Input
+						id="uf-estado"
+						name="uf"
+						type="text"
+						placeholder="Ex: SP"
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
 					/>
 				</div>

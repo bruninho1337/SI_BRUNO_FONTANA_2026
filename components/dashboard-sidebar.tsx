@@ -12,6 +12,11 @@ const navigationItems = [
 		label: "Dashboard",
 		description: "Visão geral do dia",
 	},
+	{
+		href: "/cadastro/clientes",
+		label: "Clientes",
+		description: "Cadastro de clientes",
+	},
 ];
 
 const produtosServicosItems = [

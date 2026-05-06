@@ -54,7 +54,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 			<form action={createServicoAction} className="space-y-4">
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="nome" className="text-sm text-neutral-800">
-						Nome do Serviço:
+						Serviço:
 					</Label>
 					<Input
 						id="nome"

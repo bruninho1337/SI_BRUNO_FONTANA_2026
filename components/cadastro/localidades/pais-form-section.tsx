@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 const camposPais = [
 	{
 		id: "pais",
-		label: "Nome do País",
+		label: "País",
 		placeholder: "Ex: Brasil",
 		type: "text",
 	},

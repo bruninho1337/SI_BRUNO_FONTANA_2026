@@ -29,7 +29,7 @@ export async function CategoriaFormSection({
 			<form action={createCategoriaAction} className="space-y-4">
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="nome" className="text-sm text-neutral-800">
-						Nome da Categoria:
+						Categoria:
 					</Label>
 					<Input
 						id="nome"

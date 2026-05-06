@@ -54,7 +54,7 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 			<form action={createProdutoAction} className="space-y-4">
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="nome" className="text-sm text-neutral-800">
-						Nome do Produto:
+						Produto:
 					</Label>
 					<Input
 						id="nome"
