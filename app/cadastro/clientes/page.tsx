@@ -18,7 +18,7 @@ export default async function CadastroClientesPage({
 	return (
 		<CadastroPageShell
 			title="Cadastro de Clientes"
-			description="Cadastre clientes fisicos ou juridicos com cidade, contato, limite de credito e status."
+			description="Cadastre clientes fisicos ou juridicos com cidade, contato e status."
 			tabs={null}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Dados do Cliente" />}>

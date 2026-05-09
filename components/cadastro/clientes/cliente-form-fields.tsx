@@ -19,7 +19,7 @@ type ClienteFormFieldsProps = {
 	action: (formData: FormData) => Promise<void>;
 };
 
-const inputClass = "h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900";
+const inputClass = "h-11 rounded-xl border border-neutral-300 bg-white px-4 text-neutral-900";
 
 export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsProps) {
 	const [tipo, setTipo] = useState("FISICA");
