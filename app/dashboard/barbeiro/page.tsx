@@ -74,14 +74,14 @@ export default function BarbeiroDashboardPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-neutral-100 p-6 md:p-8">
-			<div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row">
+		<div className="min-h-screen w-full overflow-x-hidden bg-neutral-100 p-4 sm:p-6 md:p-8">
+			<div className="mx-auto flex w-full max-w-7xl min-w-0 flex-col gap-6 lg:flex-row">
 				<DashboardSidebar />
 
-				<div className="flex-1 space-y-8">
-					<div className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
-						<div className="flex flex-col gap-2">
-							<h1 className="text-3xl font-bold text-neutral-900">
+				<div className="min-w-0 flex-1 space-y-8">
+					<div className="flex min-w-0 flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between md:p-6">
+						<div className="flex min-w-0 flex-col gap-2">
+							<h1 className="break-words text-2xl font-bold text-neutral-900 md:text-3xl">
 								Dashboard do Barbeiro
 							</h1>
 							<DashboardCurrentDate />
@@ -89,7 +89,7 @@ export default function BarbeiroDashboardPage() {
 
 						<Button
 							asChild
-							className="rounded-xl bg-neutral-900 text-white hover:bg-neutral-800"
+							className="w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 md:w-auto"
 						>
 							<Link href="/cadastro/produtos-servicos">
 								Cadastrar produto ou serviço
@@ -97,7 +97,7 @@ export default function BarbeiroDashboardPage() {
 						</Button>
 					</div>
 
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+					<div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 						<div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
 							<p className="text-sm text-neutral-500">Atendimentos hoje</p>
 							<h2 className="mt-2 text-3xl font-bold text-neutral-900">8</h2>
@@ -119,8 +119,8 @@ export default function BarbeiroDashboardPage() {
 						</div>
 					</div>
 
-					<div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-						<div className="xl:col-span-2 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+					<div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-3">
+						<div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6 xl:col-span-2">
 							<div className="mb-5 flex items-center justify-between">
 								<h2 className="text-xl font-semibold text-neutral-900">
 									Próximos atendimentos
@@ -162,7 +162,7 @@ export default function BarbeiroDashboardPage() {
 							</div>
 						</div>
 
-						<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+						<div className="min-w-0 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
 							<h2 className="text-xl font-semibold text-neutral-900">
 								Ações rápidas
 							</h2>
@@ -193,7 +193,7 @@ export default function BarbeiroDashboardPage() {
 						</div>
 					</div>
 
-					<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+					<div className="min-w-0 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
 						<div className="mb-5 flex items-center justify-between">
 							<h2 className="text-xl font-semibold text-neutral-900">
 								Atendimentos de hoje

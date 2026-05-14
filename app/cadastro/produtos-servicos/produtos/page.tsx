@@ -10,24 +10,37 @@ type CadastroProdutosPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		mode?: string;
+		edit?: string;
+		q?: string;
 	}>;
 };
 
-export default async function CadastroProdutosPage({
-	searchParams,
-}: CadastroProdutosPageProps) {
+export default function CadastroProdutosPage({ searchParams }: CadastroProdutosPageProps) {
 	return (
 		<CadastroPageShell
 			title="Cadastro de Produtos"
 			description="Tela exclusiva para o cadastro de produtos."
 			tabs={<ProdutosServicosTabs currentPath="/cadastro/produtos-servicos/produtos" />}
 		>
-			<Suspense fallback={<CadastroSectionFallback title="Dados do Produto" />}>
-				<ProdutoFormSection searchParams={searchParams} />
-			</Suspense>
 			<Suspense fallback={<CadastroSectionFallback title="Produtos cadastrados" />}>
-				<ProdutosListSection />
+				<CadastroProdutosContent searchParams={searchParams} />
 			</Suspense>
 		</CadastroPageShell>
+	);
+}
+
+async function CadastroProdutosContent({ searchParams }: CadastroProdutosPageProps) {
+	const params = await searchParams;
+	const resolvedSearchParams = Promise.resolve(params ?? {});
+	const showForm = params?.mode === "create" || Boolean(params?.edit);
+
+	return (
+		<>
+			{showForm ? (
+				<ProdutoFormSection searchParams={resolvedSearchParams} />
+			) : null}
+			<ProdutosListSection searchParams={resolvedSearchParams} />
+		</>
 	);
 }

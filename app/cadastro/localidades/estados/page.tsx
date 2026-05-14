@@ -10,24 +10,37 @@ type CadastroEstadosPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		mode?: string;
+		edit?: string;
+		q?: string;
 	}>;
 };
 
-export default async function CadastroEstadosPage({
-	searchParams,
-}: CadastroEstadosPageProps) {
+export default function CadastroEstadosPage({ searchParams }: CadastroEstadosPageProps) {
 	return (
 		<CadastroPageShell
 			title="Cadastro de Estados"
-			description="Tela exclusiva para a tabela `Estados`, já preparada para escolher o país por nome."
+			description="Tela exclusiva para a tabela Estados."
 			tabs={<LocalidadesTabs currentPath="/cadastro/localidades/estados" />}
 		>
-			<Suspense fallback={<CadastroSectionFallback title="Dados do Estado" />}>
-				<EstadoFormSection searchParams={searchParams} />
-			</Suspense>
 			<Suspense fallback={<CadastroSectionFallback title="Estados cadastrados" />}>
-				<EstadosListSection />
+				<CadastroEstadosContent searchParams={searchParams} />
 			</Suspense>
 		</CadastroPageShell>
+	);
+}
+
+async function CadastroEstadosContent({ searchParams }: CadastroEstadosPageProps) {
+	const params = await searchParams;
+	const resolvedSearchParams = Promise.resolve(params ?? {});
+	const showForm = params?.mode === "create" || Boolean(params?.edit);
+
+	return (
+		<>
+			{showForm ? (
+				<EstadoFormSection searchParams={resolvedSearchParams} />
+			) : null}
+			<EstadosListSection searchParams={resolvedSearchParams} />
+		</>
 	);
 }

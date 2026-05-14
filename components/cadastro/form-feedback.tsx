@@ -1,3 +1,9 @@
+"use client";
+
+import { useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+
 type FormFeedbackProps = {
 	params?: {
 		success?: string;
@@ -6,19 +12,33 @@ type FormFeedbackProps = {
 };
 
 export function FormFeedback({ params }: FormFeedbackProps) {
-	return (
-		<>
-			{params?.success ? (
-				<div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-					{params.success}
-				</div>
-			) : null}
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
 
-			{params?.error ? (
-				<div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-					{params.error}
-				</div>
-			) : null}
-		</>
-	);
+	useEffect(() => {
+		if (!params?.success && !params?.error) {
+			return;
+		}
+
+		if (params.success) {
+			toast.success(params.success);
+		}
+
+		if (params.error) {
+			toast.error(params.error);
+		}
+
+		const nextParams = new URLSearchParams(searchParams.toString());
+		nextParams.delete("success");
+		nextParams.delete("error");
+
+		const nextUrl = nextParams.toString()
+			? `${pathname}?${nextParams.toString()}`
+			: pathname;
+
+		router.replace(nextUrl, { scroll: false });
+	}, [params?.success, params?.error, pathname, router, searchParams]);
+
+	return null;
 }

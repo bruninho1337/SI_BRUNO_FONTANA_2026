@@ -6,12 +6,20 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
+const PRODUTOS_PATH = "/cadastro/produtos-servicos/produtos";
+const SERVICOS_PATH = "/cadastro/produtos-servicos/servicos";
+const CATEGORIAS_PATH = "/cadastro/produtos-servicos/categorias";
+
 function buildRedirect(path: string, type: "success" | "error", message: string) {
 	const params = new URLSearchParams({
 		[type]: message,
 	});
 
 	return `${path}?${params.toString()}`;
+}
+
+function getText(formData: FormData, name: string) {
+	return String(formData.get(name) ?? "").trim();
 }
 
 function parseDecimal(value: FormDataEntryValue | null) {
@@ -42,7 +50,7 @@ async function uploadImageIfPresent(file: File | null, folder: "produtos" | "ser
 	}
 
 	if (!file.type.startsWith("image/")) {
-		throw new Error("Selecione um arquivo de imagem válido.");
+		throw new Error("Selecione um arquivo de imagem valido.");
 	}
 
 	const bucketName = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || "cadastros";
@@ -71,29 +79,62 @@ async function uploadImageIfPresent(file: File | null, folder: "produtos" | "ser
 }
 
 export async function createProdutoAction(formData: FormData) {
-	const nome = String(formData.get("nome") ?? "").trim();
-	const codcategoriaValue = String(formData.get("codcategoria") ?? "").trim();
+	return saveProduto(formData);
+}
+
+export async function updateProdutoAction(formData: FormData) {
+	const codproduto = Number(getText(formData, "codproduto"));
+
+	if (Number.isNaN(codproduto)) {
+		redirect(buildRedirect(PRODUTOS_PATH, "error", "Produto invalido para edicao."));
+	}
+
+	return saveProduto(formData, codproduto);
+}
+
+export async function deleteProdutoAction(formData: FormData) {
+	const codproduto = Number(getText(formData, "codproduto"));
+
+	if (Number.isNaN(codproduto)) {
+		redirect(buildRedirect(PRODUTOS_PATH, "error", "Produto invalido para exclusao."));
+	}
+
+	const supabase = await createClient();
+	const { error } = await supabase.from("produtos").delete().eq("codproduto", codproduto);
+
+	if (error) {
+		redirect(buildRedirect(PRODUTOS_PATH, "error", error.message));
+	}
+
+	revalidatePath(PRODUTOS_PATH);
+	redirect(buildRedirect(PRODUTOS_PATH, "success", "Produto excluido com sucesso."));
+}
+
+async function saveProduto(formData: FormData, codproduto?: number) {
+	const nome = getText(formData, "nome");
+	const codcategoriaValue = getText(formData, "codcategoria");
 	const valor = parseDecimal(formData.get("valor"));
-	const quantidadeEstoque = Number(String(formData.get("quantidade_estoque") ?? "").trim() || "0");
+	const quantidadeEstoque = Number(getText(formData, "quantidade_estoque") || "0");
 	const valorDesconto = parseDecimal(formData.get("valor_desconto"));
-	const descricao = String(formData.get("descricao") ?? "").trim();
+	const descricao = getText(formData, "descricao");
 	const imagemArquivo = formData.get("imagem_arquivo");
-	const ativo = String(formData.get("ativo") ?? "S").trim().toUpperCase() || "S";
+	const imagemAtual = getText(formData, "imagem_url");
+	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!nome) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/produtos", "error", "Informe o nome do produto."));
+		redirect(buildRedirect(PRODUTOS_PATH, "error", "Informe o nome do produto."));
 	}
 
 	if (Number.isNaN(valor) || valor < 0) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/produtos", "error", "Informe um valor valido para o produto."));
+		redirect(buildRedirect(PRODUTOS_PATH, "error", "Informe um valor valido para o produto."));
 	}
 
 	if (Number.isNaN(quantidadeEstoque) || quantidadeEstoque < 0) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/produtos", "error", "Informe uma quantidade em estoque valida."));
+		redirect(buildRedirect(PRODUTOS_PATH, "error", "Informe uma quantidade em estoque valida."));
 	}
 
 	if (Number.isNaN(valorDesconto) || valorDesconto < 0 || valorDesconto > valor) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/produtos", "error", "O desconto do produto precisa estar entre 0 e o valor informado."));
+		redirect(buildRedirect(PRODUTOS_PATH, "error", "O desconto do produto precisa estar entre 0 e o valor informado."));
 	}
 
 	const supabase = await createClient();
@@ -105,16 +146,19 @@ export async function createProdutoAction(formData: FormData) {
 			"produtos"
 		);
 
-	const { error } = await supabase.from("produtos").insert({
-		nome,
-		codcategoria: codcategoriaValue ? Number(codcategoriaValue) : null,
-		valor,
-		quantidade_estoque: quantidadeEstoque,
-		valor_desconto: valorDesconto,
-		descricao: descricao || null,
-		imagem_url: uploadedImage?.publicUrl ?? null,
-		ativo,
-	});
+		const payload = {
+			nome,
+			codcategoria: codcategoriaValue ? Number(codcategoriaValue) : null,
+			valor,
+			quantidade_estoque: quantidadeEstoque,
+			valor_desconto: valorDesconto,
+			descricao: descricao || null,
+			imagem_url: uploadedImage?.publicUrl ?? (imagemAtual || null),
+			ativo,
+		};
+		const { error } = codproduto
+			? await supabase.from("produtos").update(payload).eq("codproduto", codproduto)
+			: await supabase.from("produtos").insert(payload);
 
 		if (error) {
 			if (uploadedImage) {
@@ -122,41 +166,74 @@ export async function createProdutoAction(formData: FormData) {
 				await adminClient.storage.from(uploadedImage.bucketName).remove([uploadedImage.path]);
 			}
 
-			redirect(buildRedirect("/cadastro/produtos-servicos/produtos", "error", error.message));
+			redirect(buildRedirect(PRODUTOS_PATH, "error", error.message));
 		}
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Nao foi possivel salvar o produto.";
-		redirect(buildRedirect("/cadastro/produtos-servicos/produtos", "error", message));
+		redirect(buildRedirect(PRODUTOS_PATH, "error", message));
 	}
 
-	revalidatePath("/cadastro/produtos-servicos/produtos");
-	redirect(buildRedirect("/cadastro/produtos-servicos/produtos", "success", "Produto salvo com sucesso."));
+	revalidatePath(PRODUTOS_PATH);
+	redirect(buildRedirect(PRODUTOS_PATH, "success", codproduto ? "Produto atualizado com sucesso." : "Produto salvo com sucesso."));
 }
 
 export async function createServicoAction(formData: FormData) {
-	const nome = String(formData.get("nome") ?? "").trim();
-	const codcategoriaValue = String(formData.get("codcategoria") ?? "").trim();
-	const duracaoMinutos = Number(String(formData.get("duracao_minutos") ?? "").trim() || "0");
+	return saveServico(formData);
+}
+
+export async function updateServicoAction(formData: FormData) {
+	const codservico = Number(getText(formData, "codservico"));
+
+	if (Number.isNaN(codservico)) {
+		redirect(buildRedirect(SERVICOS_PATH, "error", "Servico invalido para edicao."));
+	}
+
+	return saveServico(formData, codservico);
+}
+
+export async function deleteServicoAction(formData: FormData) {
+	const codservico = Number(getText(formData, "codservico"));
+
+	if (Number.isNaN(codservico)) {
+		redirect(buildRedirect(SERVICOS_PATH, "error", "Servico invalido para exclusao."));
+	}
+
+	const supabase = await createClient();
+	const { error } = await supabase.from("servicos").delete().eq("codservico", codservico);
+
+	if (error) {
+		redirect(buildRedirect(SERVICOS_PATH, "error", error.message));
+	}
+
+	revalidatePath(SERVICOS_PATH);
+	redirect(buildRedirect(SERVICOS_PATH, "success", "Servico excluido com sucesso."));
+}
+
+async function saveServico(formData: FormData, codservico?: number) {
+	const nome = getText(formData, "nome");
+	const codcategoriaValue = getText(formData, "codcategoria");
+	const duracaoMinutos = Number(getText(formData, "duracao_minutos") || "0");
 	const valor = parseDecimal(formData.get("valor"));
 	const valorDesconto = parseDecimal(formData.get("valor_desconto"));
-	const descricao = String(formData.get("descricao") ?? "").trim();
+	const descricao = getText(formData, "descricao");
 	const imagemArquivo = formData.get("imagem_arquivo");
-	const ativo = String(formData.get("ativo") ?? "S").trim().toUpperCase() || "S";
+	const imagemAtual = getText(formData, "imagem_url");
+	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!nome) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/servicos", "error", "Informe o nome do servico."));
+		redirect(buildRedirect(SERVICOS_PATH, "error", "Informe o nome do servico."));
 	}
 
 	if (Number.isNaN(duracaoMinutos) || duracaoMinutos <= 0) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/servicos", "error", "Informe uma duracao valida em minutos."));
+		redirect(buildRedirect(SERVICOS_PATH, "error", "Informe uma duracao valida em minutos."));
 	}
 
 	if (Number.isNaN(valor) || valor < 0) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/servicos", "error", "Informe um valor valido para o servico."));
+		redirect(buildRedirect(SERVICOS_PATH, "error", "Informe um valor valido para o servico."));
 	}
 
 	if (Number.isNaN(valorDesconto) || valorDesconto < 0 || valorDesconto > valor) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/servicos", "error", "O desconto do servico precisa estar entre 0 e o valor informado."));
+		redirect(buildRedirect(SERVICOS_PATH, "error", "O desconto do servico precisa estar entre 0 e o valor informado."));
 	}
 
 	const supabase = await createClient();
@@ -168,16 +245,19 @@ export async function createServicoAction(formData: FormData) {
 			"servicos"
 		);
 
-	const { error } = await supabase.from("servicos").insert({
-		nome,
-		codcategoria: codcategoriaValue ? Number(codcategoriaValue) : null,
-		duracao_minutos: duracaoMinutos,
-		valor,
-		valor_desconto: valorDesconto,
-		descricao: descricao || null,
-		imagem_url: uploadedImage?.publicUrl ?? null,
-		ativo,
-	});
+		const payload = {
+			nome,
+			codcategoria: codcategoriaValue ? Number(codcategoriaValue) : null,
+			duracao_minutos: duracaoMinutos,
+			valor,
+			valor_desconto: valorDesconto,
+			descricao: descricao || null,
+			imagem_url: uploadedImage?.publicUrl ?? (imagemAtual || null),
+			ativo,
+		};
+		const { error } = codservico
+			? await supabase.from("servicos").update(payload).eq("codservico", codservico)
+			: await supabase.from("servicos").insert(payload);
 
 		if (error) {
 			if (uploadedImage) {
@@ -185,45 +265,82 @@ export async function createServicoAction(formData: FormData) {
 				await adminClient.storage.from(uploadedImage.bucketName).remove([uploadedImage.path]);
 			}
 
-			redirect(buildRedirect("/cadastro/produtos-servicos/servicos", "error", error.message));
+			redirect(buildRedirect(SERVICOS_PATH, "error", error.message));
 		}
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Nao foi possivel salvar o servico.";
-		redirect(buildRedirect("/cadastro/produtos-servicos/servicos", "error", message));
+		redirect(buildRedirect(SERVICOS_PATH, "error", message));
 	}
 
-	revalidatePath("/cadastro/produtos-servicos/servicos");
-	redirect(buildRedirect("/cadastro/produtos-servicos/servicos", "success", "Servico salvo com sucesso."));
+	revalidatePath(SERVICOS_PATH);
+	redirect(buildRedirect(SERVICOS_PATH, "success", codservico ? "Servico atualizado com sucesso." : "Servico salvo com sucesso."));
 }
 
 export async function createCategoriaAction(formData: FormData) {
-	const nome = String(formData.get("nome") ?? "").trim();
-	const descricao = String(formData.get("descricao") ?? "").trim();
-	const tipo = String(formData.get("tipo") ?? "AMBOS").trim().toUpperCase() || "AMBOS";
-	const ativo = String(formData.get("ativo") ?? "S").trim().toUpperCase() || "S";
+	return saveCategoria(formData);
+}
 
-	if (!nome) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/categorias", "error", "Informe o nome da categoria."));
+export async function updateCategoriaAction(formData: FormData) {
+	const codcategoria = Number(getText(formData, "codcategoria"));
+
+	if (Number.isNaN(codcategoria)) {
+		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Categoria invalida para edicao."));
 	}
 
-	if (!["PRODUTO", "SERVICO", "AMBOS"].includes(tipo)) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/categorias", "error", "Selecione um tipo valido para a categoria."));
+	return saveCategoria(formData, codcategoria);
+}
+
+export async function deleteCategoriaAction(formData: FormData) {
+	const codcategoria = Number(getText(formData, "codcategoria"));
+
+	if (Number.isNaN(codcategoria)) {
+		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Categoria invalida para exclusao."));
 	}
 
 	const supabase = await createClient();
-	const { error } = await supabase.from("categorias").insert({
+	const { error } = await supabase.from("categorias").delete().eq("codcategoria", codcategoria);
+
+	if (error) {
+		redirect(buildRedirect(CATEGORIAS_PATH, "error", error.message));
+	}
+
+	revalidatePath(CATEGORIAS_PATH);
+	revalidatePath(PRODUTOS_PATH);
+	revalidatePath(SERVICOS_PATH);
+	redirect(buildRedirect(CATEGORIAS_PATH, "success", "Categoria excluida com sucesso."));
+}
+
+async function saveCategoria(formData: FormData, codcategoria?: number) {
+	const nome = getText(formData, "nome");
+	const descricao = getText(formData, "descricao");
+	const tipo = getText(formData, "tipo").toUpperCase() || "AMBOS";
+	const ativo = getText(formData, "ativo").toUpperCase() || "S";
+
+	if (!nome) {
+		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Informe o nome da categoria."));
+	}
+
+	if (!["PRODUTO", "SERVICO", "AMBOS"].includes(tipo)) {
+		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Selecione um tipo valido para a categoria."));
+	}
+
+	const supabase = await createClient();
+	const payload = {
 		nome,
 		descricao: descricao || null,
 		tipo,
 		ativo,
-	});
+	};
+	const { error } = codcategoria
+		? await supabase.from("categorias").update(payload).eq("codcategoria", codcategoria)
+		: await supabase.from("categorias").insert(payload);
 
 	if (error) {
-		redirect(buildRedirect("/cadastro/produtos-servicos/categorias", "error", error.message));
+		redirect(buildRedirect(CATEGORIAS_PATH, "error", error.message));
 	}
 
-	revalidatePath("/cadastro/produtos-servicos/categorias");
-	revalidatePath("/cadastro/produtos-servicos/produtos");
-	revalidatePath("/cadastro/produtos-servicos/servicos");
-	redirect(buildRedirect("/cadastro/produtos-servicos/categorias", "success", "Categoria salva com sucesso."));
+	revalidatePath(CATEGORIAS_PATH);
+	revalidatePath(PRODUTOS_PATH);
+	revalidatePath(SERVICOS_PATH);
+	redirect(buildRedirect(CATEGORIAS_PATH, "success", codcategoria ? "Categoria atualizada com sucesso." : "Categoria salva com sucesso."));
 }

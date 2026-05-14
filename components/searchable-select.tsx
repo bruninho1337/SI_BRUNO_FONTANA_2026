@@ -18,6 +18,7 @@ type SearchableSelectProps = {
 	selectPlaceholder: string;
 	options: Option[];
 	required?: boolean;
+	defaultValue?: string;
 };
 
 export function SearchableSelect({
@@ -28,11 +29,12 @@ export function SearchableSelect({
 	selectPlaceholder,
 	options,
 	required = false,
+	defaultValue = "",
 }: SearchableSelectProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [isOpen, setIsOpen] = useState(false);
 	const [search, setSearch] = useState("");
-	const [selectedId, setSelectedId] = useState("");
+	const [selectedId, setSelectedId] = useState(defaultValue);
 
 	const filteredOptions = useMemo(() => {
 		const term = search.trim().toLowerCase();

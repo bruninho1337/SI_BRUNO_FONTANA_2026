@@ -10,24 +10,37 @@ type CadastroCategoriasPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		mode?: string;
+		edit?: string;
+		q?: string;
 	}>;
 };
 
-export default async function CadastroCategoriasPage({
-	searchParams,
-}: CadastroCategoriasPageProps) {
+export default function CadastroCategoriasPage({ searchParams }: CadastroCategoriasPageProps) {
 	return (
 		<CadastroPageShell
 			title="Cadastro de Categorias"
-			description="Tela exclusiva para o cadastro de categorias usadas por produtos e serviços."
+			description="Tela exclusiva para o cadastro de categorias usadas por produtos e servicos."
 			tabs={<ProdutosServicosTabs currentPath="/cadastro/produtos-servicos/categorias" />}
 		>
-			<Suspense fallback={<CadastroSectionFallback title="Dados da Categoria" />}>
-				<CategoriaFormSection searchParams={searchParams} />
-			</Suspense>
 			<Suspense fallback={<CadastroSectionFallback title="Categorias cadastradas" />}>
-				<CategoriasListSection />
+				<CadastroCategoriasContent searchParams={searchParams} />
 			</Suspense>
 		</CadastroPageShell>
+	);
+}
+
+async function CadastroCategoriasContent({ searchParams }: CadastroCategoriasPageProps) {
+	const params = await searchParams;
+	const resolvedSearchParams = Promise.resolve(params ?? {});
+	const showForm = params?.mode === "create" || Boolean(params?.edit);
+
+	return (
+		<>
+			{showForm ? (
+				<CategoriaFormSection searchParams={resolvedSearchParams} />
+			) : null}
+			<CategoriasListSection searchParams={resolvedSearchParams} />
+		</>
 	);
 }

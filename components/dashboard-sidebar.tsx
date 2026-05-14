@@ -67,7 +67,7 @@ export function DashboardSidebar() {
 	}, [isLocalidadesRoute]);
 
 	return (
-		<aside className="w-full rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm lg:w-72 lg:self-start">
+		<aside className="w-full min-w-0 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm lg:w-72 lg:shrink-0 lg:self-start">
 			<div className="mb-5">
 				<p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
 					Painel
@@ -86,16 +86,16 @@ export function DashboardSidebar() {
 							key={item.href}
 							href={item.href}
 							className={cn(
-								"rounded-2xl border px-4 py-3 transition",
+									"block min-w-0 rounded-2xl border px-4 py-3 transition",
 								isActive
 									? "border-neutral-900 bg-neutral-900 text-white"
 									: "border-neutral-200 bg-neutral-50 text-neutral-800 hover:bg-neutral-100"
 							)}
 						>
-							<p className="text-sm font-semibold">{item.label}</p>
+								<p className="break-words text-sm font-semibold">{item.label}</p>
 							<p
 								className={cn(
-									"mt-1 text-xs",
+										"mt-1 break-words text-xs",
 									isActive ? "text-neutral-200" : "text-neutral-500"
 								)}
 							>
@@ -110,7 +110,7 @@ export function DashboardSidebar() {
 						type="button"
 						onClick={() => setProdutosServicosOpen((current) => !current)}
 						className={cn(
-							"flex w-full items-center justify-between px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
+								"flex w-full min-w-0 items-center justify-between gap-3 px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
 							isProdutosServicosRoute &&
 								"rounded-t-2xl bg-neutral-900 text-white hover:bg-neutral-900"
 						)}
@@ -129,7 +129,7 @@ export function DashboardSidebar() {
 							</p>
 						</div>
 
-						<span className="text-sm font-semibold">
+							<span className="shrink-0 text-sm font-semibold">
 							{produtosServicosOpen ? "−" : "+"}
 						</span>
 					</button>
@@ -144,7 +144,7 @@ export function DashboardSidebar() {
 										key={item.href}
 										href={item.href}
 										className={cn(
-											"rounded-xl px-3 py-2 text-sm transition",
+												"rounded-xl px-3 py-2 text-sm transition break-words",
 											isActive
 												? "bg-neutral-900 text-white"
 												: "text-neutral-700 hover:bg-neutral-100"
@@ -163,7 +163,7 @@ export function DashboardSidebar() {
 						type="button"
 						onClick={() => setLocalidadesOpen((current) => !current)}
 						className={cn(
-							"flex w-full items-center justify-between px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
+								"flex w-full min-w-0 items-center justify-between gap-3 px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
 							isLocalidadesRoute && "rounded-t-2xl bg-neutral-900 text-white hover:bg-neutral-900"
 						)}
 					>
@@ -179,7 +179,7 @@ export function DashboardSidebar() {
 							</p>
 						</div>
 
-						<span className="text-sm font-semibold">
+							<span className="shrink-0 text-sm font-semibold">
 							{localidadesOpen ? "−" : "+"}
 						</span>
 					</button>
@@ -194,7 +194,7 @@ export function DashboardSidebar() {
 										key={item.href}
 										href={item.href}
 										className={cn(
-											"rounded-xl px-3 py-2 text-sm transition",
+												"rounded-xl px-3 py-2 text-sm transition break-words",
 											isActive
 												? "bg-neutral-900 text-white"
 												: "text-neutral-700 hover:bg-neutral-100"

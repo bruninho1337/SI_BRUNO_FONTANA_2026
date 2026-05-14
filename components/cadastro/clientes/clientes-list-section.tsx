@@ -1,4 +1,11 @@
+import { deleteClienteAction } from "@/app/cadastro/clientes/actions";
+import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
+import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { listarClientesComCidades } from "@/lib/clientes";
+
+type ClientesListSectionProps = {
+	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;
+};
 
 function formatDate(value: string | null) {
 	if (!value) {
@@ -8,20 +15,38 @@ function formatDate(value: string | null) {
 	return new Intl.DateTimeFormat("pt-BR").format(new Date(value));
 }
 
-export async function ClientesListSection() {
+export async function ClientesListSection({ searchParams }: ClientesListSectionProps) {
+	const params = await searchParams;
+	const query = String(params?.q ?? "").trim().toLowerCase();
 	const { cidades, clientes, error } = await listarClientesComCidades();
 	const cidadeMap = new Map((cidades ?? []).map((cidade) => [cidade.codcidade, cidade.cidade]));
+	const filtered = (clientes ?? []).filter((cliente) =>
+		[
+			cliente.codcliente,
+			cliente.cliente,
+			cliente.apelido,
+			cliente.tipo,
+			cidadeMap.get(cliente.codcidade),
+			cliente.telefone,
+			cliente.email,
+			cliente.cpf_cnpj,
+		].some((value) => String(value ?? "").toLowerCase().includes(query))
+	);
 
 	return (
 		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-			<div className="mb-5 flex items-center justify-between">
-				<h2 className="text-xl font-semibold text-neutral-900">Clientes cadastrados</h2>
-				<span className="text-sm text-neutral-500">{clientes?.length ?? 0} registro(s)</span>
-			</div>
+			<CadastroListToolbar
+				title="Clientes cadastrados"
+				count={filtered.length}
+				createHref="/cadastro/clientes?mode=create"
+				searchValue={params?.q}
+				searchPlaceholder="Pesquisar por cliente, cidade, telefone, e-mail ou documento"
+			/>
+			<FormFeedback params={params} />
 
 			{error ? (
 				<p className="text-sm text-red-600">Erro ao carregar clientes: {error.message}</p>
-			) : clientes && clientes.length > 0 ? (
+			) : filtered.length > 0 ? (
 				<div className="overflow-x-auto">
 					<table className="min-w-full border-separate border-spacing-y-3">
 						<thead>
@@ -34,10 +59,11 @@ export async function ClientesListSection() {
 								<th className="pb-2 font-medium">E-mail</th>
 								<th className="pb-2 font-medium">Criacao</th>
 								<th className="pb-2 font-medium">Ativo</th>
+								<th className="pb-2 text-right font-medium">Acoes</th>
 							</tr>
 						</thead>
 						<tbody>
-							{clientes.map((cliente) => (
+							{filtered.map((cliente) => (
 								<tr key={cliente.codcliente} className="bg-neutral-50">
 									<td className="rounded-l-xl px-4 py-3 text-sm font-semibold text-neutral-900">
 										{cliente.codcliente}
@@ -49,16 +75,18 @@ export async function ClientesListSection() {
 										) : null}
 									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{cliente.tipo}</td>
-									<td className="px-4 py-3 text-sm text-neutral-700">
-										{cidadeMap.get(cliente.codcidade) ?? "-"}
-									</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">{cidadeMap.get(cliente.codcidade) ?? "-"}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{cliente.telefone}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{cliente.email}</td>
-									<td className="px-4 py-3 text-sm text-neutral-700">
-										{formatDate(cliente.data_criacao)}
-									</td>
-									<td className="rounded-r-xl px-4 py-3 text-sm font-semibold text-neutral-900">
-										{cliente.ativo}
+									<td className="px-4 py-3 text-sm text-neutral-700">{formatDate(cliente.data_criacao)}</td>
+									<td className="px-4 py-3 text-sm font-semibold text-neutral-900">{cliente.ativo}</td>
+									<td className="rounded-r-xl px-4 py-3">
+										<CadastroRowActions
+											editHref={`/cadastro/clientes?edit=${cliente.codcliente}`}
+											deleteAction={deleteClienteAction}
+											idName="codcliente"
+											idValue={cliente.codcliente}
+										/>
 									</td>
 								</tr>
 							))}
@@ -66,7 +94,7 @@ export async function ClientesListSection() {
 					</table>
 				</div>
 			) : (
-				<p className="text-sm text-neutral-500">Nenhum cliente cadastrado no banco ainda.</p>
+				<p className="text-sm text-neutral-500">Nenhum cliente encontrado.</p>
 			)}
 		</div>
 	);

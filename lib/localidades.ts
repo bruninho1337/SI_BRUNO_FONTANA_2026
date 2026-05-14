@@ -9,6 +9,16 @@ export async function listarPaises() {
 		.order("pais", { ascending: true });
 }
 
+export async function buscarPaisPorId(codpais: number) {
+	const supabase = await createClient();
+
+	return supabase
+		.from("paises")
+		.select("codpais, pais, sigla, ddi, moeda, ativo")
+		.eq("codpais", codpais)
+		.maybeSingle();
+}
+
 export async function listarPaisesParaSelecao() {
 	const supabase = await createClient();
 
@@ -41,6 +51,16 @@ export async function listarEstadosComPaises() {
 	return { paises, estados, error };
 }
 
+export async function buscarEstadoPorId(codestado: number) {
+	const supabase = await createClient();
+
+	return supabase
+		.from("estados")
+		.select("codestado, estado, uf, codpais, ativo")
+		.eq("codestado", codestado)
+		.maybeSingle();
+}
+
 export async function listarCidadesComEstados() {
 	const supabase = await createClient();
 
@@ -53,4 +73,14 @@ export async function listarCidadesComEstados() {
 	]);
 
 	return { estados, cidades, error };
+}
+
+export async function buscarCidadePorId(codcidade: number) {
+	const supabase = await createClient();
+
+	return supabase
+		.from("cidades")
+		.select("codcidade, cidade, codest, ativo")
+		.eq("codcidade", codcidade)
+		.maybeSingle();
 }

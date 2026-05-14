@@ -17,12 +17,24 @@ type Option = {
 type ClienteFormFieldsProps = {
 	cidadeOptions: Option[];
 	action: (formData: FormData) => Promise<void>;
+	initialData?: Record<string, string | number | null>;
+	submitLabel?: string;
 };
 
 const inputClass = "h-11 rounded-xl border border-neutral-300 bg-white px-4 text-neutral-900";
 
-export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsProps) {
-	const [tipo, setTipo] = useState("FISICA");
+function keepOnlyDigits(event: React.FormEvent<HTMLInputElement>) {
+	const input = event.currentTarget;
+	input.value = input.value.replace(/\D/g, "");
+}
+
+export function ClienteFormFields({
+	cidadeOptions,
+	action,
+	initialData,
+	submitLabel = "Salvar cliente",
+}: ClienteFormFieldsProps) {
+	const [tipo, setTipo] = useState(String(initialData?.tipo ?? "FISICA"));
 	const dataNascimentoRef = useRef<HTMLInputElement>(null);
 	const isFisica = tipo === "FISICA";
 
@@ -39,6 +51,22 @@ export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsPr
 
 	return (
 		<form action={action} className="space-y-5">
+			{initialData?.codcliente ? (
+				<>
+					<input type="hidden" name="codcliente" value={String(initialData.codcliente)} />
+					<div className="flex flex-col gap-2">
+						<Label htmlFor="codcliente-display" className="text-sm text-neutral-800">
+							Codigo:
+						</Label>
+						<Input
+							id="codcliente-display"
+							value={String(initialData.codcliente)}
+							readOnly
+							className="h-11 rounded-xl border border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
+						/>
+					</div>
+				</>
+			) : null}
 			<div className="grid gap-4 md:grid-cols-2">
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="tipo" className="text-sm text-neutral-800">
@@ -61,14 +89,14 @@ export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsPr
 					<Label htmlFor="cliente" className="text-sm text-neutral-800">
 						Cliente:
 					</Label>
-					<Input id="cliente" name="cliente" minLength={5} maxLength={60} required className={inputClass} />
+					<Input id="cliente" name="cliente" minLength={5} maxLength={60} required defaultValue={String(initialData?.cliente ?? "")} className={inputClass} />
 				</div>
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="apelido" className="text-sm text-neutral-800">
 						Apelido:
 					</Label>
-					<Input id="apelido" name="apelido" maxLength={60} className={inputClass} />
+					<Input id="apelido" name="apelido" maxLength={60} defaultValue={String(initialData?.apelido ?? "")} className={inputClass} />
 				</div>
 
 				{isFisica ? (
@@ -76,7 +104,7 @@ export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsPr
 						<Label htmlFor="estado-civil" className="text-sm text-neutral-800">
 							Estado Civil:
 						</Label>
-						<select id="estado-civil" name="estado_civil" className={inputClass}>
+						<select id="estado-civil" name="estado_civil" defaultValue={String(initialData?.estado_civil ?? "")} className={inputClass}>
 							<option value="">Selecione</option>
 							<option value="SOLTEIRO">Solteiro(a)</option>
 							<option value="CASADO">Casado(a)</option>
@@ -92,35 +120,57 @@ export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsPr
 					<Label htmlFor="endereco" className="text-sm text-neutral-800">
 						Endereco:
 					</Label>
-					<Input id="endereco" name="endereco" minLength={5} maxLength={60} required className={inputClass} />
+					<Input id="endereco" name="endereco" minLength={5} maxLength={60} required defaultValue={String(initialData?.endereco ?? "")} className={inputClass} />
 				</div>
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="numero" className="text-sm text-neutral-800">
 						Numero:
 					</Label>
-					<Input id="numero" name="numero" minLength={1} maxLength={10} required className={inputClass} />
+					<Input
+						id="numero"
+						name="numero"
+						inputMode="numeric"
+						pattern="\\d*"
+						minLength={1}
+						maxLength={10}
+						required
+						defaultValue={String(initialData?.numero ?? "")}
+						onInput={keepOnlyDigits}
+						className={inputClass}
+					/>
 				</div>
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="complemento" className="text-sm text-neutral-800">
 						Complemento:
 					</Label>
-					<Input id="complemento" name="complemento" maxLength={60} className={inputClass} />
+					<Input id="complemento" name="complemento" maxLength={60} defaultValue={String(initialData?.complemento ?? "")} className={inputClass} />
 				</div>
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="bairro" className="text-sm text-neutral-800">
 						Bairro:
 					</Label>
-					<Input id="bairro" name="bairro" minLength={5} maxLength={60} required className={inputClass} />
+					<Input id="bairro" name="bairro" minLength={5} maxLength={60} required defaultValue={String(initialData?.bairro ?? "")} className={inputClass} />
 				</div>
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="cep" className="text-sm text-neutral-800">
 						CEP:
 					</Label>
-					<Input id="cep" name="cep" minLength={8} maxLength={9} required className={inputClass} />
+					<Input
+						id="cep"
+						name="cep"
+						inputMode="numeric"
+						pattern="\\d{8}"
+						minLength={8}
+						maxLength={8}
+						required
+						defaultValue={String(initialData?.cep ?? "")}
+						onInput={keepOnlyDigits}
+						className={inputClass}
+					/>
 				</div>
 
 				<SearchableSelect
@@ -131,20 +181,32 @@ export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsPr
 					selectPlaceholder="Selecione uma cidade"
 					options={cidadeOptions}
 					required
+					defaultValue={String(initialData?.codcidade ?? "")}
 				/>
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="telefone" className="text-sm text-neutral-800">
 						Telefone:
 					</Label>
-					<Input id="telefone" name="telefone" minLength={5} maxLength={20} required className={inputClass} />
+					<Input
+						id="telefone"
+						name="telefone"
+						inputMode="tel"
+						pattern="\\d{10,11}"
+						minLength={10}
+						maxLength={11}
+						required
+						defaultValue={String(initialData?.telefone ?? "")}
+						onInput={keepOnlyDigits}
+						className={inputClass}
+					/>
 				</div>
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="email" className="text-sm text-neutral-800">
 						E-mail:
 					</Label>
-					<Input id="email" name="email" type="email" minLength={5} maxLength={60} required className={inputClass} />
+					<Input id="email" name="email" type="email" minLength={5} maxLength={60} required defaultValue={String(initialData?.email ?? "")} className={inputClass} />
 				</div>
 
 				{isFisica ? (
@@ -153,11 +215,10 @@ export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsPr
 							<Label htmlFor="sexo" className="text-sm text-neutral-800">
 								Sexo:
 							</Label>
-							<select id="sexo" name="sexo" className={inputClass}>
+							<select id="sexo" name="sexo" defaultValue={String(initialData?.sexo ?? "")} className={inputClass}>
 								<option value="">Selecione</option>
 								<option value="MASCULINO">Masculino</option>
 								<option value="FEMININO">Feminino</option>
-								<option value="OUTROS">Outros</option>
 							</select>
 						</div>
 
@@ -165,7 +226,7 @@ export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsPr
 							<Label htmlFor="nacionalidade" className="text-sm text-neutral-800">
 								Nacionalidade:
 							</Label>
-							<Input id="nacionalidade" name="nacionalidade" minLength={5} maxLength={20} className={inputClass} />
+							<Input id="nacionalidade" name="nacionalidade" minLength={5} maxLength={20} defaultValue={String(initialData?.nacionalidade ?? "")} className={inputClass} />
 						</div>
 					</>
 				) : null}
@@ -180,6 +241,7 @@ export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsPr
 							id="data-nascimento"
 							name="data_nascimento"
 							type="date"
+							defaultValue={String(initialData?.data_nascimento ?? "")}
 							className={inputClass}
 						/>
 						<button
@@ -198,14 +260,34 @@ export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsPr
 					<Label htmlFor="rg-inscricao-estadual" className="text-sm text-neutral-800">
 						{isFisica ? "RG:" : "Inscricao Estadual:"}
 					</Label>
-					<Input id="rg-inscricao-estadual" name="rg_inscricao_estadual" minLength={5} maxLength={14} className={inputClass} />
+					<Input
+						id="rg-inscricao-estadual"
+						name="rg_inscricao_estadual"
+						inputMode="numeric"
+						pattern="\\d*"
+						minLength={5}
+						maxLength={14}
+						defaultValue={String(initialData?.rg_inscricao_estadual ?? "")}
+						onInput={keepOnlyDigits}
+						className={inputClass}
+					/>
 				</div>
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="cpf-cnpj" className="text-sm text-neutral-800">
 						{isFisica ? "CPF:" : "CNPJ:"}
 					</Label>
-					<Input id="cpf-cnpj" name="cpf_cnpj" minLength={5} maxLength={14} className={inputClass} />
+					<Input
+						id="cpf-cnpj"
+						name="cpf_cnpj"
+						inputMode="numeric"
+						pattern="(\\d{11}|\\d{14})?"
+						minLength={11}
+						maxLength={14}
+						defaultValue={String(initialData?.cpf_cnpj ?? "")}
+						onInput={keepOnlyDigits}
+						className={inputClass}
+					/>
 				</div>
 			</div>
 
@@ -217,14 +299,15 @@ export function ClienteFormFields({ cidadeOptions, action }: ClienteFormFieldsPr
 					id="observacoes"
 					name="observacoes"
 					maxLength={255}
+					defaultValue={String(initialData?.observacoes ?? "")}
 					className="min-h-28 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
 				/>
 			</div>
 
-			<ActiveToggle name="ativo" />
+			<ActiveToggle name="ativo" defaultValue={initialData?.ativo === "N" ? "N" : "S"} />
 
 			<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
-				Salvar cliente
+				{submitLabel}
 			</Button>
 		</form>
 	);

@@ -9,10 +9,13 @@ type CadastroClientesPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		mode?: string;
+		edit?: string;
+		q?: string;
 	}>;
 };
 
-export default async function CadastroClientesPage({
+export default function CadastroClientesPage({
 	searchParams,
 }: CadastroClientesPageProps) {
 	return (
@@ -21,12 +24,26 @@ export default async function CadastroClientesPage({
 			description="Cadastre clientes fisicos ou juridicos com cidade, contato e status."
 			tabs={null}
 		>
-			<Suspense fallback={<CadastroSectionFallback title="Dados do Cliente" />}>
-				<ClienteFormSection searchParams={searchParams} />
-			</Suspense>
 			<Suspense fallback={<CadastroSectionFallback title="Clientes cadastrados" />}>
-				<ClientesListSection />
+				<CadastroClientesContent searchParams={searchParams} />
 			</Suspense>
 		</CadastroPageShell>
+	);
+}
+
+async function CadastroClientesContent({
+	searchParams,
+}: CadastroClientesPageProps) {
+	const params = await searchParams;
+	const resolvedSearchParams = Promise.resolve(params ?? {});
+	const showForm = params?.mode === "create" || Boolean(params?.edit);
+
+	return (
+		<>
+			{showForm ? (
+				<ClienteFormSection searchParams={resolvedSearchParams} />
+			) : null}
+			<ClientesListSection searchParams={resolvedSearchParams} />
+		</>
 	);
 }

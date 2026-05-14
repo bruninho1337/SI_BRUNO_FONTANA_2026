@@ -10,24 +10,37 @@ type CadastroCidadesPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		mode?: string;
+		edit?: string;
+		q?: string;
 	}>;
 };
 
-export default async function CadastroCidadesPage({
-	searchParams,
-}: CadastroCidadesPageProps) {
+export default function CadastroCidadesPage({ searchParams }: CadastroCidadesPageProps) {
 	return (
 		<CadastroPageShell
 			title="Cadastro de Cidades"
-			description="Tela exclusiva para a tabela `Cidades`, com busca de estado por nome."
+			description="Tela exclusiva para a tabela Cidades."
 			tabs={<LocalidadesTabs currentPath="/cadastro/localidades/cidades" />}
 		>
-			<Suspense fallback={<CadastroSectionFallback title="Dados da Cidade" />}>
-				<CidadeFormSection searchParams={searchParams} />
-			</Suspense>
 			<Suspense fallback={<CadastroSectionFallback title="Cidades cadastradas" />}>
-				<CidadesListSection />
+				<CadastroCidadesContent searchParams={searchParams} />
 			</Suspense>
 		</CadastroPageShell>
+	);
+}
+
+async function CadastroCidadesContent({ searchParams }: CadastroCidadesPageProps) {
+	const params = await searchParams;
+	const resolvedSearchParams = Promise.resolve(params ?? {});
+	const showForm = params?.mode === "create" || Boolean(params?.edit);
+
+	return (
+		<>
+			{showForm ? (
+				<CidadeFormSection searchParams={resolvedSearchParams} />
+			) : null}
+			<CidadesListSection searchParams={resolvedSearchParams} />
+		</>
 	);
 }

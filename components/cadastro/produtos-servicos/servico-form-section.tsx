@@ -1,4 +1,4 @@
-import { createServicoAction } from "@/app/cadastro/produtos-servicos/actions";
+import { createServicoAction, updateServicoAction } from "@/app/cadastro/produtos-servicos/actions";
 import { ActiveToggle } from "@/components/active-toggle";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { SearchableSelect } from "@/components/searchable-select";
@@ -6,31 +6,19 @@ import { StorageImageUpload } from "@/components/storage-image-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { listarCategoriasPorTipo } from "@/lib/produtos-servicos";
-
-const camposServico = [
-	{ id: "valor", label: "Valor", placeholder: "Ex: 35,00", type: "text" },
-	{
-		id: "duracao_minutos",
-		label: "Duração em Minutos",
-		placeholder: "Ex: 45",
-		type: "number",
-	},
-	{
-		id: "valor_desconto",
-		label: "Valor de Desconto",
-		placeholder: "Ex: 5,00",
-		type: "text",
-	},
-];
+import { buscarServicoPorId, listarCategoriasPorTipo } from "@/lib/produtos-servicos";
 
 type ServicoFormSectionProps = {
-	searchParams?: Promise<{ success?: string; error?: string }>;
+	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;
 };
 
 export async function ServicoFormSection({ searchParams }: ServicoFormSectionProps) {
 	const params = await searchParams;
-	const { data: categorias, error } = await listarCategoriasPorTipo(["SERVICO", "AMBOS"]);
+	const editId = Number(params?.edit ?? "");
+	const [{ data: categorias, error }, { data: servicoEditando }] = await Promise.all([
+		listarCategoriasPorTipo(["SERVICO", "AMBOS"]),
+		Number.isNaN(editId) ? Promise.resolve({ data: null }) : buscarServicoPorId(editId),
+	]);
 
 	const categoriaOptions =
 		categorias?.map((categoria) => ({
@@ -41,8 +29,10 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 	return (
 		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
 			<div className="mb-6">
-				<h2 className="text-xl font-semibold text-neutral-900">Dados do Serviço</h2>
-				<p className="mt-1 text-sm text-neutral-500">Preencha os dados do serviço abaixo.</p>
+				<h2 className="text-xl font-semibold text-neutral-900">
+					{servicoEditando ? "Editar Servico" : "Novo Servico"}
+				</h2>
+				<p className="mt-1 text-sm text-neutral-500">Preencha os dados do servico abaixo.</p>
 			</div>
 
 			<FormFeedback params={params} />
@@ -51,16 +41,35 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 				<p className="mb-4 text-sm text-red-600">Erro ao carregar categorias: {error.message}</p>
 			) : null}
 
-			<form action={createServicoAction} className="space-y-4">
+			<form action={servicoEditando ? updateServicoAction : createServicoAction} className="space-y-4">
+				{servicoEditando ? (
+					<>
+						<input type="hidden" name="codservico" value={servicoEditando.codservico} />
+						<input type="hidden" name="imagem_url" value={servicoEditando.imagem_url ?? ""} />
+						<div className="flex flex-col gap-2">
+							<Label htmlFor="codservico-display" className="text-sm text-neutral-800">
+								Codigo:
+							</Label>
+							<Input
+								id="codservico-display"
+								value={servicoEditando.codservico}
+								readOnly
+								className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
+							/>
+						</div>
+					</>
+				) : null}
+
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="nome" className="text-sm text-neutral-800">
-						Serviço:
+						Servico:
 					</Label>
 					<Input
 						id="nome"
 						name="nome"
 						type="text"
 						placeholder="Ex: Corte social"
+						defaultValue={servicoEditando?.nome ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
 					/>
 				</div>
@@ -72,42 +81,50 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 					searchPlaceholder="Digite o nome da categoria"
 					selectPlaceholder="Selecione uma categoria"
 					options={categoriaOptions}
+					defaultValue={String(servicoEditando?.codcategoria ?? "")}
 				/>
 
-				{camposServico.map((campo) => (
-					<div key={campo.id} className="flex flex-col gap-2">
-						<Label htmlFor={campo.id} className="text-sm text-neutral-800">
-							{campo.label}:
+				<div className="grid gap-4 md:grid-cols-3">
+					<div className="flex flex-col gap-2">
+						<Label htmlFor="valor" className="text-sm text-neutral-800">
+							Valor:
 						</Label>
-						<Input
-							id={campo.id}
-							name={campo.id}
-							type={campo.type}
-							placeholder={campo.placeholder}
-							className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
-						/>
+						<Input id="valor" name="valor" type="text" placeholder="Ex: 35,00" defaultValue={String(servicoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
-				))}
+					<div className="flex flex-col gap-2">
+						<Label htmlFor="duracao_minutos" className="text-sm text-neutral-800">
+							Duracao:
+						</Label>
+						<Input id="duracao_minutos" name="duracao_minutos" type="number" placeholder="Ex: 45" defaultValue={String(servicoEditando?.duracao_minutos ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+					</div>
+					<div className="flex flex-col gap-2">
+						<Label htmlFor="valor_desconto" className="text-sm text-neutral-800">
+							Desconto:
+						</Label>
+						<Input id="valor_desconto" name="valor_desconto" type="text" placeholder="Ex: 5,00" defaultValue={String(servicoEditando?.valor_desconto ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+					</div>
+				</div>
 
 				<StorageImageUpload name="imagem_arquivo" label="Imagem" folder="servicos" />
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="descricao" className="text-sm text-neutral-800">
-						Descrição:
+						Descricao:
 					</Label>
 					<textarea
 						id="descricao"
 						name="descricao"
 						placeholder="Descreva rapidamente o servico"
 						rows={4}
+						defaultValue={servicoEditando?.descricao ?? ""}
 						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
 
-				<ActiveToggle name="ativo" />
+				<ActiveToggle name="ativo" defaultValue={servicoEditando?.ativo === "N" ? "N" : "S"} />
 
 				<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
-					Salvar serviço
+					{servicoEditando ? "Atualizar servico" : "Salvar servico"}
 				</Button>
 			</form>
 		</div>

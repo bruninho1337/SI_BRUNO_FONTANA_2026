@@ -10,24 +10,37 @@ type CadastroServicosPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		mode?: string;
+		edit?: string;
+		q?: string;
 	}>;
 };
 
-export default async function CadastroServicosPage({
-	searchParams,
-}: CadastroServicosPageProps) {
+export default function CadastroServicosPage({ searchParams }: CadastroServicosPageProps) {
 	return (
 		<CadastroPageShell
-			title="Cadastro de Serviços"
-			description="Tela exclusiva para o cadastro de serviços."
+			title="Cadastro de Servicos"
+			description="Tela exclusiva para o cadastro de servicos."
 			tabs={<ProdutosServicosTabs currentPath="/cadastro/produtos-servicos/servicos" />}
 		>
-			<Suspense fallback={<CadastroSectionFallback title="Dados do Serviço" />}>
-				<ServicoFormSection searchParams={searchParams} />
-			</Suspense>
-			<Suspense fallback={<CadastroSectionFallback title="Serviços cadastrados" />}>
-				<ServicosListSection />
+			<Suspense fallback={<CadastroSectionFallback title="Servicos cadastrados" />}>
+				<CadastroServicosContent searchParams={searchParams} />
 			</Suspense>
 		</CadastroPageShell>
+	);
+}
+
+async function CadastroServicosContent({ searchParams }: CadastroServicosPageProps) {
+	const params = await searchParams;
+	const resolvedSearchParams = Promise.resolve(params ?? {});
+	const showForm = params?.mode === "create" || Boolean(params?.edit);
+
+	return (
+		<>
+			{showForm ? (
+				<ServicoFormSection searchParams={resolvedSearchParams} />
+			) : null}
+			<ServicosListSection searchParams={resolvedSearchParams} />
+		</>
 	);
 }
