@@ -131,7 +131,7 @@ export function ClienteFormFields({
 						id="numero"
 						name="numero"
 						inputMode="numeric"
-						pattern="\\d*"
+						pattern="[0-9]*"
 						minLength={1}
 						maxLength={10}
 						required
@@ -163,7 +163,7 @@ export function ClienteFormFields({
 						id="cep"
 						name="cep"
 						inputMode="numeric"
-						pattern="\\d{8}"
+						pattern="[0-9]{8}"
 						minLength={8}
 						maxLength={8}
 						required
@@ -192,7 +192,7 @@ export function ClienteFormFields({
 						id="telefone"
 						name="telefone"
 						inputMode="tel"
-						pattern="\\d{10,11}"
+						pattern="[0-9]{10,11}"
 						minLength={10}
 						maxLength={11}
 						required
@@ -264,7 +264,7 @@ export function ClienteFormFields({
 						id="rg-inscricao-estadual"
 						name="rg_inscricao_estadual"
 						inputMode="numeric"
-						pattern="\\d*"
+						pattern="[0-9]*"
 						minLength={5}
 						maxLength={14}
 						defaultValue={String(initialData?.rg_inscricao_estadual ?? "")}
@@ -281,7 +281,7 @@ export function ClienteFormFields({
 						id="cpf-cnpj"
 						name="cpf_cnpj"
 						inputMode="numeric"
-						pattern="(\\d{11}|\\d{14})?"
+						pattern="([0-9]{11}|[0-9]{14})?"
 						minLength={11}
 						maxLength={14}
 						defaultValue={String(initialData?.cpf_cnpj ?? "")}
