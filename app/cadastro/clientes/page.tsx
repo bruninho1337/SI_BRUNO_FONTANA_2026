@@ -20,8 +20,8 @@ export default function CadastroClientesPage({
 }: CadastroClientesPageProps) {
 	return (
 		<CadastroPageShell
-			title="Cadastro de Clientes"
-			description="Cadastre clientes fisicos ou juridicos com cidade, contato e status."
+			title="Clientes"
+			description="Consulte clientes fisicos ou juridicos com cidade, e-mail ou documento."
 			tabs={null}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Clientes cadastrados" />}>

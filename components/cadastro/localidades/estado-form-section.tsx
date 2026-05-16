@@ -5,6 +5,7 @@ import { SearchableSelect } from "@/components/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 import { buscarEstadoPorId, listarPaisesParaSelecao } from "@/lib/localidades";
 
 type EstadoFormSectionProps = {
@@ -68,15 +69,16 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 				/>
 
 				<div className="flex flex-col gap-2 md:col-span-4">
-					<Label htmlFor="nome-estado" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="nome-estado" className="text-sm text-neutral-800">
 						Estado:
-					</Label>
+					</RequiredLabel>
 					<Input
 						id="nome-estado"
 						name="estado"
 						type="text"
 						minLength={2}
 						maxLength={60}
+						required
 						placeholder="Ex: Sao Paulo"
 						defaultValue={estadoEditando?.estado ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
@@ -84,15 +86,16 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 				</div>
 
 				<div className="flex flex-col gap-2 md:col-span-2">
-					<Label htmlFor="uf-estado" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="uf-estado" className="text-sm text-neutral-800">
 						UF:
-					</Label>
+					</RequiredLabel>
 					<Input
 						id="uf-estado"
 						name="uf"
 						type="text"
 						minLength={2}
 						maxLength={2}
+						required
 						placeholder="Ex: SP"
 						defaultValue={estadoEditando?.uf ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"

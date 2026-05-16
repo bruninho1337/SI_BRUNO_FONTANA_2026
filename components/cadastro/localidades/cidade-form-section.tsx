@@ -5,6 +5,7 @@ import { SearchableSelect } from "@/components/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 import { buscarCidadePorId, listarEstadosParaSelecao } from "@/lib/localidades";
 
 type CidadeFormSectionProps = {
@@ -68,15 +69,16 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 				/>
 
 				<div className="flex flex-col gap-2 md:col-span-4">
-					<Label htmlFor="nome-cidade" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="nome-cidade" className="text-sm text-neutral-800">
 						Cidade:
-					</Label>
+					</RequiredLabel>
 					<Input
 						id="nome-cidade"
 						name="cidade"
 						type="text"
 						minLength={2}
 						maxLength={100}
+						required
 						placeholder="Ex: Campinas"
 						defaultValue={cidadeEditando?.cidade ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"

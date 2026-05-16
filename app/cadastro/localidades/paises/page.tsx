@@ -19,8 +19,8 @@ type CadastroPaisesPageProps = {
 export default function CadastroPaisesPage({ searchParams }: CadastroPaisesPageProps) {
 	return (
 		<CadastroPageShell
-			title="Cadastro de Paises"
-			description="Tela exclusiva para a tabela Paises."
+			title="Países"
+			description="Tela de consulta para a tabela de Países."
 			tabs={<LocalidadesTabs currentPath="/cadastro/localidades/paises" />}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Paises cadastrados" />}>

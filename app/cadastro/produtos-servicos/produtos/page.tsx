@@ -19,8 +19,8 @@ type CadastroProdutosPageProps = {
 export default function CadastroProdutosPage({ searchParams }: CadastroProdutosPageProps) {
 	return (
 		<CadastroPageShell
-			title="Cadastro de Produtos"
-			description="Tela exclusiva para o cadastro de produtos."
+			title="Produtos"
+			description="Consulta de produtos por categoria ou descrição."
 			tabs={<ProdutosServicosTabs currentPath="/cadastro/produtos-servicos/produtos" />}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Produtos cadastrados" />}>

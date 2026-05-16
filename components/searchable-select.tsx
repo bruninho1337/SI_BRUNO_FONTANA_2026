@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 import { cn } from "@/lib/utils";
 
 type Option = {
@@ -76,9 +77,15 @@ export function SearchableSelect({
 
 	return (
 		<div ref={containerRef} className={cn("space-y-2", className)}>
-			<Label htmlFor={`${name}-trigger`} className="text-sm text-neutral-800">
-				{label}:
-			</Label>
+			{required ? (
+				<RequiredLabel htmlFor={`${name}-trigger`} className="text-sm text-neutral-800">
+					{label}:
+				</RequiredLabel>
+			) : (
+				<Label htmlFor={`${name}-trigger`} className="text-sm text-neutral-800">
+					{label}:
+				</Label>
+			)}
 			<input name={name} value={selectedId} required={required} type="hidden" readOnly />
 			<button
 				id={`${name}-trigger`}

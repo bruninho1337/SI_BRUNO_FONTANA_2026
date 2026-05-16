@@ -15,7 +15,7 @@ const navigationItems = [
 	{
 		href: "/cadastro/clientes",
 		label: "Clientes",
-		description: "Cadastro de clientes",
+		description: "Lista de clientes",
 	},
 ];
 
@@ -125,7 +125,7 @@ export function DashboardSidebar() {
 										: "text-neutral-500"
 								)}
 							>
-								Cadastros de produtos e serviços
+								Lista de produtos e serviços
 							</p>
 						</div>
 

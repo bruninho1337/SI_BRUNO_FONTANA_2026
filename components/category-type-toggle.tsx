@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 import { cn } from "@/lib/utils";
 
 type CategoriaTipo = "PRODUTO" | "SERVICO" | "AMBOS";
@@ -28,7 +28,7 @@ export function CategoryTypeToggle({
 
 	return (
 		<div className={cn("flex flex-col gap-2", className)}>
-			<Label className="text-sm text-neutral-800">Tipo:</Label>
+			<RequiredLabel className="text-sm text-neutral-800">Tipo:</RequiredLabel>
 			<input type="hidden" name={name} value={value} readOnly />
 			<div className="flex flex-wrap gap-3">
 				{options.map((option) => (

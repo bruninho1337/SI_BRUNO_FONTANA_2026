@@ -6,6 +6,7 @@ import { StorageImageUpload } from "@/components/storage-image-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 import { buscarServicoPorId, listarCategoriasPorTipo } from "@/lib/produtos-servicos";
 
 type ServicoFormSectionProps = {
@@ -62,13 +63,14 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 				) : null}
 
 				<div className="flex flex-col gap-2 md:col-span-5">
-					<Label htmlFor="nome" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="nome" className="text-sm text-neutral-800">
 						Servico:
-					</Label>
+					</RequiredLabel>
 					<Input
 						id="nome"
 						name="nome"
 						type="text"
+						required
 						placeholder="Ex: Corte social"
 						defaultValue={servicoEditando?.nome ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
@@ -101,10 +103,10 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 						<Input id="valor" name="valor" type="text" placeholder="Ex: 35,00" defaultValue={String(servicoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-2">
-						<Label htmlFor="duracao_minutos" className="text-sm text-neutral-800">
+						<RequiredLabel htmlFor="duracao_minutos" className="text-sm text-neutral-800">
 							Duracao:
-						</Label>
-						<Input id="duracao_minutos" name="duracao_minutos" type="number" placeholder="Ex: 45" defaultValue={String(servicoEditando?.duracao_minutos ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+						</RequiredLabel>
+						<Input id="duracao_minutos" name="duracao_minutos" type="number" required placeholder="Ex: 45" defaultValue={String(servicoEditando?.duracao_minutos ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-3">
 						<Label htmlFor="valor_desconto" className="text-sm text-neutral-800">

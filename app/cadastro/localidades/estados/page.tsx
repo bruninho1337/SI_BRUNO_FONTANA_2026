@@ -19,8 +19,8 @@ type CadastroEstadosPageProps = {
 export default function CadastroEstadosPage({ searchParams }: CadastroEstadosPageProps) {
 	return (
 		<CadastroPageShell
-			title="Cadastro de Estados"
-			description="Tela exclusiva para a tabela Estados."
+			title="Estados"
+			description="Tela de consulta para a tabela de Estados."
 			tabs={<LocalidadesTabs currentPath="/cadastro/localidades/estados" />}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Estados cadastrados" />}>

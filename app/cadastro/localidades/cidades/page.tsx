@@ -19,8 +19,8 @@ type CadastroCidadesPageProps = {
 export default function CadastroCidadesPage({ searchParams }: CadastroCidadesPageProps) {
 	return (
 		<CadastroPageShell
-			title="Cadastro de Cidades"
-			description="Tela exclusiva para a tabela Cidades."
+			title="Cidades"
+			description="Tela de consulta para a tabela de Cidades."
 			tabs={<LocalidadesTabs currentPath="/cadastro/localidades/cidades" />}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Cidades cadastradas" />}>

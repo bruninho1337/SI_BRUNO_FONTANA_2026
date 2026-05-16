@@ -8,6 +8,7 @@ import { SearchableSelect } from "@/components/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 
 type Option = {
 	id: string;
@@ -144,9 +145,9 @@ export function ClienteFormFields({
 
 			<div className="grid gap-4 md:grid-cols-12">
 				<div className={fieldClass.sm}>
-					<Label htmlFor="tipo" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="tipo" className="text-sm text-neutral-800">
 						Tipo:
-					</Label>
+					</RequiredLabel>
 					{isEditing ? <input type="hidden" name="tipo" value={tipo} /> : null}
 					<select
 						id="tipo"
@@ -163,9 +164,9 @@ export function ClienteFormFields({
 				</div>
 
 				<div className={fieldClass.lg}>
-					<Label htmlFor="cliente" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="cliente" className="text-sm text-neutral-800">
 						Cliente:
-					</Label>
+					</RequiredLabel>
 					<Input id="cliente" name="cliente" minLength={5} maxLength={60} required defaultValue={String(initialData?.cliente ?? "")} className={inputClass} />
 				</div>
 
@@ -194,16 +195,16 @@ export function ClienteFormFields({
 				) : null}
 
 				<div className={fieldClass.xl}>
-					<Label htmlFor="endereco" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="endereco" className="text-sm text-neutral-800">
 						Endereco:
-					</Label>
+					</RequiredLabel>
 					<Input id="endereco" name="endereco" minLength={5} maxLength={60} required defaultValue={String(initialData?.endereco ?? "")} className={inputClass} />
 				</div>
 
 				<div className={fieldClass.xs}>
-					<Label htmlFor="numero" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="numero" className="text-sm text-neutral-800">
 						Numero:
-					</Label>
+					</RequiredLabel>
 					<Input
 						id="numero"
 						name="numero"
@@ -226,16 +227,16 @@ export function ClienteFormFields({
 				</div>
 
 				<div className={fieldClass.md}>
-					<Label htmlFor="bairro" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="bairro" className="text-sm text-neutral-800">
 						Bairro:
-					</Label>
+					</RequiredLabel>
 					<Input id="bairro" name="bairro" minLength={5} maxLength={60} required defaultValue={String(initialData?.bairro ?? "")} className={inputClass} />
 				</div>
 
 				<div className={fieldClass.sm}>
-					<Label htmlFor="cep" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="cep" className="text-sm text-neutral-800">
 						CEP:
-					</Label>
+					</RequiredLabel>
 					<Input
 						id="cep"
 						name="cep"
@@ -263,9 +264,9 @@ export function ClienteFormFields({
 				/>
 
 				<div className={fieldClass.sm}>
-					<Label htmlFor="telefone" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="telefone" className="text-sm text-neutral-800">
 						Telefone:
-					</Label>
+					</RequiredLabel>
 					<Input
 						id="telefone"
 						name="telefone"
@@ -281,18 +282,18 @@ export function ClienteFormFields({
 				</div>
 
 				<div className={fieldClass.lg}>
-					<Label htmlFor="email" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="email" className="text-sm text-neutral-800">
 						E-mail:
-					</Label>
+					</RequiredLabel>
 					<Input id="email" name="email" type="email" minLength={5} maxLength={60} required defaultValue={String(initialData?.email ?? "")} className={inputClass} />
 				</div>
 
 				{isFisica ? (
 					<>
 						<div className={fieldClass.sm}>
-							<Label htmlFor="sexo" className="text-sm text-neutral-800">
+							<RequiredLabel htmlFor="sexo" className="text-sm text-neutral-800">
 								Sexo:
-							</Label>
+							</RequiredLabel>
 							<select
 								id="sexo"
 								name="sexo"

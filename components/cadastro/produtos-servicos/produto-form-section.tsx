@@ -6,6 +6,7 @@ import { StorageImageUpload } from "@/components/storage-image-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 import { buscarProdutoPorId, listarCategoriasPorTipo } from "@/lib/produtos-servicos";
 
 type ProdutoFormSectionProps = {
@@ -62,13 +63,14 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 				) : null}
 
 				<div className="flex flex-col gap-2 md:col-span-5">
-					<Label htmlFor="nome" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="nome" className="text-sm text-neutral-800">
 						Produto:
-					</Label>
+					</RequiredLabel>
 					<Input
 						id="nome"
 						name="nome"
 						type="text"
+						required
 						placeholder="Ex: Pomada modeladora"
 						defaultValue={produtoEditando?.nome ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"

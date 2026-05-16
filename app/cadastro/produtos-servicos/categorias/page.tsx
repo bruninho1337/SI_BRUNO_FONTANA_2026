@@ -19,8 +19,8 @@ type CadastroCategoriasPageProps = {
 export default function CadastroCategoriasPage({ searchParams }: CadastroCategoriasPageProps) {
 	return (
 		<CadastroPageShell
-			title="Cadastro de Categorias"
-			description="Tela exclusiva para o cadastro de categorias usadas por produtos e servicos."
+			title="Categorias"
+			description="Tela de consulta para a tabela de Categorias."
 			tabs={<ProdutosServicosTabs currentPath="/cadastro/produtos-servicos/categorias" />}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Categorias cadastradas" />}>

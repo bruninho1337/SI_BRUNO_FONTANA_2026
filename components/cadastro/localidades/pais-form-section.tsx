@@ -4,6 +4,7 @@ import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 import { buscarPaisPorId } from "@/lib/localidades";
 
 const camposPais = [
@@ -66,14 +67,21 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 
 				{camposPais.map((campo) => (
 					<div key={campo.id} className={`${fieldClass} ${campo.className}`}>
-						<Label htmlFor={campo.id} className="text-sm text-neutral-800">
-							{campo.label}:
-						</Label>
+						{campo.id === "pais" ? (
+							<RequiredLabel htmlFor={campo.id} className="text-sm text-neutral-800">
+								{campo.label}:
+							</RequiredLabel>
+						) : (
+							<Label htmlFor={campo.id} className="text-sm text-neutral-800">
+								{campo.label}:
+							</Label>
+						)}
 						<Input
 							id={campo.id}
 							name={campo.id}
 							type={campo.type}
 							maxLength={campo.maxLength}
+							required={campo.id === "pais"}
 							placeholder={campo.placeholder}
 							defaultValue={String(paisEditando?.[campo.id as keyof typeof paisEditando] ?? "")}
 							className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
