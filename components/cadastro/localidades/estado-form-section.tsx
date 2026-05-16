@@ -43,10 +43,11 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 			) : null}
 
 			<form action={estadoEditando ? updateEstadoAction : createEstadoAction} className="space-y-4">
+				<div className="grid gap-4 md:grid-cols-12">
 				{estadoEditando ? (
 					<>
 						<input type="hidden" name="codestado" value={estadoEditando.codestado} />
-						<div className="flex flex-col gap-2">
+						<div className="flex flex-col gap-2 md:col-span-2">
 							<Label htmlFor="codestado-display" className="text-sm text-neutral-800">
 								Codigo:
 							</Label>
@@ -60,7 +61,13 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 					</>
 				) : null}
 
-				<div className="flex flex-col gap-2">
+				<ActiveToggle
+					name="ativo"
+					defaultValue={estadoEditando?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+				/>
+
+				<div className="flex flex-col gap-2 md:col-span-4">
 					<Label htmlFor="nome-estado" className="text-sm text-neutral-800">
 						Estado:
 					</Label>
@@ -68,13 +75,15 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 						id="nome-estado"
 						name="estado"
 						type="text"
+						minLength={2}
+						maxLength={60}
 						placeholder="Ex: Sao Paulo"
 						defaultValue={estadoEditando?.estado ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
 					/>
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className="flex flex-col gap-2 md:col-span-2">
 					<Label htmlFor="uf-estado" className="text-sm text-neutral-800">
 						UF:
 					</Label>
@@ -82,6 +91,8 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 						id="uf-estado"
 						name="uf"
 						type="text"
+						minLength={2}
+						maxLength={2}
 						placeholder="Ex: SP"
 						defaultValue={estadoEditando?.uf ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
@@ -97,9 +108,9 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 					options={paisOptions}
 					defaultValue={String(estadoEditando?.codpais ?? "")}
 					required
+					className="md:col-span-5"
 				/>
-
-				<ActiveToggle name="ativo" defaultValue={estadoEditando?.ativo === "N" ? "N" : "S"} />
+				</div>
 
 				<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 					{estadoEditando ? "Atualizar estado" : "Salvar estado"}

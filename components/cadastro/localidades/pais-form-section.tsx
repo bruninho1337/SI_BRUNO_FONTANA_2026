@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { buscarPaisPorId } from "@/lib/localidades";
 
 const camposPais = [
-	{ id: "pais", label: "Pais", placeholder: "Ex: Brasil", type: "text" },
-	{ id: "sigla", label: "Sigla", placeholder: "Ex: BR", type: "text" },
-	{ id: "ddi", label: "DDI", placeholder: "Ex: 55", type: "text" },
-	{ id: "moeda", label: "Moeda", placeholder: "Ex: BRL", type: "text" },
+	{ id: "pais", label: "Pais", placeholder: "Ex: Brasil", type: "text", maxLength: 60, className: "md:col-span-4" },
+	{ id: "sigla", label: "Sigla", placeholder: "Ex: BR", type: "text", maxLength: 5, className: "md:col-span-2" },
+	{ id: "ddi", label: "DDI", placeholder: "Ex: 55", type: "text", maxLength: 5, className: "md:col-span-2" },
+	{ id: "moeda", label: "Moeda", placeholder: "Ex: BRL", type: "text", maxLength: 10, className: "md:col-span-2" },
 ];
+
+const fieldClass = "flex flex-col gap-2";
 
 type PaisFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;
@@ -38,10 +40,11 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 			<FormFeedback params={params} />
 
 			<form action={paisEditando ? updatePaisAction : createPaisAction} className="space-y-4">
+				<div className="grid gap-4 md:grid-cols-12">
 				{paisEditando ? (
 					<>
 						<input type="hidden" name="codpais" value={paisEditando.codpais} />
-						<div className="flex flex-col gap-2">
+						<div className={`${fieldClass} md:col-span-2`}>
 							<Label htmlFor="codpais-display" className="text-sm text-neutral-800">
 								Codigo:
 							</Label>
@@ -55,8 +58,14 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 					</>
 				) : null}
 
+				<ActiveToggle
+					name="ativo"
+					defaultValue={paisEditando?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+				/>
+
 				{camposPais.map((campo) => (
-					<div key={campo.id} className="flex flex-col gap-2">
+					<div key={campo.id} className={`${fieldClass} ${campo.className}`}>
 						<Label htmlFor={campo.id} className="text-sm text-neutral-800">
 							{campo.label}:
 						</Label>
@@ -64,14 +73,14 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 							id={campo.id}
 							name={campo.id}
 							type={campo.type}
+							maxLength={campo.maxLength}
 							placeholder={campo.placeholder}
 							defaultValue={String(paisEditando?.[campo.id as keyof typeof paisEditando] ?? "")}
 							className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
 						/>
 					</div>
 				))}
-
-				<ActiveToggle name="ativo" defaultValue={paisEditando?.ativo === "N" ? "N" : "S"} />
+				</div>
 
 				<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 					{paisEditando ? "Atualizar pais" : "Salvar pais"}

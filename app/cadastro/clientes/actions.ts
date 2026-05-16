@@ -39,6 +39,66 @@ function hasOnlyDigitsAndFormatting(value: string) {
 	return /^[\d\s().+-]+$/.test(value);
 }
 
+function hasRepeatedDigits(value: string) {
+	return /^(\d)\1+$/.test(value);
+}
+
+function isValidCpf(value: string) {
+	if (value.length !== 11 || hasRepeatedDigits(value)) {
+		return false;
+	}
+
+	const digits = value.split("").map(Number);
+	const firstCheckSum = digits
+		.slice(0, 9)
+		.reduce((sum, digit, index) => sum + digit * (10 - index), 0);
+	const firstCheckDigit = (firstCheckSum * 10) % 11;
+
+	if ((firstCheckDigit === 10 ? 0 : firstCheckDigit) !== digits[9]) {
+		return false;
+	}
+
+	const secondCheckSum = digits
+		.slice(0, 10)
+		.reduce((sum, digit, index) => sum + digit * (11 - index), 0);
+	const secondCheckDigit = (secondCheckSum * 10) % 11;
+
+	return (secondCheckDigit === 10 ? 0 : secondCheckDigit) === digits[10];
+}
+
+function isValidCnpj(value: string) {
+	if (value.length !== 14 || hasRepeatedDigits(value)) {
+		return false;
+	}
+
+	const digits = value.split("").map(Number);
+	const getCheckDigit = (baseDigits: number[], weights: number[]) => {
+		const sum = baseDigits.reduce(
+			(total, digit, index) => total + digit * weights[index],
+			0
+		);
+		const remainder = sum % 11;
+
+		return remainder < 2 ? 0 : 11 - remainder;
+	};
+
+	const firstCheckDigit = getCheckDigit(
+		digits.slice(0, 12),
+		[5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+	);
+
+	if (firstCheckDigit !== digits[12]) {
+		return false;
+	}
+
+	const secondCheckDigit = getCheckDigit(
+		digits.slice(0, 13),
+		[6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+	);
+
+	return secondCheckDigit === digits[13];
+}
+
 function isOlderThan15(dateValue: string) {
 	if (!dateValue) {
 		return true;
@@ -163,6 +223,10 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "E-mail deve ter entre 5 e 60 caracteres."));
 	}
 
+	if (tipo === "FISICA" && !["MASCULINO", "FEMININO"].includes(sexo)) {
+		redirect(buildRedirect(CLIENTES_PATH, "error", "Selecione o sexo do cliente."));
+	}
+
 	if (!isOptionalLengthBetween(nacionalidade, 5, 20)) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "Nacionalidade deve ter entre 5 e 20 caracteres."));
 	}
@@ -181,6 +245,22 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 
 	if (cpfCnpj && ![11, 14].includes(cpfCnpj.length)) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "CPF deve conter 11 digitos ou CNPJ deve conter 14 digitos."));
+	}
+
+	if (cpfCnpj && tipo === "FISICA" && cpfCnpj.length !== 11) {
+		redirect(buildRedirect(CLIENTES_PATH, "error", "Cliente pessoa fisica deve informar um CPF com 11 digitos."));
+	}
+
+	if (cpfCnpj && tipo === "JURIDICA" && cpfCnpj.length !== 14) {
+		redirect(buildRedirect(CLIENTES_PATH, "error", "Cliente pessoa juridica deve informar um CNPJ com 14 digitos."));
+	}
+
+	if (cpfCnpj.length === 11 && !isValidCpf(cpfCnpj)) {
+		redirect(buildRedirect(CLIENTES_PATH, "error", "CPF invalido."));
+	}
+
+	if (cpfCnpj.length === 14 && !isValidCnpj(cpfCnpj)) {
+		redirect(buildRedirect(CLIENTES_PATH, "error", "CNPJ invalido."));
 	}
 
 	if (observacoes.length > 255) {

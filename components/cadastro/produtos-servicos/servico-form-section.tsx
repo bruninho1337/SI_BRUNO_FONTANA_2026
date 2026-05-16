@@ -42,11 +42,12 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 			) : null}
 
 			<form action={servicoEditando ? updateServicoAction : createServicoAction} className="space-y-4">
+				<div className="grid gap-4 md:grid-cols-12">
 				{servicoEditando ? (
 					<>
 						<input type="hidden" name="codservico" value={servicoEditando.codservico} />
 						<input type="hidden" name="imagem_url" value={servicoEditando.imagem_url ?? ""} />
-						<div className="flex flex-col gap-2">
+						<div className="flex flex-col gap-2 md:col-span-2">
 							<Label htmlFor="codservico-display" className="text-sm text-neutral-800">
 								Codigo:
 							</Label>
@@ -60,7 +61,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 					</>
 				) : null}
 
-				<div className="flex flex-col gap-2">
+				<div className="flex flex-col gap-2 md:col-span-5">
 					<Label htmlFor="nome" className="text-sm text-neutral-800">
 						Servico:
 					</Label>
@@ -82,22 +83,30 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 					selectPlaceholder="Selecione uma categoria"
 					options={categoriaOptions}
 					defaultValue={String(servicoEditando?.codcategoria ?? "")}
+					className="md:col-span-3"
 				/>
 
-				<div className="grid gap-4 md:grid-cols-3">
-					<div className="flex flex-col gap-2">
+				<ActiveToggle
+					name="ativo"
+					defaultValue={servicoEditando?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+				/>
+				</div>
+
+				<div className="grid gap-4 md:grid-cols-12">
+					<div className="flex flex-col gap-2 md:col-span-3">
 						<Label htmlFor="valor" className="text-sm text-neutral-800">
 							Valor:
 						</Label>
 						<Input id="valor" name="valor" type="text" placeholder="Ex: 35,00" defaultValue={String(servicoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
-					<div className="flex flex-col gap-2">
+					<div className="flex flex-col gap-2 md:col-span-2">
 						<Label htmlFor="duracao_minutos" className="text-sm text-neutral-800">
 							Duracao:
 						</Label>
 						<Input id="duracao_minutos" name="duracao_minutos" type="number" placeholder="Ex: 45" defaultValue={String(servicoEditando?.duracao_minutos ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
-					<div className="flex flex-col gap-2">
+					<div className="flex flex-col gap-2 md:col-span-3">
 						<Label htmlFor="valor_desconto" className="text-sm text-neutral-800">
 							Desconto:
 						</Label>
@@ -120,8 +129,6 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
-
-				<ActiveToggle name="ativo" defaultValue={servicoEditando?.ativo === "N" ? "N" : "S"} />
 
 				<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 					{servicoEditando ? "Atualizar servico" : "Salvar servico"}

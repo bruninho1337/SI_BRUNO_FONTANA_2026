@@ -32,10 +32,11 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 			<FormFeedback params={params} />
 
 			<form action={categoriaEditando ? updateCategoriaAction : createCategoriaAction} className="space-y-4">
+				<div className="grid gap-4 md:grid-cols-12">
 				{categoriaEditando ? (
 					<>
 						<input type="hidden" name="codcategoria" value={categoriaEditando.codcategoria} />
-						<div className="flex flex-col gap-2">
+						<div className="flex flex-col gap-2 md:col-span-2">
 							<Label htmlFor="codcategoria-display" className="text-sm text-neutral-800">
 								Codigo:
 							</Label>
@@ -49,7 +50,7 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 					</>
 				) : null}
 
-				<div className="flex flex-col gap-2">
+				<div className="flex flex-col gap-2 md:col-span-5">
 					<Label htmlFor="nome" className="text-sm text-neutral-800">
 						Categoria:
 					</Label>
@@ -70,7 +71,15 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 							? categoriaEditando.tipo
 							: "AMBOS"
 					}
+					className="md:col-span-3"
 				/>
+
+				<ActiveToggle
+					name="ativo"
+					defaultValue={categoriaEditando?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+				/>
+				</div>
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="descricao" className="text-sm text-neutral-800">
@@ -85,8 +94,6 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
-
-				<ActiveToggle name="ativo" defaultValue={categoriaEditando?.ativo === "N" ? "N" : "S"} />
 
 				<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 					{categoriaEditando ? "Atualizar categoria" : "Salvar categoria"}

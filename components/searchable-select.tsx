@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 type Option = {
 	id: string;
@@ -19,6 +20,7 @@ type SearchableSelectProps = {
 	options: Option[];
 	required?: boolean;
 	defaultValue?: string;
+	className?: string;
 };
 
 export function SearchableSelect({
@@ -30,6 +32,7 @@ export function SearchableSelect({
 	options,
 	required = false,
 	defaultValue = "",
+	className,
 }: SearchableSelectProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -72,7 +75,7 @@ export function SearchableSelect({
 	}, []);
 
 	return (
-		<div ref={containerRef} className="space-y-2">
+		<div ref={containerRef} className={cn("space-y-2", className)}>
 			<Label htmlFor={`${name}-trigger`} className="text-sm text-neutral-800">
 				{label}:
 			</Label>

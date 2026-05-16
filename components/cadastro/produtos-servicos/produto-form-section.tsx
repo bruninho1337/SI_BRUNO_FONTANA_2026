@@ -42,11 +42,12 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 			) : null}
 
 			<form action={produtoEditando ? updateProdutoAction : createProdutoAction} className="space-y-4">
+				<div className="grid gap-4 md:grid-cols-12">
 				{produtoEditando ? (
 					<>
 						<input type="hidden" name="codproduto" value={produtoEditando.codproduto} />
 						<input type="hidden" name="imagem_url" value={produtoEditando.imagem_url ?? ""} />
-						<div className="flex flex-col gap-2">
+						<div className="flex flex-col gap-2 md:col-span-2">
 							<Label htmlFor="codproduto-display" className="text-sm text-neutral-800">
 								Codigo:
 							</Label>
@@ -60,7 +61,7 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 					</>
 				) : null}
 
-				<div className="flex flex-col gap-2">
+				<div className="flex flex-col gap-2 md:col-span-5">
 					<Label htmlFor="nome" className="text-sm text-neutral-800">
 						Produto:
 					</Label>
@@ -82,22 +83,30 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 					selectPlaceholder="Selecione uma categoria"
 					options={categoriaOptions}
 					defaultValue={String(produtoEditando?.codcategoria ?? "")}
+					className="md:col-span-3"
 				/>
 
-				<div className="grid gap-4 md:grid-cols-3">
-					<div className="flex flex-col gap-2">
+				<ActiveToggle
+					name="ativo"
+					defaultValue={produtoEditando?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+				/>
+				</div>
+
+				<div className="grid gap-4 md:grid-cols-12">
+					<div className="flex flex-col gap-2 md:col-span-3">
 						<Label htmlFor="valor" className="text-sm text-neutral-800">
 							Valor:
 						</Label>
 						<Input id="valor" name="valor" type="text" placeholder="Ex: 39,90" defaultValue={String(produtoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
-					<div className="flex flex-col gap-2">
+					<div className="flex flex-col gap-2 md:col-span-2">
 						<Label htmlFor="quantidade_estoque" className="text-sm text-neutral-800">
 							Estoque:
 						</Label>
 						<Input id="quantidade_estoque" name="quantidade_estoque" type="number" placeholder="Ex: 12" defaultValue={String(produtoEditando?.quantidade_estoque ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
-					<div className="flex flex-col gap-2">
+					<div className="flex flex-col gap-2 md:col-span-3">
 						<Label htmlFor="valor_desconto" className="text-sm text-neutral-800">
 							Desconto:
 						</Label>
@@ -120,8 +129,6 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
-
-				<ActiveToggle name="ativo" defaultValue={produtoEditando?.ativo === "N" ? "N" : "S"} />
 
 				<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 					{produtoEditando ? "Atualizar produto" : "Salvar produto"}

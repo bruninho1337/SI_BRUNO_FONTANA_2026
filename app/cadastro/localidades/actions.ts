@@ -21,6 +21,14 @@ function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
 
+function isLengthBetween(value: string, min: number, max: number) {
+	return value.length >= min && value.length <= max;
+}
+
+function isOptionalMaxLength(value: string, max: number) {
+	return !value || value.length <= max;
+}
+
 export async function createPaisAction(formData: FormData) {
 	return savePais(formData);
 }
@@ -61,8 +69,20 @@ async function savePais(formData: FormData, codpais?: number) {
 	const moeda = getText(formData, "moeda").toUpperCase();
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!pais) {
-		redirect(buildRedirect(PAISES_PATH, "error", "Informe o nome do pais."));
+	if (!isLengthBetween(pais, 2, 60)) {
+		redirect(buildRedirect(PAISES_PATH, "error", "Pais deve ter entre 2 e 60 caracteres."));
+	}
+
+	if (!isOptionalMaxLength(sigla, 5)) {
+		redirect(buildRedirect(PAISES_PATH, "error", "Sigla deve ter no maximo 5 caracteres."));
+	}
+
+	if (!isOptionalMaxLength(ddi, 5)) {
+		redirect(buildRedirect(PAISES_PATH, "error", "DDI deve ter no maximo 5 caracteres."));
+	}
+
+	if (!isOptionalMaxLength(moeda, 10)) {
+		redirect(buildRedirect(PAISES_PATH, "error", "Moeda deve ter no maximo 10 caracteres."));
 	}
 
 	const supabase = await createClient();
@@ -126,8 +146,16 @@ async function saveEstado(formData: FormData, codestado?: number) {
 	const codpais = Number(codpaisValue);
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!uf || !estado || !codpaisValue || Number.isNaN(codpais)) {
-		redirect(buildRedirect(ESTADOS_PATH, "error", "Preencha UF, estado e pais."));
+	if (!isLengthBetween(uf, 2, 2)) {
+		redirect(buildRedirect(ESTADOS_PATH, "error", "UF deve ter exatamente 2 caracteres."));
+	}
+
+	if (!isLengthBetween(estado, 2, 60)) {
+		redirect(buildRedirect(ESTADOS_PATH, "error", "Estado deve ter entre 2 e 60 caracteres."));
+	}
+
+	if (!codpaisValue || Number.isNaN(codpais)) {
+		redirect(buildRedirect(ESTADOS_PATH, "error", "Selecione o pais do estado."));
 	}
 
 	const supabase = await createClient();
@@ -188,8 +216,12 @@ async function saveCidade(formData: FormData, codcidade?: number) {
 	const codest = Number(codestValue);
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!cidade || !codestValue || Number.isNaN(codest)) {
-		redirect(buildRedirect(CIDADES_PATH, "error", "Preencha a cidade e selecione um estado."));
+	if (!isLengthBetween(cidade, 2, 100)) {
+		redirect(buildRedirect(CIDADES_PATH, "error", "Cidade deve ter entre 2 e 100 caracteres."));
+	}
+
+	if (!codestValue || Number.isNaN(codest)) {
+		redirect(buildRedirect(CIDADES_PATH, "error", "Selecione o estado da cidade."));
 	}
 
 	const supabase = await createClient();

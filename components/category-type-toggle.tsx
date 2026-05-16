@@ -10,6 +10,7 @@ type CategoriaTipo = "PRODUTO" | "SERVICO" | "AMBOS";
 type CategoryTypeToggleProps = {
 	name: string;
 	defaultValue?: CategoriaTipo;
+	className?: string;
 };
 
 const options: Array<{ value: CategoriaTipo; label: string }> = [
@@ -21,11 +22,12 @@ const options: Array<{ value: CategoriaTipo; label: string }> = [
 export function CategoryTypeToggle({
 	name,
 	defaultValue = "AMBOS",
+	className,
 }: CategoryTypeToggleProps) {
 	const [value, setValue] = useState<CategoriaTipo>(defaultValue);
 
 	return (
-		<div className="flex flex-col gap-2">
+		<div className={cn("flex flex-col gap-2", className)}>
 			<Label className="text-sm text-neutral-800">Tipo:</Label>
 			<input type="hidden" name={name} value={value} readOnly />
 			<div className="flex flex-wrap gap-3">

@@ -9,17 +9,19 @@ type ActiveToggleProps = {
 	name: string;
 	label?: string;
 	defaultValue?: "S" | "N";
+	className?: string;
 };
 
 export function ActiveToggle({
 	name,
 	label = "Ativo",
 	defaultValue = "S",
+	className,
 }: ActiveToggleProps) {
 	const [value, setValue] = useState<"S" | "N">(defaultValue);
 
 	return (
-		<div className="flex flex-col gap-2">
+		<div className={cn("flex flex-col gap-2", className)}>
 			<Label className="text-sm text-neutral-800">{label}:</Label>
 			<input type="hidden" name={name} value={value} readOnly />
 			<div className="flex gap-3">

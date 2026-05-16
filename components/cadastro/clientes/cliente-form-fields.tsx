@@ -22,10 +22,75 @@ type ClienteFormFieldsProps = {
 };
 
 const inputClass = "h-11 rounded-xl border border-neutral-300 bg-white px-4 text-neutral-900";
+const readOnlyInputClass = "h-11 rounded-xl border border-neutral-300 bg-neutral-100 px-4 text-neutral-600";
+const fieldClass = {
+	xs: "flex flex-col gap-2 md:col-span-2",
+	sm: "flex flex-col gap-2 md:col-span-3",
+	md: "flex flex-col gap-2 md:col-span-4",
+	lg: "flex flex-col gap-2 md:col-span-6",
+	xl: "flex flex-col gap-2 md:col-span-8",
+};
 
 function keepOnlyDigits(event: React.FormEvent<HTMLInputElement>) {
 	const input = event.currentTarget;
 	input.value = input.value.replace(/\D/g, "");
+}
+
+function onlyDigits(value: string) {
+	return value.replace(/\D/g, "");
+}
+
+function formatCep(value: string) {
+	const digits = onlyDigits(value).slice(0, 8);
+
+	if (digits.length <= 5) {
+		return digits;
+	}
+
+	return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
+function formatCpfCnpj(value: string) {
+	const digits = onlyDigits(value).slice(0, 14);
+
+	if (digits.length <= 11) {
+		return digits
+			.replace(/^(\d{3})(\d)/, "$1.$2")
+			.replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+			.replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
+	}
+
+	return digits
+		.replace(/^(\d{2})(\d)/, "$1.$2")
+		.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+		.replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3/$4")
+		.replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, "$1.$2.$3/$4-$5");
+}
+
+function formatRg(value: string) {
+	const digits = onlyDigits(value).slice(0, 9);
+
+	if (digits.length <= 2) {
+		return digits;
+	}
+
+	if (digits.length <= 5) {
+		return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+	}
+
+	if (digits.length <= 8) {
+		return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`;
+	}
+
+	return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}-${digits.slice(8)}`;
+}
+
+function formatInput(
+	event: React.FormEvent<HTMLInputElement>,
+	formatter: (value: string) => string
+) {
+	const input = event.currentTarget;
+	input.value = formatter(input.value);
 }
 
 export function ClienteFormFields({
@@ -36,6 +101,7 @@ export function ClienteFormFields({
 }: ClienteFormFieldsProps) {
 	const [tipo, setTipo] = useState(String(initialData?.tipo ?? "FISICA"));
 	const dataNascimentoRef = useRef<HTMLInputElement>(null);
+	const isEditing = Boolean(initialData?.codcliente);
 	const isFisica = tipo === "FISICA";
 
 	function openDatePicker() {
@@ -51,48 +117,59 @@ export function ClienteFormFields({
 
 	return (
 		<form action={action} className="space-y-5">
-			{initialData?.codcliente ? (
-				<>
-					<input type="hidden" name="codcliente" value={String(initialData.codcliente)} />
-					<div className="flex flex-col gap-2">
-						<Label htmlFor="codcliente-display" className="text-sm text-neutral-800">
-							Codigo:
-						</Label>
-						<Input
-							id="codcliente-display"
-							value={String(initialData.codcliente)}
-							readOnly
-							className="h-11 rounded-xl border border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
-						/>
-					</div>
-				</>
-			) : null}
-			<div className="grid gap-4 md:grid-cols-2">
-				<div className="flex flex-col gap-2">
+			<div className="grid gap-4 md:grid-cols-12">
+				{initialData?.codcliente ? (
+					<>
+						<input type="hidden" name="codcliente" value={String(initialData.codcliente)} />
+						<div className={fieldClass.xs}>
+							<Label htmlFor="codcliente-display" className="text-sm text-neutral-800">
+								Codigo:
+							</Label>
+							<Input
+								id="codcliente-display"
+								value={String(initialData.codcliente)}
+								readOnly
+								className={readOnlyInputClass}
+							/>
+						</div>
+					</>
+				) : null}
+
+				<ActiveToggle
+					name="ativo"
+					defaultValue={initialData?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+				/>
+			</div>
+
+			<div className="grid gap-4 md:grid-cols-12">
+				<div className={fieldClass.sm}>
 					<Label htmlFor="tipo" className="text-sm text-neutral-800">
 						Tipo:
 					</Label>
+					{isEditing ? <input type="hidden" name="tipo" value={tipo} /> : null}
 					<select
 						id="tipo"
-						name="tipo"
+						name={isEditing ? undefined : "tipo"}
 						value={tipo}
 						onChange={(event) => setTipo(event.target.value)}
+						disabled={isEditing}
 						required
-						className={inputClass}
+						className={`${inputClass} disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600`}
 					>
 						<option value="FISICA">Fisica</option>
 						<option value="JURIDICA">Juridica</option>
 					</select>
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.lg}>
 					<Label htmlFor="cliente" className="text-sm text-neutral-800">
 						Cliente:
 					</Label>
 					<Input id="cliente" name="cliente" minLength={5} maxLength={60} required defaultValue={String(initialData?.cliente ?? "")} className={inputClass} />
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.sm}>
 					<Label htmlFor="apelido" className="text-sm text-neutral-800">
 						Apelido:
 					</Label>
@@ -100,7 +177,7 @@ export function ClienteFormFields({
 				</div>
 
 				{isFisica ? (
-					<div className="flex flex-col gap-2">
+					<div className={fieldClass.sm}>
 						<Label htmlFor="estado-civil" className="text-sm text-neutral-800">
 							Estado Civil:
 						</Label>
@@ -116,14 +193,14 @@ export function ClienteFormFields({
 					</div>
 				) : null}
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.xl}>
 					<Label htmlFor="endereco" className="text-sm text-neutral-800">
 						Endereco:
 					</Label>
 					<Input id="endereco" name="endereco" minLength={5} maxLength={60} required defaultValue={String(initialData?.endereco ?? "")} className={inputClass} />
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.xs}>
 					<Label htmlFor="numero" className="text-sm text-neutral-800">
 						Numero:
 					</Label>
@@ -141,37 +218,37 @@ export function ClienteFormFields({
 					/>
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.md}>
 					<Label htmlFor="complemento" className="text-sm text-neutral-800">
 						Complemento:
 					</Label>
 					<Input id="complemento" name="complemento" maxLength={60} defaultValue={String(initialData?.complemento ?? "")} className={inputClass} />
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.md}>
 					<Label htmlFor="bairro" className="text-sm text-neutral-800">
 						Bairro:
 					</Label>
 					<Input id="bairro" name="bairro" minLength={5} maxLength={60} required defaultValue={String(initialData?.bairro ?? "")} className={inputClass} />
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.sm}>
 					<Label htmlFor="cep" className="text-sm text-neutral-800">
 						CEP:
 					</Label>
 					<Input
 						id="cep"
 						name="cep"
-						inputMode="numeric"
-						pattern="[0-9]{8}"
-						minLength={8}
-						maxLength={8}
-						required
-						defaultValue={String(initialData?.cep ?? "")}
-						onInput={keepOnlyDigits}
-						className={inputClass}
-					/>
-				</div>
+							inputMode="numeric"
+							pattern="\d{5}-?\d{3}"
+							minLength={8}
+							maxLength={9}
+							required
+							defaultValue={formatCep(String(initialData?.cep ?? ""))}
+							onInput={(event) => formatInput(event, formatCep)}
+							className={inputClass}
+						/>
+					</div>
 
 				<SearchableSelect
 					name="codcidade"
@@ -182,9 +259,10 @@ export function ClienteFormFields({
 					options={cidadeOptions}
 					required
 					defaultValue={String(initialData?.codcidade ?? "")}
+					className="md:col-span-5"
 				/>
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.sm}>
 					<Label htmlFor="telefone" className="text-sm text-neutral-800">
 						Telefone:
 					</Label>
@@ -202,7 +280,7 @@ export function ClienteFormFields({
 					/>
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.lg}>
 					<Label htmlFor="email" className="text-sm text-neutral-800">
 						E-mail:
 					</Label>
@@ -211,18 +289,24 @@ export function ClienteFormFields({
 
 				{isFisica ? (
 					<>
-						<div className="flex flex-col gap-2">
+						<div className={fieldClass.sm}>
 							<Label htmlFor="sexo" className="text-sm text-neutral-800">
 								Sexo:
 							</Label>
-							<select id="sexo" name="sexo" defaultValue={String(initialData?.sexo ?? "")} className={inputClass}>
+							<select
+								id="sexo"
+								name="sexo"
+								defaultValue={String(initialData?.sexo ?? "")}
+								required
+								className={inputClass}
+							>
 								<option value="">Selecione</option>
 								<option value="MASCULINO">Masculino</option>
 								<option value="FEMININO">Feminino</option>
 							</select>
 						</div>
 
-						<div className="flex flex-col gap-2">
+						<div className={fieldClass.sm}>
 							<Label htmlFor="nacionalidade" className="text-sm text-neutral-800">
 								Nacionalidade:
 							</Label>
@@ -231,7 +315,7 @@ export function ClienteFormFields({
 					</>
 				) : null}
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.sm}>
 					<Label htmlFor="data-nascimento" className="text-sm text-neutral-800">
 						Data Nascimento:
 					</Label>
@@ -256,7 +340,7 @@ export function ClienteFormFields({
 					</div>
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.sm}>
 					<Label htmlFor="rg-inscricao-estadual" className="text-sm text-neutral-800">
 						{isFisica ? "RG:" : "Inscricao Estadual:"}
 					</Label>
@@ -264,31 +348,39 @@ export function ClienteFormFields({
 						id="rg-inscricao-estadual"
 						name="rg_inscricao_estadual"
 						inputMode="numeric"
-						pattern="[0-9]*"
+						pattern={isFisica ? "\\d{2}\\.?\\d{3}\\.?\\d{3}-?\\d?" : "[0-9]*"}
 						minLength={5}
-						maxLength={14}
-						defaultValue={String(initialData?.rg_inscricao_estadual ?? "")}
-						onInput={keepOnlyDigits}
+						maxLength={isFisica ? 12 : 14}
+						defaultValue={
+							isFisica
+								? formatRg(String(initialData?.rg_inscricao_estadual ?? ""))
+								: String(initialData?.rg_inscricao_estadual ?? "")
+						}
+						onInput={
+							isFisica
+								? (event) => formatInput(event, formatRg)
+								: keepOnlyDigits
+						}
 						className={inputClass}
 					/>
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className={fieldClass.sm}>
 					<Label htmlFor="cpf-cnpj" className="text-sm text-neutral-800">
 						{isFisica ? "CPF:" : "CNPJ:"}
 					</Label>
 					<Input
-						id="cpf-cnpj"
-						name="cpf_cnpj"
-						inputMode="numeric"
-						pattern="([0-9]{11}|[0-9]{14})?"
-						minLength={11}
-						maxLength={14}
-						defaultValue={String(initialData?.cpf_cnpj ?? "")}
-						onInput={keepOnlyDigits}
-						className={inputClass}
-					/>
-				</div>
+							id="cpf-cnpj"
+							name="cpf_cnpj"
+							inputMode="numeric"
+							pattern="(\d{3}\.?\d{3}\.?\d{3}-?\d{2}|\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2})?"
+							minLength={11}
+							maxLength={18}
+							defaultValue={formatCpfCnpj(String(initialData?.cpf_cnpj ?? ""))}
+							onInput={(event) => formatInput(event, formatCpfCnpj)}
+							className={inputClass}
+						/>
+					</div>
 			</div>
 
 			<div className="flex flex-col gap-2">
@@ -303,8 +395,6 @@ export function ClienteFormFields({
 					className="min-h-28 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
 				/>
 			</div>
-
-			<ActiveToggle name="ativo" defaultValue={initialData?.ativo === "N" ? "N" : "S"} />
 
 			<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 				{submitLabel}

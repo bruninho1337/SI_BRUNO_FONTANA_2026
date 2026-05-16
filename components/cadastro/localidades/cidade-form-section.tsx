@@ -43,10 +43,11 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 			) : null}
 
 			<form action={cidadeEditando ? updateCidadeAction : createCidadeAction} className="space-y-4">
+				<div className="grid gap-4 md:grid-cols-12">
 				{cidadeEditando ? (
 					<>
 						<input type="hidden" name="codcidade" value={cidadeEditando.codcidade} />
-						<div className="flex flex-col gap-2">
+						<div className="flex flex-col gap-2 md:col-span-2">
 							<Label htmlFor="codcidade-display" className="text-sm text-neutral-800">
 								Codigo:
 							</Label>
@@ -60,7 +61,13 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 					</>
 				) : null}
 
-				<div className="flex flex-col gap-2">
+				<ActiveToggle
+					name="ativo"
+					defaultValue={cidadeEditando?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+				/>
+
+				<div className="flex flex-col gap-2 md:col-span-4">
 					<Label htmlFor="nome-cidade" className="text-sm text-neutral-800">
 						Cidade:
 					</Label>
@@ -68,6 +75,8 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 						id="nome-cidade"
 						name="cidade"
 						type="text"
+						minLength={2}
+						maxLength={100}
 						placeholder="Ex: Campinas"
 						defaultValue={cidadeEditando?.cidade ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
@@ -83,9 +92,9 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 					options={estadoOptions}
 					defaultValue={String(cidadeEditando?.codest ?? "")}
 					required
+					className="md:col-span-5"
 				/>
-
-				<ActiveToggle name="ativo" defaultValue={cidadeEditando?.ativo === "N" ? "N" : "S"} />
+				</div>
 
 				<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 					{cidadeEditando ? "Atualizar cidade" : "Salvar cidade"}
