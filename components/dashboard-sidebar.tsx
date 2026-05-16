@@ -17,6 +17,11 @@ const navigationItems = [
 		label: "Clientes",
 		description: "Lista de clientes",
 	},
+	{
+		href: "/cadastro/condicoes-pagamento",
+		label: "Condicoes de Pagamento",
+		description: "Prazos e regras comerciais",
+	},
 ];
 
 const produtosServicosItems = [

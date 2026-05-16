@@ -17,6 +17,7 @@ type Option = {
 
 type ClienteFormFieldsProps = {
 	cidadeOptions: Option[];
+	condicaoPagamentoOptions: Option[];
 	action: (formData: FormData) => Promise<void>;
 	initialData?: Record<string, string | number | null>;
 	submitLabel?: string;
@@ -96,6 +97,7 @@ function formatInput(
 
 export function ClienteFormFields({
 	cidadeOptions,
+	condicaoPagamentoOptions,
 	action,
 	initialData,
 	submitLabel = "Salvar cliente",
@@ -261,6 +263,22 @@ export function ClienteFormFields({
 					required
 					defaultValue={String(initialData?.codcidade ?? "")}
 					className="md:col-span-5"
+					createHref="/cadastro/localidades/cidades?mode=create"
+					createLabel="Nova cidade"
+				/>
+
+				<SearchableSelect
+					name="codcondicao_pagamento"
+					label="Condicao de Pagamento"
+					searchLabel="Pesquisar condicao por nome"
+					searchPlaceholder="Digite o nome da condicao"
+					selectPlaceholder="Selecione uma condicao"
+					options={condicaoPagamentoOptions}
+					required
+					defaultValue={String(initialData?.codcondicao_pagamento ?? "")}
+					className="md:col-span-5"
+					createHref="/cadastro/condicoes-pagamento?mode=create"
+					createLabel="Nova condicao"
 				/>
 
 				<div className={fieldClass.sm}>

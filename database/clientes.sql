@@ -13,6 +13,7 @@ create table if not exists public.clientes (
 	bairro text not null check (char_length(bairro) between 5 and 60),
 	cep text not null check (char_length(cep) between 8 and 9),
 	codcidade bigint not null references public.cidades(codcidade),
+	codcondicao_pagamento integer references public.condicoes_pagamento(codcondicao_pagamento),
 	telefone text not null check (char_length(telefone) between 5 and 20),
 	email text not null check (char_length(email) between 5 and 60),
 	sexo text check (sexo is null or sexo in ('MASCULINO', 'FEMININO', 'OUTROS')),
@@ -45,3 +46,14 @@ create trigger set_clientes_data_atualizacao
 before update on public.clientes
 for each row
 execute function public.set_data_atualizacao();
+
+alter table public.clientes
+add column if not exists codcondicao_pagamento integer;
+
+alter table public.clientes
+drop constraint if exists fk_clientes_condicoes_pagamento;
+
+alter table public.clientes
+add constraint fk_clientes_condicoes_pagamento
+foreign key (codcondicao_pagamento)
+references public.condicoes_pagamento(codcondicao_pagamento);

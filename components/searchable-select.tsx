@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { Plus } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +24,8 @@ type SearchableSelectProps = {
 	required?: boolean;
 	defaultValue?: string;
 	className?: string;
+	createHref?: string;
+	createLabel?: string;
 };
 
 export function SearchableSelect({
@@ -34,6 +38,8 @@ export function SearchableSelect({
 	required = false,
 	defaultValue = "",
 	className,
+	createHref,
+	createLabel = "Adicionar",
 }: SearchableSelectProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -104,13 +110,25 @@ export function SearchableSelect({
 					<Label htmlFor={`${name}-search`} className="text-xs text-neutral-500">
 						{searchLabel}
 					</Label>
-					<Input
-						id={`${name}-search`}
-						value={search}
-						onChange={(event) => setSearch(event.target.value)}
-						placeholder={searchPlaceholder}
-						className="mt-2 h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
-					/>
+					<div className="mt-2 flex gap-2">
+						<Input
+							id={`${name}-search`}
+							value={search}
+							onChange={(event) => setSearch(event.target.value)}
+							placeholder={searchPlaceholder}
+							className="h-11 min-w-0 flex-1 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
+						/>
+						{createHref ? (
+							<Link
+								href={createHref}
+								aria-label={createLabel}
+								title={createLabel}
+								className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white text-neutral-800 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+							>
+								<Plus className="h-4 w-4" aria-hidden="true" />
+							</Link>
+						) : null}
+					</div>
 
 					<div className="mt-3 max-h-56 overflow-y-auto">
 						{filteredOptions.length > 0 ? (

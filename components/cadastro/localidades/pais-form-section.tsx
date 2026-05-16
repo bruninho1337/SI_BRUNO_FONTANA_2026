@@ -67,21 +67,15 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 
 				{camposPais.map((campo) => (
 					<div key={campo.id} className={`${fieldClass} ${campo.className}`}>
-						{campo.id === "pais" ? (
-							<RequiredLabel htmlFor={campo.id} className="text-sm text-neutral-800">
-								{campo.label}:
-							</RequiredLabel>
-						) : (
-							<Label htmlFor={campo.id} className="text-sm text-neutral-800">
-								{campo.label}:
-							</Label>
-						)}
+						<RequiredLabel htmlFor={campo.id} className="text-sm text-neutral-800">
+							{campo.label}:
+						</RequiredLabel>
 						<Input
 							id={campo.id}
 							name={campo.id}
 							type={campo.type}
 							maxLength={campo.maxLength}
-							required={campo.id === "pais"}
+							required
 							placeholder={campo.placeholder}
 							defaultValue={String(paisEditando?.[campo.id as keyof typeof paisEditando] ?? "")}
 							className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"

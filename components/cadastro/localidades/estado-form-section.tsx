@@ -112,6 +112,8 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 					defaultValue={String(estadoEditando?.codpais ?? "")}
 					required
 					className="md:col-span-5"
+					createHref="/cadastro/localidades/paises?mode=create"
+					createLabel="Novo pais"
 				/>
 				</div>
 

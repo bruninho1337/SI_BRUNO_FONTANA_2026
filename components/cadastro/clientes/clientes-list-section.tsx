@@ -18,8 +18,11 @@ function formatDate(value: string | null) {
 export async function ClientesListSection({ searchParams }: ClientesListSectionProps) {
 	const params = await searchParams;
 	const query = String(params?.q ?? "").trim().toLowerCase();
-	const { cidades, clientes, error } = await listarClientesComCidades();
+	const { cidades, condicoesPagamento, clientes, error } = await listarClientesComCidades();
 	const cidadeMap = new Map((cidades ?? []).map((cidade) => [cidade.codcidade, cidade.cidade]));
+	const condicaoPagamentoMap = new Map(
+		(condicoesPagamento ?? []).map((condicao) => [condicao.codcondicao_pagamento, condicao.nome])
+	);
 	const filtered = (clientes ?? []).filter((cliente) =>
 		[
 			cliente.codcliente,
@@ -27,6 +30,7 @@ export async function ClientesListSection({ searchParams }: ClientesListSectionP
 			cliente.apelido,
 			cliente.tipo,
 			cidadeMap.get(cliente.codcidade),
+			condicaoPagamentoMap.get(cliente.codcondicao_pagamento),
 			cliente.telefone,
 			cliente.email,
 			cliente.cpf_cnpj,
@@ -55,6 +59,7 @@ export async function ClientesListSection({ searchParams }: ClientesListSectionP
 								<th className="pb-2 font-medium">Cliente</th>
 								<th className="pb-2 font-medium">Tipo</th>
 								<th className="pb-2 font-medium">Cidade</th>
+								<th className="pb-2 font-medium">Condicao</th>
 								<th className="pb-2 font-medium">Telefone</th>
 								<th className="pb-2 font-medium">E-mail</th>
 								<th className="pb-2 font-medium">Criacao</th>
@@ -76,6 +81,9 @@ export async function ClientesListSection({ searchParams }: ClientesListSectionP
 									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{cliente.tipo}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{cidadeMap.get(cliente.codcidade) ?? "-"}</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">
+										{condicaoPagamentoMap.get(cliente.codcondicao_pagamento) ?? "-"}
+									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{cliente.telefone}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{cliente.email}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatDate(cliente.data_criacao)}</td>

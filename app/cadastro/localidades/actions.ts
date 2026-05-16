@@ -25,10 +25,6 @@ function isLengthBetween(value: string, min: number, max: number) {
 	return value.length >= min && value.length <= max;
 }
 
-function isOptionalMaxLength(value: string, max: number) {
-	return !value || value.length <= max;
-}
-
 export async function createPaisAction(formData: FormData) {
 	return savePais(formData);
 }
@@ -73,24 +69,24 @@ async function savePais(formData: FormData, codpais?: number) {
 		redirect(buildRedirect(PAISES_PATH, "error", "Pais deve ter entre 2 e 60 caracteres."));
 	}
 
-	if (!isOptionalMaxLength(sigla, 5)) {
-		redirect(buildRedirect(PAISES_PATH, "error", "Sigla deve ter no maximo 5 caracteres."));
+	if (!isLengthBetween(sigla, 1, 5)) {
+		redirect(buildRedirect(PAISES_PATH, "error", "Sigla deve ter entre 1 e 5 caracteres."));
 	}
 
-	if (!isOptionalMaxLength(ddi, 5)) {
-		redirect(buildRedirect(PAISES_PATH, "error", "DDI deve ter no maximo 5 caracteres."));
+	if (!isLengthBetween(ddi, 1, 5)) {
+		redirect(buildRedirect(PAISES_PATH, "error", "DDI deve ter entre 1 e 5 caracteres."));
 	}
 
-	if (!isOptionalMaxLength(moeda, 10)) {
-		redirect(buildRedirect(PAISES_PATH, "error", "Moeda deve ter no maximo 10 caracteres."));
+	if (!isLengthBetween(moeda, 1, 10)) {
+		redirect(buildRedirect(PAISES_PATH, "error", "Moeda deve ter entre 1 e 10 caracteres."));
 	}
 
 	const supabase = await createClient();
 	const payload = {
 		pais,
-		sigla: sigla || null,
-		ddi: ddi || null,
-		moeda: moeda || null,
+		sigla,
+		ddi,
+		moeda,
 		ativo,
 	};
 	const { error } = codpais

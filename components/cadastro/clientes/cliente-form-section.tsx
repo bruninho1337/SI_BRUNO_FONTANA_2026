@@ -2,6 +2,7 @@ import { createClienteAction, updateClienteAction } from "@/app/cadastro/cliente
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { ClienteFormFields } from "@/components/cadastro/clientes/cliente-form-fields";
 import { buscarClientePorId } from "@/lib/clientes";
+import { listarCondicoesPagamentoParaSelecao } from "@/lib/condicoes-pagamento";
 import { listarCidadesComEstados } from "@/lib/localidades";
 
 type ClienteFormSectionProps = {
@@ -11,10 +12,15 @@ type ClienteFormSectionProps = {
 export async function ClienteFormSection({ searchParams }: ClienteFormSectionProps) {
 	const params = await searchParams;
 	const editId = Number(params?.edit ?? "");
-	const { cidades, estados, error } = await listarCidadesComEstados();
-	const { data: cliente } = Number.isNaN(editId)
-		? { data: null }
-		: await buscarClientePorId(editId);
+	const [
+		{ cidades, estados, error: cidadesError },
+		{ data: condicoesPagamento, error: condicoesPagamentoError },
+		{ data: cliente },
+	] = await Promise.all([
+		listarCidadesComEstados(),
+		listarCondicoesPagamentoParaSelecao(),
+		Number.isNaN(editId) ? Promise.resolve({ data: null }) : buscarClientePorId(editId),
+	]);
 	const estadoMap = new Map(
 		(estados ?? []).map((estado) => [estado.codestado, `${estado.estado} - ${estado.uf}`])
 	);
@@ -22,6 +28,11 @@ export async function ClienteFormSection({ searchParams }: ClienteFormSectionPro
 		cidades?.map((cidade) => ({
 			id: String(cidade.codcidade),
 			label: `${cidade.cidade}${estadoMap.get(cidade.codest) ? ` - ${estadoMap.get(cidade.codest)}` : ""}`,
+		})) ?? [];
+	const condicaoPagamentoOptions =
+		condicoesPagamento?.map((condicao) => ({
+			id: String(condicao.codcondicao_pagamento),
+			label: `${condicao.nome} (${condicao.prazo_dias} dia(s), ${condicao.parcelas}x)`,
 		})) ?? [];
 
 	return (
@@ -37,13 +48,18 @@ export async function ClienteFormSection({ searchParams }: ClienteFormSectionPro
 
 			<FormFeedback params={params} />
 
-			{error ? (
-				<p className="mb-4 text-sm text-red-600">Erro ao carregar cidades: {error.message}</p>
+			{cidadesError ? (
+				<p className="mb-4 text-sm text-red-600">Erro ao carregar cidades: {cidadesError.message}</p>
+			) : null}
+
+			{condicoesPagamentoError ? (
+				<p className="mb-4 text-sm text-red-600">Erro ao carregar condicoes de pagamento: {condicoesPagamentoError.message}</p>
 			) : null}
 
 			<ClienteFormFields
 				action={cliente ? updateClienteAction : createClienteAction}
 				cidadeOptions={cidadeOptions}
+				condicaoPagamentoOptions={condicaoPagamentoOptions}
 				initialData={cliente ?? undefined}
 				submitLabel={cliente ? "Atualizar cliente" : "Salvar cliente"}
 			/>

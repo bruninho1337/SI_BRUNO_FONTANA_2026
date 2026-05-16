@@ -86,6 +86,8 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 					options={categoriaOptions}
 					defaultValue={String(produtoEditando?.codcategoria ?? "")}
 					className="md:col-span-3"
+					createHref="/cadastro/produtos-servicos/categorias?mode=create"
+					createLabel="Nova categoria"
 				/>
 
 				<ActiveToggle

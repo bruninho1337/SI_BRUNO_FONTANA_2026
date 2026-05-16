@@ -95,6 +95,8 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 					defaultValue={String(cidadeEditando?.codest ?? "")}
 					required
 					className="md:col-span-5"
+					createHref="/cadastro/localidades/estados?mode=create"
+					createLabel="Novo estado"
 				/>
 				</div>
 

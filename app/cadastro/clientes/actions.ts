@@ -166,6 +166,8 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 	const cep = onlyDigits(cepRaw);
 	const codcidadeValue = getText(formData, "codcidade");
 	const codcidade = Number(codcidadeValue);
+	const codcondicaoPagamentoValue = getText(formData, "codcondicao_pagamento");
+	const codcondicaoPagamento = Number(codcondicaoPagamentoValue);
 	const telefoneRaw = getText(formData, "telefone");
 	const telefone = onlyDigits(telefoneRaw);
 	const email = getText(formData, "email");
@@ -213,6 +215,10 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 
 	if (!codcidadeValue || Number.isNaN(codcidade)) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "Selecione a cidade do cliente."));
+	}
+
+	if (!codcondicaoPagamentoValue || Number.isNaN(codcondicaoPagamento)) {
+		redirect(buildRedirect(CLIENTES_PATH, "error", "Selecione a condicao de pagamento do cliente."));
 	}
 
 	if (!isLengthBetween(telefone, 10, 11) || !hasOnlyDigitsAndFormatting(telefoneRaw)) {
@@ -279,6 +285,7 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 		bairro,
 		cep,
 		codcidade,
+		codcondicao_pagamento: codcondicaoPagamento,
 		telefone,
 		email,
 		sexo: tipo === "FISICA" ? sexo || null : null,
