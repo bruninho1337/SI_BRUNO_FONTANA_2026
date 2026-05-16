@@ -62,10 +62,10 @@ export function DeleteConfirmForm({
 							</div>
 							<div>
 								<h2 id="delete-confirm-title" className="text-lg font-semibold text-neutral-900">
-									Confirmar exclusao
+									Confirmar exclusão
 								</h2>
 								<p className="mt-2 text-sm leading-6 text-neutral-600">
-									Tem certeza que deseja excluir este registro? Essa acao nao pode ser desfeita.
+									Tem certeza que deseja excluir este registro? Essa ação nao pode ser desfeita.
 								</p>
 							</div>
 						</div>
