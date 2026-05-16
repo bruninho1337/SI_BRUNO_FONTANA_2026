@@ -17,7 +17,6 @@ export function StorageImageUpload({
 	folder,
 }: StorageImageUploadProps) {
 	const inputId = useId();
-	const bucketName = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || "cadastros";
 	const [error, setError] = useState<string | null>(null);
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [previewUrl, setPreviewUrl] = useState("");
@@ -47,7 +46,7 @@ export function StorageImageUpload({
 
 		if (!file.type.startsWith("image/")) {
 			setSelectedFile(null);
-			setError("Selecione um arquivo de imagem válido.");
+			setError("Selecione um arquivo de imagem valido.");
 			event.target.value = "";
 			return;
 		}
@@ -90,7 +89,7 @@ export function StorageImageUpload({
 			) : null}
 			{error ? <p className="text-sm text-red-600">{error}</p> : null}
 			<p className="text-xs text-neutral-500">
-				A imagem sera enviada para o bucket `{bucketName}` apenas ao salvar o {folder === "produtos" ? "produto" : "serviço"}.
+				A imagem sera enviada apenas ao salvar o {folder === "produtos" ? "produto" : "servico"}.
 			</p>
 		</div>
 	);

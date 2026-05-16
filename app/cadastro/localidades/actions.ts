@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
+import { executeQuery } from "@/lib/db";
 
 const PAISES_PATH = "/cadastro/localidades/paises";
 const ESTADOS_PATH = "/cadastro/localidades/estados";
@@ -46,8 +46,7 @@ export async function deletePaisAction(formData: FormData) {
 		redirect(buildRedirect(PAISES_PATH, "error", "Pais invalido para exclusao."));
 	}
 
-	const supabase = await createClient();
-	const { error } = await supabase.from("paises").delete().eq("codpais", codpais);
+	const { error } = await executeQuery("delete from public.paises where codpais = $1", [codpais]);
 
 	if (error) {
 		redirect(buildRedirect(PAISES_PATH, "error", error.message));
@@ -81,17 +80,15 @@ async function savePais(formData: FormData, codpais?: number) {
 		redirect(buildRedirect(PAISES_PATH, "error", "Moeda deve ter entre 1 e 10 caracteres."));
 	}
 
-	const supabase = await createClient();
-	const payload = {
-		pais,
-		sigla,
-		ddi,
-		moeda,
-		ativo,
-	};
 	const { error } = codpais
-		? await supabase.from("paises").update(payload).eq("codpais", codpais)
-		: await supabase.from("paises").insert(payload);
+		? await executeQuery(
+				"update public.paises set pais = $1, sigla = $2, ddi = $3, moeda = $4, ativo = $5 where codpais = $6",
+				[pais, sigla, ddi, moeda, ativo, codpais]
+			)
+		: await executeQuery(
+				"insert into public.paises (pais, sigla, ddi, moeda, ativo) values ($1, $2, $3, $4, $5)",
+				[pais, sigla, ddi, moeda, ativo]
+			);
 
 	if (error) {
 		redirect(buildRedirect(PAISES_PATH, "error", error.message));
@@ -123,8 +120,7 @@ export async function deleteEstadoAction(formData: FormData) {
 		redirect(buildRedirect(ESTADOS_PATH, "error", "Estado invalido para exclusao."));
 	}
 
-	const supabase = await createClient();
-	const { error } = await supabase.from("estados").delete().eq("codestado", codestado);
+	const { error } = await executeQuery("delete from public.estados where codestado = $1", [codestado]);
 
 	if (error) {
 		redirect(buildRedirect(ESTADOS_PATH, "error", error.message));
@@ -154,16 +150,15 @@ async function saveEstado(formData: FormData, codestado?: number) {
 		redirect(buildRedirect(ESTADOS_PATH, "error", "Selecione o pais do estado."));
 	}
 
-	const supabase = await createClient();
-	const payload = {
-		uf,
-		estado,
-		codpais,
-		ativo,
-	};
 	const { error } = codestado
-		? await supabase.from("estados").update(payload).eq("codestado", codestado)
-		: await supabase.from("estados").insert(payload);
+		? await executeQuery(
+				"update public.estados set uf = $1, estado = $2, codpais = $3, ativo = $4 where codestado = $5",
+				[uf, estado, codpais, ativo, codestado]
+			)
+		: await executeQuery(
+				"insert into public.estados (uf, estado, codpais, ativo) values ($1, $2, $3, $4)",
+				[uf, estado, codpais, ativo]
+			);
 
 	if (error) {
 		redirect(buildRedirect(ESTADOS_PATH, "error", error.message));
@@ -195,8 +190,7 @@ export async function deleteCidadeAction(formData: FormData) {
 		redirect(buildRedirect(CIDADES_PATH, "error", "Cidade invalida para exclusao."));
 	}
 
-	const supabase = await createClient();
-	const { error } = await supabase.from("cidades").delete().eq("codcidade", codcidade);
+	const { error } = await executeQuery("delete from public.cidades where codcidade = $1", [codcidade]);
 
 	if (error) {
 		redirect(buildRedirect(CIDADES_PATH, "error", error.message));
@@ -220,15 +214,15 @@ async function saveCidade(formData: FormData, codcidade?: number) {
 		redirect(buildRedirect(CIDADES_PATH, "error", "Selecione o estado da cidade."));
 	}
 
-	const supabase = await createClient();
-	const payload = {
-		cidade,
-		codest,
-		ativo,
-	};
 	const { error } = codcidade
-		? await supabase.from("cidades").update(payload).eq("codcidade", codcidade)
-		: await supabase.from("cidades").insert(payload);
+		? await executeQuery(
+				"update public.cidades set cidade = $1, codest = $2, ativo = $3 where codcidade = $4",
+				[cidade, codest, ativo, codcidade]
+			)
+		: await executeQuery(
+				"insert into public.cidades (cidade, codest, ativo) values ($1, $2, $3)",
+				[cidade, codest, ativo]
+			);
 
 	if (error) {
 		redirect(buildRedirect(CIDADES_PATH, "error", error.message));

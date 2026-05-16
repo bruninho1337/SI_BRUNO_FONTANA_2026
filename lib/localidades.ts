@@ -1,86 +1,52 @@
-import { createClient } from "@/lib/supabase/server";
+import { queryMaybeSingle, queryRows } from "@/lib/db";
 
 export async function listarPaises() {
-	const supabase = await createClient();
-
-	return supabase
-		.from("paises")
-		.select("codpais, pais, sigla, ddi, moeda, ativo")
-		.order("pais", { ascending: true });
+	return queryRows("select codpais, pais, sigla, ddi, moeda, ativo from public.paises order by pais asc");
 }
 
 export async function buscarPaisPorId(codpais: number) {
-	const supabase = await createClient();
-
-	return supabase
-		.from("paises")
-		.select("codpais, pais, sigla, ddi, moeda, ativo")
-		.eq("codpais", codpais)
-		.maybeSingle();
+	return queryMaybeSingle(
+		"select codpais, pais, sigla, ddi, moeda, ativo from public.paises where codpais = $1",
+		[codpais]
+	);
 }
 
 export async function listarPaisesParaSelecao() {
-	const supabase = await createClient();
-
-	return supabase
-		.from("paises")
-		.select("codpais, pais")
-		.order("pais", { ascending: true });
+	return queryRows("select codpais, pais from public.paises order by pais asc");
 }
 
 export async function listarEstadosParaSelecao() {
-	const supabase = await createClient();
-
-	return supabase
-		.from("estados")
-		.select("codestado, estado, uf")
-		.order("estado", { ascending: true });
+	return queryRows("select codestado, estado, uf from public.estados order by estado asc");
 }
 
 export async function listarEstadosComPaises() {
-	const supabase = await createClient();
-
 	const [{ data: paises }, { data: estados, error }] = await Promise.all([
-		supabase.from("paises").select("codpais, pais"),
-		supabase
-			.from("estados")
-			.select("codestado, estado, uf, codpais, ativo")
-			.order("estado", { ascending: true }),
+		queryRows("select codpais, pais from public.paises order by pais asc"),
+		queryRows("select codestado, estado, uf, codpais, ativo from public.estados order by estado asc"),
 	]);
 
 	return { paises, estados, error };
 }
 
 export async function buscarEstadoPorId(codestado: number) {
-	const supabase = await createClient();
-
-	return supabase
-		.from("estados")
-		.select("codestado, estado, uf, codpais, ativo")
-		.eq("codestado", codestado)
-		.maybeSingle();
+	return queryMaybeSingle(
+		"select codestado, estado, uf, codpais, ativo from public.estados where codestado = $1",
+		[codestado]
+	);
 }
 
 export async function listarCidadesComEstados() {
-	const supabase = await createClient();
-
 	const [{ data: estados }, { data: cidades, error }] = await Promise.all([
-		supabase.from("estados").select("codestado, estado, uf"),
-		supabase
-			.from("cidades")
-			.select("codcidade, cidade, codest, ativo")
-			.order("cidade", { ascending: true }),
+		queryRows("select codestado, estado, uf from public.estados order by estado asc"),
+		queryRows("select codcidade, cidade, codest, ativo from public.cidades order by cidade asc"),
 	]);
 
 	return { estados, cidades, error };
 }
 
 export async function buscarCidadePorId(codcidade: number) {
-	const supabase = await createClient();
-
-	return supabase
-		.from("cidades")
-		.select("codcidade, cidade, codest, ativo")
-		.eq("codcidade", codcidade)
-		.maybeSingle();
+	return queryMaybeSingle(
+		"select codcidade, cidade, codest, ativo from public.cidades where codcidade = $1",
+		[codcidade]
+	);
 }

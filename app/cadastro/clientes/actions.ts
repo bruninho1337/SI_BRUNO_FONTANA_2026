@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
+import { executeQuery } from "@/lib/db";
 
 const CLIENTES_PATH = "/cadastro/clientes";
 
@@ -141,8 +141,7 @@ export async function deleteClienteAction(formData: FormData) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "Cliente invalido para exclusao."));
 	}
 
-	const supabase = await createClient();
-	const { error } = await supabase.from("clientes").delete().eq("codcliente", codcliente);
+	const { error } = await executeQuery("delete from public.clientes where codcliente = $1", [codcliente]);
 
 	if (error) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", error.message));
@@ -273,33 +272,70 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "Observacoes devem ter no maximo 255 caracteres."));
 	}
 
-	const supabase = await createClient();
-	const payload = {
-		tipo,
-		cliente,
-		apelido: apelido || null,
-		estado_civil: tipo === "FISICA" ? estadoCivil || null : null,
-		endereco,
-		numero,
-		complemento: complemento || null,
-		bairro,
-		cep,
-		codcidade,
-		codcondicao_pagamento: codcondicaoPagamento,
-		telefone,
-		email,
-		sexo: tipo === "FISICA" ? sexo || null : null,
-		nacionalidade: tipo === "FISICA" ? nacionalidade || null : null,
-		data_nascimento: dataNascimento || null,
-		rg_inscricao_estadual: rgInscricaoEstadual || null,
-		cpf_cnpj: cpfCnpj || null,
-		observacoes: observacoes || null,
-		ativo,
-	};
-
 	const { error } = codcliente
-		? await supabase.from("clientes").update(payload).eq("codcliente", codcliente)
-		: await supabase.from("clientes").insert(payload);
+		? await executeQuery(
+				`update public.clientes
+				set tipo = $1, cliente = $2, apelido = $3, estado_civil = $4, endereco = $5, numero = $6,
+					complemento = $7, bairro = $8, cep = $9, codcidade = $10, codcondicao_pagamento = $11,
+					telefone = $12, email = $13, sexo = $14, nacionalidade = $15, data_nascimento = $16,
+					rg_inscricao_estadual = $17, cpf_cnpj = $18, observacoes = $19, ativo = $20
+				where codcliente = $21`,
+				[
+					tipo,
+					cliente,
+					apelido || null,
+					tipo === "FISICA" ? estadoCivil || null : null,
+					endereco,
+					numero,
+					complemento || null,
+					bairro,
+					cep,
+					codcidade,
+					codcondicaoPagamento,
+					telefone,
+					email,
+					tipo === "FISICA" ? sexo || null : null,
+					tipo === "FISICA" ? nacionalidade || null : null,
+					dataNascimento || null,
+					rgInscricaoEstadual || null,
+					cpfCnpj || null,
+					observacoes || null,
+					ativo,
+					codcliente,
+				]
+			)
+		: await executeQuery(
+				`insert into public.clientes (
+					tipo, cliente, apelido, estado_civil, endereco, numero, complemento, bairro, cep,
+					codcidade, codcondicao_pagamento, telefone, email, sexo, nacionalidade, data_nascimento,
+					rg_inscricao_estadual, cpf_cnpj, observacoes, ativo
+				) values (
+					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+					$11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+				)`,
+				[
+					tipo,
+					cliente,
+					apelido || null,
+					tipo === "FISICA" ? estadoCivil || null : null,
+					endereco,
+					numero,
+					complemento || null,
+					bairro,
+					cep,
+					codcidade,
+					codcondicaoPagamento,
+					telefone,
+					email,
+					tipo === "FISICA" ? sexo || null : null,
+					tipo === "FISICA" ? nacionalidade || null : null,
+					dataNascimento || null,
+					rgInscricaoEstadual || null,
+					cpfCnpj || null,
+					observacoes || null,
+					ativo,
+				]
+			);
 
 	if (error) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", error.message));

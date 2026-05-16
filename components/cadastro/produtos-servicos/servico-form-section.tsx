@@ -99,10 +99,10 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 
 				<div className="grid gap-4 md:grid-cols-12">
 					<div className="flex flex-col gap-2 md:col-span-3">
-						<Label htmlFor="valor" className="text-sm text-neutral-800">
+						<RequiredLabel htmlFor="valor" className="text-sm text-neutral-800">
 							Valor:
-						</Label>
-						<Input id="valor" name="valor" type="text" placeholder="Ex: 35,00" defaultValue={String(servicoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+						</RequiredLabel>
+						<Input id="valor" name="valor" type="text" required placeholder="Ex: 35,00" defaultValue={String(servicoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-2">
 						<RequiredLabel htmlFor="duracao_minutos" className="text-sm text-neutral-800">

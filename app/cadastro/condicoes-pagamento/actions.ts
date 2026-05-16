@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
+import { executeQuery } from "@/lib/db";
 
 const CONDICOES_PAGAMENTO_PATH = "/cadastro/condicoes-pagamento";
 const CLIENTES_PATH = "/cadastro/clientes";
@@ -54,11 +54,10 @@ export async function deleteCondicaoPagamentoAction(formData: FormData) {
 		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Condicao de pagamento invalida para exclusao."));
 	}
 
-	const supabase = await createClient();
-	const { error } = await supabase
-		.from("condicoes_pagamento")
-		.delete()
-		.eq("codcondicao_pagamento", codcondicaoPagamento);
+	const { error } = await executeQuery(
+		"delete from public.condicoes_pagamento where codcondicao_pagamento = $1",
+		[codcondicaoPagamento]
+	);
 
 	if (error) {
 		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", error.message));
@@ -94,19 +93,15 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Juro, multa e desconto devem ser valores maiores ou iguais a zero."));
 	}
 
-	const supabase = await createClient();
-	const payload = {
-		nome,
-		prazo_dias: prazoDias,
-		parcelas,
-		juro,
-		multa,
-		desconto,
-		ativo,
-	};
 	const { error } = codcondicaoPagamento
-		? await supabase.from("condicoes_pagamento").update(payload).eq("codcondicao_pagamento", codcondicaoPagamento)
-		: await supabase.from("condicoes_pagamento").insert(payload);
+		? await executeQuery(
+				"update public.condicoes_pagamento set nome = $1, prazo_dias = $2, parcelas = $3, juro = $4, multa = $5, desconto = $6, ativo = $7 where codcondicao_pagamento = $8",
+				[nome, prazoDias, parcelas, juro, multa, desconto, ativo, codcondicaoPagamento]
+			)
+		: await executeQuery(
+				"insert into public.condicoes_pagamento (nome, prazo_dias, parcelas, juro, multa, desconto, ativo) values ($1, $2, $3, $4, $5, $6, $7)",
+				[nome, prazoDias, parcelas, juro, multa, desconto, ativo]
+			);
 
 	if (error) {
 		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", error.message));

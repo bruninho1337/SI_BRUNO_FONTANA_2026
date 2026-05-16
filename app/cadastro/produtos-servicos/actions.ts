@@ -1,10 +1,12 @@
 "use server";
 
+import { randomUUID } from "crypto";
+import { mkdir, unlink, writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import path from "path";
 
-import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { executeQuery } from "@/lib/db";
 
 const PRODUTOS_PATH = "/cadastro/produtos-servicos/produtos";
 const SERVICOS_PATH = "/cadastro/produtos-servicos/servicos";
@@ -53,28 +55,19 @@ async function uploadImageIfPresent(file: File | null, folder: "produtos" | "ser
 		throw new Error("Selecione um arquivo de imagem valido.");
 	}
 
-	const bucketName = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || "cadastros";
-	const supabase = createAdminClient();
 	const safeName = sanitizeFileName(file.name);
-	const filePath = `${folder}/${Date.now()}-${safeName}`;
+	const fileName = `${Date.now()}-${randomUUID()}-${safeName}`;
+	const relativePath = path.posix.join("uploads", folder, fileName);
+	const uploadDir = path.join(process.cwd(), "public", "uploads", folder);
+	const filePath = path.join(uploadDir, fileName);
 	const fileBuffer = Buffer.from(await file.arrayBuffer());
 
-	const { error } = await supabase.storage.from(bucketName).upload(filePath, fileBuffer, {
-		cacheControl: "3600",
-		upsert: false,
-		contentType: file.type || undefined,
-	});
-
-	if (error) {
-		throw new Error(error.message);
-	}
-
-	const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+	await mkdir(uploadDir, { recursive: true });
+	await writeFile(filePath, fileBuffer);
 
 	return {
 		path: filePath,
-		publicUrl: data.publicUrl,
-		bucketName,
+		publicUrl: `/${relativePath}`,
 	};
 }
 
@@ -99,8 +92,7 @@ export async function deleteProdutoAction(formData: FormData) {
 		redirect(buildRedirect(PRODUTOS_PATH, "error", "Produto invalido para exclusao."));
 	}
 
-	const supabase = await createClient();
-	const { error } = await supabase.from("produtos").delete().eq("codproduto", codproduto);
+	const { error } = await executeQuery("delete from public.produtos where codproduto = $1", [codproduto]);
 
 	if (error) {
 		redirect(buildRedirect(PRODUTOS_PATH, "error", error.message));
@@ -137,7 +129,6 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 		redirect(buildRedirect(PRODUTOS_PATH, "error", "O desconto do produto precisa estar entre 0 e o valor informado."));
 	}
 
-	const supabase = await createClient();
 	let uploadedImage: Awaited<ReturnType<typeof uploadImageIfPresent>> = null;
 
 	try {
@@ -146,24 +137,43 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 			"produtos"
 		);
 
-		const payload = {
-			nome,
-			codcategoria: codcategoriaValue ? Number(codcategoriaValue) : null,
-			valor,
-			quantidade_estoque: quantidadeEstoque,
-			valor_desconto: valorDesconto,
-			descricao: descricao || null,
-			imagem_url: uploadedImage?.publicUrl ?? (imagemAtual || null),
-			ativo,
-		};
 		const { error } = codproduto
-			? await supabase.from("produtos").update(payload).eq("codproduto", codproduto)
-			: await supabase.from("produtos").insert(payload);
+			? await executeQuery(
+					`update public.produtos
+					set nome = $1, codcategoria = $2, valor = $3, quantidade_estoque = $4,
+						valor_desconto = $5, descricao = $6, imagem_url = $7, ativo = $8
+					where codproduto = $9`,
+					[
+						nome,
+						codcategoriaValue ? Number(codcategoriaValue) : null,
+						valor,
+						quantidadeEstoque,
+						valorDesconto,
+						descricao || null,
+						uploadedImage?.publicUrl ?? (imagemAtual || null),
+						ativo,
+						codproduto,
+					]
+				)
+			: await executeQuery(
+					`insert into public.produtos (
+						nome, codcategoria, valor, quantidade_estoque, valor_desconto, descricao, imagem_url, ativo
+					) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+					[
+						nome,
+						codcategoriaValue ? Number(codcategoriaValue) : null,
+						valor,
+						quantidadeEstoque,
+						valorDesconto,
+						descricao || null,
+						uploadedImage?.publicUrl ?? (imagemAtual || null),
+						ativo,
+					]
+				);
 
 		if (error) {
 			if (uploadedImage) {
-				const adminClient = createAdminClient();
-				await adminClient.storage.from(uploadedImage.bucketName).remove([uploadedImage.path]);
+				await unlink(uploadedImage.path).catch(() => undefined);
 			}
 
 			redirect(buildRedirect(PRODUTOS_PATH, "error", error.message));
@@ -198,8 +208,7 @@ export async function deleteServicoAction(formData: FormData) {
 		redirect(buildRedirect(SERVICOS_PATH, "error", "Servico invalido para exclusao."));
 	}
 
-	const supabase = await createClient();
-	const { error } = await supabase.from("servicos").delete().eq("codservico", codservico);
+	const { error } = await executeQuery("delete from public.servicos where codservico = $1", [codservico]);
 
 	if (error) {
 		redirect(buildRedirect(SERVICOS_PATH, "error", error.message));
@@ -236,7 +245,6 @@ async function saveServico(formData: FormData, codservico?: number) {
 		redirect(buildRedirect(SERVICOS_PATH, "error", "O desconto do servico precisa estar entre 0 e o valor informado."));
 	}
 
-	const supabase = await createClient();
 	let uploadedImage: Awaited<ReturnType<typeof uploadImageIfPresent>> = null;
 
 	try {
@@ -245,24 +253,43 @@ async function saveServico(formData: FormData, codservico?: number) {
 			"servicos"
 		);
 
-		const payload = {
-			nome,
-			codcategoria: codcategoriaValue ? Number(codcategoriaValue) : null,
-			duracao_minutos: duracaoMinutos,
-			valor,
-			valor_desconto: valorDesconto,
-			descricao: descricao || null,
-			imagem_url: uploadedImage?.publicUrl ?? (imagemAtual || null),
-			ativo,
-		};
 		const { error } = codservico
-			? await supabase.from("servicos").update(payload).eq("codservico", codservico)
-			: await supabase.from("servicos").insert(payload);
+			? await executeQuery(
+					`update public.servicos
+					set nome = $1, codcategoria = $2, duracao_minutos = $3, valor = $4,
+						valor_desconto = $5, descricao = $6, imagem_url = $7, ativo = $8
+					where codservico = $9`,
+					[
+						nome,
+						codcategoriaValue ? Number(codcategoriaValue) : null,
+						duracaoMinutos,
+						valor,
+						valorDesconto,
+						descricao || null,
+						uploadedImage?.publicUrl ?? (imagemAtual || null),
+						ativo,
+						codservico,
+					]
+				)
+			: await executeQuery(
+					`insert into public.servicos (
+						nome, codcategoria, duracao_minutos, valor, valor_desconto, descricao, imagem_url, ativo
+					) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+					[
+						nome,
+						codcategoriaValue ? Number(codcategoriaValue) : null,
+						duracaoMinutos,
+						valor,
+						valorDesconto,
+						descricao || null,
+						uploadedImage?.publicUrl ?? (imagemAtual || null),
+						ativo,
+					]
+				);
 
 		if (error) {
 			if (uploadedImage) {
-				const adminClient = createAdminClient();
-				await adminClient.storage.from(uploadedImage.bucketName).remove([uploadedImage.path]);
+				await unlink(uploadedImage.path).catch(() => undefined);
 			}
 
 			redirect(buildRedirect(SERVICOS_PATH, "error", error.message));
@@ -297,8 +324,7 @@ export async function deleteCategoriaAction(formData: FormData) {
 		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Categoria invalida para exclusao."));
 	}
 
-	const supabase = await createClient();
-	const { error } = await supabase.from("categorias").delete().eq("codcategoria", codcategoria);
+	const { error } = await executeQuery("delete from public.categorias where codcategoria = $1", [codcategoria]);
 
 	if (error) {
 		redirect(buildRedirect(CATEGORIAS_PATH, "error", error.message));
@@ -324,16 +350,15 @@ async function saveCategoria(formData: FormData, codcategoria?: number) {
 		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Selecione um tipo valido para a categoria."));
 	}
 
-	const supabase = await createClient();
-	const payload = {
-		nome,
-		descricao: descricao || null,
-		tipo,
-		ativo,
-	};
 	const { error } = codcategoria
-		? await supabase.from("categorias").update(payload).eq("codcategoria", codcategoria)
-		: await supabase.from("categorias").insert(payload);
+		? await executeQuery(
+				"update public.categorias set nome = $1, descricao = $2, tipo = $3, ativo = $4 where codcategoria = $5",
+				[nome, descricao || null, tipo, ativo, codcategoria]
+			)
+		: await executeQuery(
+				"insert into public.categorias (nome, descricao, tipo, ativo) values ($1, $2, $3, $4)",
+				[nome, descricao || null, tipo, ativo]
+			);
 
 	if (error) {
 		redirect(buildRedirect(CATEGORIAS_PATH, "error", error.message));

@@ -99,16 +99,16 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 
 				<div className="grid gap-4 md:grid-cols-12">
 					<div className="flex flex-col gap-2 md:col-span-3">
-						<Label htmlFor="valor" className="text-sm text-neutral-800">
+						<RequiredLabel htmlFor="valor" className="text-sm text-neutral-800">
 							Valor:
-						</Label>
-						<Input id="valor" name="valor" type="text" placeholder="Ex: 39,90" defaultValue={String(produtoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+						</RequiredLabel>
+						<Input id="valor" name="valor" type="text" required placeholder="Ex: 39,90" defaultValue={String(produtoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-2">
-						<Label htmlFor="quantidade_estoque" className="text-sm text-neutral-800">
+						<RequiredLabel htmlFor="quantidade_estoque" className="text-sm text-neutral-800">
 							Estoque:
-						</Label>
-						<Input id="quantidade_estoque" name="quantidade_estoque" type="number" placeholder="Ex: 12" defaultValue={String(produtoEditando?.quantidade_estoque ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+						</RequiredLabel>
+						<Input id="quantidade_estoque" name="quantidade_estoque" type="number" required placeholder="Ex: 12" defaultValue={String(produtoEditando?.quantidade_estoque ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-3">
 						<Label htmlFor="valor_desconto" className="text-sm text-neutral-800">
