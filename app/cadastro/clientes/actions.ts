@@ -216,8 +216,8 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "Selecione a cidade do cliente."));
 	}
 
-	if (!codcondicaoPagamentoValue || Number.isNaN(codcondicaoPagamento)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Selecione a condicao de pagamento do cliente."));
+	if (codcondicaoPagamentoValue && Number.isNaN(codcondicaoPagamento)) {
+		redirect(buildRedirect(CLIENTES_PATH, "error", "Condicao de pagamento invalida."));
 	}
 
 	if (!isLengthBetween(telefone, 10, 11) || !hasOnlyDigitsAndFormatting(telefoneRaw)) {
@@ -291,7 +291,7 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 					bairro,
 					cep,
 					codcidade,
-					codcondicaoPagamento,
+					codcondicaoPagamentoValue ? codcondicaoPagamento : null,
 					telefone,
 					email,
 					tipo === "FISICA" ? sexo || null : null,
@@ -324,7 +324,7 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 					bairro,
 					cep,
 					codcidade,
-					codcondicaoPagamento,
+					codcondicaoPagamentoValue ? codcondicaoPagamento : null,
 					telefone,
 					email,
 					tipo === "FISICA" ? sexo || null : null,

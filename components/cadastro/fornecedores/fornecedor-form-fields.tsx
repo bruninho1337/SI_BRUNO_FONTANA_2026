@@ -9,6 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
+import {
+	formatCep,
+	formatCpfCnpj,
+	formatInscricaoEstadual,
+	formatRg,
+	formatTelefone,
+	onlyDigits,
+} from "@/lib/formatters";
 
 type Option = {
 	id: string;
@@ -32,58 +40,9 @@ const fieldClass = {
 	xl: "flex flex-col gap-2 md:col-span-8",
 };
 
-function onlyDigits(value: string) {
-	return value.replace(/\D/g, "");
-}
-
 function keepOnlyDigits(event: React.FormEvent<HTMLInputElement>) {
 	const input = event.currentTarget;
 	input.value = onlyDigits(input.value);
-}
-
-function formatCep(value: string) {
-	const digits = onlyDigits(value).slice(0, 8);
-
-	if (digits.length <= 5) {
-		return digits;
-	}
-
-	return `${digits.slice(0, 5)}-${digits.slice(5)}`;
-}
-
-function formatCpfCnpj(value: string, maxDigits = 14) {
-	const digits = onlyDigits(value).slice(0, maxDigits);
-
-	if (digits.length <= 11) {
-		return digits
-			.replace(/^(\d{3})(\d)/, "$1.$2")
-			.replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
-			.replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
-	}
-
-	return digits
-		.replace(/^(\d{2})(\d)/, "$1.$2")
-		.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-		.replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3/$4")
-		.replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, "$1.$2.$3/$4-$5");
-}
-
-function formatRg(value: string) {
-	const digits = onlyDigits(value).slice(0, 9);
-
-	if (digits.length <= 2) {
-		return digits;
-	}
-
-	if (digits.length <= 5) {
-		return `${digits.slice(0, 2)}.${digits.slice(2)}`;
-	}
-
-	if (digits.length <= 8) {
-		return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`;
-	}
-
-	return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}-${digits.slice(8)}`;
 }
 
 function formatInput(
@@ -287,7 +246,18 @@ export function FornecedorFormFields({
 					<RequiredLabel htmlFor="telefone" className="text-sm text-neutral-800">
 						Telefone:
 					</RequiredLabel>
-					<Input id="telefone" name="telefone" inputMode="tel" pattern="[0-9]{10,11}" minLength={10} maxLength={11} required defaultValue={String(initialData?.telefone ?? "")} onInput={keepOnlyDigits} className={inputClass} />
+					<Input
+						id="telefone"
+						name="telefone"
+						inputMode="tel"
+						pattern="\(?\d{2}\)?\s?\d{4,5}-?\d{4}"
+						minLength={10}
+						maxLength={15}
+						required
+						defaultValue={formatTelefone(String(initialData?.telefone ?? ""))}
+						onInput={(event) => formatInput(event, formatTelefone)}
+						className={inputClass}
+					/>
 				</div>
 
 				<div className={fieldClass.lg}>
@@ -305,18 +275,18 @@ export function FornecedorFormFields({
 						id="rg_inscricao_estadual"
 						name="rg_inscricao_estadual"
 						inputMode="numeric"
-						pattern={isFisica ? "\\d{2}\\.?\\d{3}\\.?\\d{3}-?\\d?" : "[0-9]*"}
+						pattern={isFisica ? "\\d{2}\\.?\\d{3}\\.?\\d{3}-?\\d?" : "[0-9]{5,14}"}
 						minLength={5}
 						maxLength={isFisica ? 12 : 14}
 						defaultValue={
 							isFisica
 								? formatRg(String(initialData?.rg_inscricao_estadual ?? ""))
-								: String(initialData?.rg_inscricao_estadual ?? "")
+								: formatInscricaoEstadual(String(initialData?.rg_inscricao_estadual ?? ""))
 						}
 						onInput={
 							isFisica
 								? (event) => formatInput(event, formatRg)
-								: keepOnlyDigits
+								: (event) => formatInput(event, formatInscricaoEstadual)
 						}
 						className={inputClass}
 					/>

@@ -37,6 +37,10 @@ function parseDecimal(value: FormDataEntryValue | null) {
 	return Number(normalized);
 }
 
+function isLengthBetween(value: string, min: number, max: number) {
+	return value.length >= min && value.length <= max;
+}
+
 function sanitizeFileName(fileName: string) {
 	return fileName
 		.normalize("NFD")
@@ -113,8 +117,8 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 	const imagemAtual = getText(formData, "imagem_url");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!nome) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", "Informe o nome do produto."));
+	if (!isLengthBetween(nome, 2, 80)) {
+		redirect(buildRedirect(PRODUTOS_PATH, "error", "Produto deve ter entre 2 e 80 caracteres."));
 	}
 
 	if (Number.isNaN(valor) || valor < 0) {
@@ -127,6 +131,10 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 
 	if (Number.isNaN(valorDesconto) || valorDesconto < 0 || valorDesconto > valor) {
 		redirect(buildRedirect(PRODUTOS_PATH, "error", "O desconto do produto precisa estar entre 0 e o valor informado."));
+	}
+
+	if (descricao.length > 255) {
+		redirect(buildRedirect(PRODUTOS_PATH, "error", "Descricao deve ter no maximo 255 caracteres."));
 	}
 
 	let uploadedImage: Awaited<ReturnType<typeof uploadImageIfPresent>> = null;
@@ -229,8 +237,8 @@ async function saveServico(formData: FormData, codservico?: number) {
 	const imagemAtual = getText(formData, "imagem_url");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!nome) {
-		redirect(buildRedirect(SERVICOS_PATH, "error", "Informe o nome do servico."));
+	if (!isLengthBetween(nome, 2, 80)) {
+		redirect(buildRedirect(SERVICOS_PATH, "error", "Servico deve ter entre 2 e 80 caracteres."));
 	}
 
 	if (Number.isNaN(duracaoMinutos) || duracaoMinutos <= 0) {
@@ -243,6 +251,10 @@ async function saveServico(formData: FormData, codservico?: number) {
 
 	if (Number.isNaN(valorDesconto) || valorDesconto < 0 || valorDesconto > valor) {
 		redirect(buildRedirect(SERVICOS_PATH, "error", "O desconto do servico precisa estar entre 0 e o valor informado."));
+	}
+
+	if (descricao.length > 255) {
+		redirect(buildRedirect(SERVICOS_PATH, "error", "Descricao deve ter no maximo 255 caracteres."));
 	}
 
 	let uploadedImage: Awaited<ReturnType<typeof uploadImageIfPresent>> = null;
@@ -342,12 +354,16 @@ async function saveCategoria(formData: FormData, codcategoria?: number) {
 	const tipo = getText(formData, "tipo").toUpperCase() || "AMBOS";
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!nome) {
-		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Informe o nome da categoria."));
+	if (!isLengthBetween(nome, 2, 80)) {
+		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Categoria deve ter entre 2 e 80 caracteres."));
 	}
 
 	if (!["PRODUTO", "SERVICO", "AMBOS"].includes(tipo)) {
 		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Selecione um tipo valido para a categoria."));
+	}
+
+	if (descricao.length > 255) {
+		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Descricao deve ter no maximo 255 caracteres."));
 	}
 
 	const { error } = codcategoria

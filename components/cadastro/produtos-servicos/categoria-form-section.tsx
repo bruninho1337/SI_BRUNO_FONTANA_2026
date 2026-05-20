@@ -60,6 +60,8 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 						id="nome"
 						name="nome"
 						type="text"
+						minLength={2}
+						maxLength={80}
 						required
 						placeholder="Ex: Finalizacao"
 						defaultValue={categoriaEditando?.nome ?? ""}
@@ -92,6 +94,7 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 						id="descricao"
 						name="descricao"
 						placeholder="Descreva rapidamente a categoria"
+						maxLength={255}
 						rows={4}
 						defaultValue={categoriaEditando?.descricao ?? ""}
 						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"

@@ -8,14 +8,14 @@ create table if not exists public.fornecedores (
 	numero text not null check (char_length(numero) between 1 and 10),
 	complemento text check (complemento is null or char_length(complemento) <= 60),
 	bairro text not null check (char_length(bairro) between 5 and 60),
-	cep text not null check (char_length(cep) between 8 and 9),
+	cep text not null check (char_length(cep) = 8),
 	codcidade integer not null references public.cidades(codcidade),
-	telefone text not null check (char_length(telefone) between 5 and 20),
+	telefone text not null check (char_length(telefone) in (10, 11)),
 	email text not null check (char_length(email) between 5 and 80),
 	rg_inscricao_estadual text check (
 		rg_inscricao_estadual is null or char_length(rg_inscricao_estadual) between 5 and 14
 	),
-	cpf_cnpj text check (cpf_cnpj is null or char_length(cpf_cnpj) between 5 and 14),
+	cpf_cnpj text check (cpf_cnpj is null or char_length(cpf_cnpj) in (11, 14)),
 	observacoes text check (observacoes is null or char_length(observacoes) <= 255),
 	data_criacao timestamptz not null default now(),
 	data_atualizacao timestamptz not null default now(),

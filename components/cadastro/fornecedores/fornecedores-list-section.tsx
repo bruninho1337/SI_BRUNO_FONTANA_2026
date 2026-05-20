@@ -1,6 +1,7 @@
 import { deleteFornecedorAction } from "@/app/cadastro/fornecedores/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
+import { formatTelefone } from "@/lib/formatters";
 import { listarFornecedoresComCidades } from "@/lib/fornecedores";
 
 type FornecedoresListSectionProps = {
@@ -79,7 +80,7 @@ export async function FornecedoresListSection({ searchParams }: FornecedoresList
 									<td className="px-4 py-3 text-sm text-neutral-700">{fornecedor.tipo}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{cidadeMap.get(fornecedor.codcidade) ?? "-"}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{fornecedor.contato ?? "-"}</td>
-									<td className="px-4 py-3 text-sm text-neutral-700">{fornecedor.telefone}</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">{formatTelefone(fornecedor.telefone)}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{fornecedor.email}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatDate(fornecedor.data_criacao)}</td>
 									<td className="px-4 py-3 text-sm font-semibold text-neutral-900">{fornecedor.ativo}</td>

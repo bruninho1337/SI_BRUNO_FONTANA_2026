@@ -10,6 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
+import {
+	formatCep,
+	formatCpfCnpj,
+	formatDateInput,
+	formatInscricaoEstadual,
+	formatRg,
+	formatTelefone,
+	onlyDigits,
+} from "@/lib/formatters";
 
 type Option = {
 	id: string;
@@ -20,7 +29,7 @@ type ClienteFormFieldsProps = {
 	cidadeOptions: Option[];
 	condicaoPagamentoOptions: Option[];
 	action: (formData: FormData) => Promise<void>;
-	initialData?: Record<string, string | number | null>;
+	initialData?: Record<string, string | number | Date | null>;
 	submitLabel?: string;
 };
 
@@ -36,56 +45,7 @@ const fieldClass = {
 
 function keepOnlyDigits(event: React.FormEvent<HTMLInputElement>) {
 	const input = event.currentTarget;
-	input.value = input.value.replace(/\D/g, "");
-}
-
-function onlyDigits(value: string) {
-	return value.replace(/\D/g, "");
-}
-
-function formatCep(value: string) {
-	const digits = onlyDigits(value).slice(0, 8);
-
-	if (digits.length <= 5) {
-		return digits;
-	}
-
-	return `${digits.slice(0, 5)}-${digits.slice(5)}`;
-}
-
-function formatCpfCnpj(value: string, maxDigits = 14) {
-	const digits = onlyDigits(value).slice(0, maxDigits);
-
-	if (digits.length <= 11) {
-		return digits
-			.replace(/^(\d{3})(\d)/, "$1.$2")
-			.replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
-			.replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
-	}
-
-	return digits
-		.replace(/^(\d{2})(\d)/, "$1.$2")
-		.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-		.replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3/$4")
-		.replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, "$1.$2.$3/$4-$5");
-}
-
-function formatRg(value: string) {
-	const digits = onlyDigits(value).slice(0, 9);
-
-	if (digits.length <= 2) {
-		return digits;
-	}
-
-	if (digits.length <= 5) {
-		return `${digits.slice(0, 2)}.${digits.slice(2)}`;
-	}
-
-	if (digits.length <= 8) {
-		return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`;
-	}
-
-	return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}-${digits.slice(8)}`;
+	input.value = onlyDigits(input.value);
 }
 
 function formatInput(
@@ -139,10 +99,6 @@ export function ClienteFormFields({
 
 		if (!String(formData.get("codcidade") ?? "").trim()) {
 			nextErrors.codcidade = "Selecione a cidade do cliente.";
-		}
-
-		if (!String(formData.get("codcondicao_pagamento") ?? "").trim()) {
-			nextErrors.codcondicao_pagamento = "Selecione a condicao de pagamento do cliente.";
 		}
 
 		setSelectErrors(nextErrors);
@@ -322,7 +278,6 @@ export function ClienteFormFields({
 					searchPlaceholder="Digite o nome da condicao"
 					selectPlaceholder="Selecione uma condicao"
 					options={condicaoPagamentoOptions}
-					required
 					defaultValue={String(initialData?.codcondicao_pagamento ?? "")}
 					className="md:col-span-5"
 					createHref="/cadastro/condicoes-pagamento?mode=create"
@@ -339,12 +294,12 @@ export function ClienteFormFields({
 						id="telefone"
 						name="telefone"
 						inputMode="tel"
-						pattern="[0-9]{10,11}"
+						pattern="\(?\d{2}\)?\s?\d{4,5}-?\d{4}"
 						minLength={10}
-						maxLength={11}
+						maxLength={15}
 						required
-						defaultValue={String(initialData?.telefone ?? "")}
-						onInput={keepOnlyDigits}
+						defaultValue={formatTelefone(String(initialData?.telefone ?? ""))}
+						onInput={(event) => formatInput(event, formatTelefone)}
 						className={inputClass}
 					/>
 				</div>
@@ -394,7 +349,7 @@ export function ClienteFormFields({
 							id="data-nascimento"
 							name="data_nascimento"
 							type="date"
-							defaultValue={String(initialData?.data_nascimento ?? "")}
+							defaultValue={formatDateInput(initialData?.data_nascimento)}
 							className={inputClass}
 						/>
 						<button
@@ -417,18 +372,18 @@ export function ClienteFormFields({
 						id="rg-inscricao-estadual"
 						name="rg_inscricao_estadual"
 						inputMode="numeric"
-						pattern={isFisica ? "\\d{2}\\.?\\d{3}\\.?\\d{3}-?\\d?" : "[0-9]*"}
+						pattern={isFisica ? "\\d{2}\\.?\\d{3}\\.?\\d{3}-?\\d?" : "[0-9]{5,14}"}
 						minLength={5}
 						maxLength={isFisica ? 12 : 14}
 						defaultValue={
 							isFisica
 								? formatRg(String(initialData?.rg_inscricao_estadual ?? ""))
-								: String(initialData?.rg_inscricao_estadual ?? "")
+								: formatInscricaoEstadual(String(initialData?.rg_inscricao_estadual ?? ""))
 						}
 						onInput={
 							isFisica
 								? (event) => formatInput(event, formatRg)
-								: keepOnlyDigits
+								: (event) => formatInput(event, formatInscricaoEstadual)
 						}
 						className={inputClass}
 					/>

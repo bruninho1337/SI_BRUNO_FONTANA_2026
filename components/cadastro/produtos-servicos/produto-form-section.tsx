@@ -71,6 +71,8 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 						id="nome"
 						name="nome"
 						type="text"
+						minLength={2}
+						maxLength={80}
 						required
 						placeholder="Ex: Pomada modeladora"
 						defaultValue={produtoEditando?.nome ?? ""}
@@ -129,6 +131,7 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 						id="descricao"
 						name="descricao"
 						placeholder="Descreva rapidamente o produto"
+						maxLength={255}
 						rows={4}
 						defaultValue={produtoEditando?.descricao ?? ""}
 						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"

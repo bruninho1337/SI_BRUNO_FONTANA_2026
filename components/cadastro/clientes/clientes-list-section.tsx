@@ -2,6 +2,7 @@ import { deleteClienteAction } from "@/app/cadastro/clientes/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { listarClientesComCidades } from "@/lib/clientes";
+import { formatTelefone } from "@/lib/formatters";
 
 type ClientesListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;
@@ -84,7 +85,7 @@ export async function ClientesListSection({ searchParams }: ClientesListSectionP
 									<td className="px-4 py-3 text-sm text-neutral-700">
 										{condicaoPagamentoMap.get(cliente.codcondicao_pagamento) ?? "-"}
 									</td>
-									<td className="px-4 py-3 text-sm text-neutral-700">{cliente.telefone}</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">{formatTelefone(cliente.telefone)}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{cliente.email}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatDate(cliente.data_criacao)}</td>
 									<td className="px-4 py-3 text-sm font-semibold text-neutral-900">{cliente.ativo}</td>
