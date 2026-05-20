@@ -103,6 +103,7 @@ export function ClienteFormFields({
 	submitLabel = "Salvar cliente",
 }: ClienteFormFieldsProps) {
 	const [tipo, setTipo] = useState(String(initialData?.tipo ?? "FISICA"));
+	const [selectErrors, setSelectErrors] = useState<Record<string, string>>({});
 	const dataNascimentoRef = useRef<HTMLInputElement>(null);
 	const isEditing = Boolean(initialData?.codcliente);
 	const isFisica = tipo === "FISICA";
@@ -118,8 +119,39 @@ export function ClienteFormFields({
 		input.focus();
 	}
 
+	function clearSelectError(name: string) {
+		setSelectErrors((current) => {
+			if (!current[name]) {
+				return current;
+			}
+
+			const next = { ...current };
+			delete next[name];
+			return next;
+		});
+	}
+
+	function validateSearchableSelects(event: React.FormEvent<HTMLFormElement>) {
+		const formData = new FormData(event.currentTarget);
+		const nextErrors: Record<string, string> = {};
+
+		if (!String(formData.get("codcidade") ?? "").trim()) {
+			nextErrors.codcidade = "Selecione a cidade do cliente.";
+		}
+
+		if (!String(formData.get("codcondicao_pagamento") ?? "").trim()) {
+			nextErrors.codcondicao_pagamento = "Selecione a condicao de pagamento do cliente.";
+		}
+
+		setSelectErrors(nextErrors);
+
+		if (Object.keys(nextErrors).length > 0) {
+			event.preventDefault();
+		}
+	}
+
 	return (
-		<form action={action} className="space-y-5">
+		<form action={action} onSubmit={validateSearchableSelects} className="space-y-5">
 			<div className="grid gap-4 md:grid-cols-12">
 				{initialData?.codcliente ? (
 					<>
@@ -265,6 +297,8 @@ export function ClienteFormFields({
 					className="md:col-span-5"
 					createHref="/cadastro/localidades/cidades?mode=create"
 					createLabel="Nova cidade"
+					error={selectErrors.codcidade}
+					onValueChange={() => clearSelectError("codcidade")}
 				/>
 
 				<SearchableSelect
@@ -279,6 +313,8 @@ export function ClienteFormFields({
 					className="md:col-span-5"
 					createHref="/cadastro/condicoes-pagamento?mode=create"
 					createLabel="Nova condicao"
+					error={selectErrors.codcondicao_pagamento}
+					onValueChange={() => clearSelectError("codcondicao_pagamento")}
 				/>
 
 				<div className={fieldClass.sm}>

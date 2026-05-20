@@ -18,6 +18,11 @@ const navigationItems = [
 		description: "Lista de clientes",
 	},
 	{
+		href: "/cadastro/fornecedores",
+		label: "Fornecedores",
+		description: "Lista de fornecedores",
+	},
+	{
 		href: "/cadastro/condicoes-pagamento",
 		label: "Condicoes de Pagamento",
 		description: "Prazos e regras comerciais",

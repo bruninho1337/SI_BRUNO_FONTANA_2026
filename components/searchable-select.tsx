@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,8 @@ type SearchableSelectProps = {
 	className?: string;
 	createHref?: string;
 	createLabel?: string;
+	error?: string;
+	onValueChange?: (value: string) => void;
 };
 
 export function SearchableSelect({
@@ -40,6 +42,8 @@ export function SearchableSelect({
 	className,
 	createHref,
 	createLabel = "Adicionar",
+	error,
+	onValueChange,
 }: SearchableSelectProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -96,14 +100,30 @@ export function SearchableSelect({
 			<button
 				id={`${name}-trigger`}
 				type="button"
+				data-invalid={error ? "true" : undefined}
+				aria-describedby={error ? `${name}-error` : undefined}
 				onClick={() => setIsOpen((current) => !current)}
-				className="flex h-11 w-full items-center justify-between rounded-xl border border-neutral-300 bg-white px-4 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
+				className={cn(
+					"flex h-11 w-full items-center justify-between rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring",
+					error ? "border-red-500 focus-visible:ring-red-500" : "border-neutral-300"
+				)}
 			>
 				<span className={selectedOption ? "text-neutral-900" : "text-neutral-500"}>
 					{selectedOption?.label ?? selectPlaceholder}
 				</span>
-				<span className="text-neutral-500">{isOpen ? "▲" : "▼"}</span>
+				<span className="text-neutral-500">
+					{isOpen ? (
+						<ChevronUp className="h-4 w-4" aria-hidden="true" />
+					) : (
+						<ChevronDown className="h-4 w-4" aria-hidden="true" />
+					)}
+				</span>
 			</button>
+			{error ? (
+				<p id={`${name}-error`} className="text-sm text-red-600">
+					{error}
+				</p>
+			) : null}
 
 			{isOpen ? (
 				<div className="rounded-2xl border border-neutral-300 bg-white p-3 shadow-lg">
@@ -142,6 +162,7 @@ export function SearchableSelect({
 											type="button"
 											onClick={() => {
 												setSelectedId(option.id);
+												onValueChange?.(option.id);
 												setSearch("");
 												setIsOpen(false);
 											}}
