@@ -14,7 +14,7 @@ export async function listarClientesComCidades() {
 
 export async function buscarClientePorId(codcliente: number) {
 	return queryMaybeSingle(
-		"select codcliente, tipo, cliente, apelido, estado_civil, endereco, numero, complemento, bairro, cep, codcidade, codcondicao_pagamento, telefone, email, sexo, nacionalidade, data_nascimento, rg_inscricao_estadual, cpf_cnpj, observacoes, ativo from public.clientes where codcliente = $1",
+		"select codcliente, tipo, cliente, apelido, estado_civil, endereco, numero, complemento, bairro, cep, codcidade, codcondicao_pagamento, telefone, email, sexo, nacionalidade, data_nascimento, rg_inscricao_estadual, cpf_cnpj, observacoes, ativo, data_criacao, data_atualizacao from public.clientes where codcliente = $1",
 		[codcliente]
 	);
 }

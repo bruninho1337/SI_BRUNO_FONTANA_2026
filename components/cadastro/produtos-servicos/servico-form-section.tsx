@@ -1,5 +1,6 @@
 import { createServicoAction, updateServicoAction } from "@/app/cadastro/produtos-servicos/actions";
 import { ActiveToggle } from "@/components/active-toggle";
+import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { SearchableSelect } from "@/components/searchable-select";
 import { StorageImageUpload } from "@/components/storage-image-upload";
@@ -133,6 +134,11 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
+
+				<AuditDates
+					createdAt={servicoEditando?.data_criacao}
+					updatedAt={servicoEditando?.data_atualizacao}
+				/>
 
 				<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 					{servicoEditando ? "Atualizar servico" : "Salvar servico"}

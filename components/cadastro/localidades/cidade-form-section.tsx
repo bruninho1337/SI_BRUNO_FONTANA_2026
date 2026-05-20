@@ -1,5 +1,6 @@
 import { createCidadeAction, updateCidadeAction } from "@/app/cadastro/localidades/actions";
 import { ActiveToggle } from "@/components/active-toggle";
+import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { SearchableSelect } from "@/components/searchable-select";
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,11 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 					createLabel="Novo estado"
 				/>
 				</div>
+
+				<AuditDates
+					createdAt={cidadeEditando?.data_criacao}
+					updatedAt={cidadeEditando?.data_atualizacao}
+				/>
 
 				<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 					{cidadeEditando ? "Atualizar cidade" : "Salvar cidade"}

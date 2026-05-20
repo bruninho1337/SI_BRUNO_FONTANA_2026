@@ -3,6 +3,7 @@ import {
 	updateCondicaoPagamentoAction,
 } from "@/app/cadastro/condicoes-pagamento/actions";
 import { ActiveToggle } from "@/components/active-toggle";
+import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -167,6 +168,11 @@ export async function CondicaoPagamentoFormSection({
 						/>
 					</div>
 				</div>
+
+				<AuditDates
+					createdAt={condicaoEditando?.data_criacao}
+					updatedAt={condicaoEditando?.data_atualizacao}
+				/>
 
 				<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 					{condicaoEditando ? "Atualizar condicao" : "Salvar condicao"}

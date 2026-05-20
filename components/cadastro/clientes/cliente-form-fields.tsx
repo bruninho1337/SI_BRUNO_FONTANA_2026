@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Calendar } from "lucide-react";
 
 import { ActiveToggle } from "@/components/active-toggle";
+import { AuditDates } from "@/components/cadastro/audit-dates";
 import { SearchableSelect } from "@/components/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -464,6 +465,11 @@ export function ClienteFormFields({
 					className="min-h-28 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
 				/>
 			</div>
+
+			<AuditDates
+				createdAt={initialData?.data_criacao}
+				updatedAt={initialData?.data_atualizacao}
+			/>
 
 			<Button className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">
 				{submitLabel}
