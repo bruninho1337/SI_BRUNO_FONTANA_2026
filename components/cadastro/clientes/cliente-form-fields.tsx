@@ -330,39 +330,39 @@ export function ClienteFormFields({
 							</select>
 						</div>
 
-						<div className={fieldClass.sm}>
-							<Label htmlFor="nacionalidade" className="text-sm text-neutral-800">
-								Nacionalidade:
-							</Label>
-							<Input id="nacionalidade" name="nacionalidade" minLength={5} maxLength={20} defaultValue={String(initialData?.nacionalidade ?? "")} className={inputClass} />
-						</div>
-					</>
-				) : null}
+							<div className={fieldClass.sm}>
+								<Label htmlFor="nacionalidade" className="text-sm text-neutral-800">
+									Nacionalidade:
+								</Label>
+								<Input id="nacionalidade" name="nacionalidade" minLength={5} maxLength={20} defaultValue={String(initialData?.nacionalidade ?? "")} className={inputClass} />
+							</div>
 
-				<div className={fieldClass.sm}>
-					<Label htmlFor="data-nascimento" className="text-sm text-neutral-800">
-						Data Nascimento:
-					</Label>
-					<div className="flex gap-2">
-						<Input
-							ref={dataNascimentoRef}
-							id="data-nascimento"
-							name="data_nascimento"
-							type="date"
-							defaultValue={formatDateInput(initialData?.data_nascimento)}
-							className={inputClass}
-						/>
-						<button
-							type="button"
-							aria-label="Selecionar data de nascimento"
-							title="Selecionar data"
-							onClick={openDatePicker}
-							className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white text-neutral-700 shadow-sm transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-						>
-							<Calendar className="h-4 w-4" aria-hidden="true" />
-						</button>
-					</div>
-				</div>
+							<div className={fieldClass.sm}>
+								<Label htmlFor="data-nascimento" className="text-sm text-neutral-800">
+									Data Nascimento:
+								</Label>
+								<div className="flex gap-2">
+									<Input
+										ref={dataNascimentoRef}
+										id="data-nascimento"
+										name="data_nascimento"
+										type="date"
+										defaultValue={formatDateInput(initialData?.data_nascimento)}
+										className={inputClass}
+									/>
+									<button
+										type="button"
+										aria-label="Selecionar data de nascimento"
+										title="Selecionar data"
+										onClick={openDatePicker}
+										className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white text-neutral-700 shadow-sm transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+									>
+										<Calendar className="h-4 w-4" aria-hidden="true" />
+									</button>
+								</div>
+							</div>
+						</>
+					) : null}
 
 				<div className={fieldClass.sm}>
 					<Label htmlFor="rg-inscricao-estadual" className="text-sm text-neutral-800">

@@ -236,7 +236,7 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "Nacionalidade deve ter entre 5 e 20 caracteres."));
 	}
 
-	if (!isOlderThan15(dataNascimento)) {
+	if (tipo === "FISICA" && !isOlderThan15(dataNascimento)) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "Data de nascimento exige idade maior que 15 anos."));
 	}
 
@@ -296,7 +296,7 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 					email,
 					tipo === "FISICA" ? sexo || null : null,
 					tipo === "FISICA" ? nacionalidade || null : null,
-					dataNascimento || null,
+					tipo === "FISICA" ? dataNascimento || null : null,
 					rgInscricaoEstadual || null,
 					cpfCnpj || null,
 					observacoes || null,
@@ -329,7 +329,7 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 					email,
 					tipo === "FISICA" ? sexo || null : null,
 					tipo === "FISICA" ? nacionalidade || null : null,
-					dataNascimento || null,
+					tipo === "FISICA" ? dataNascimento || null : null,
 					rgInscricaoEstadual || null,
 					cpfCnpj || null,
 					observacoes || null,
