@@ -40,7 +40,7 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 						<input type="hidden" name="codcategoria" value={categoriaEditando.codcategoria} />
 						<div className="flex flex-col gap-2 md:col-span-2">
 							<Label htmlFor="codcategoria-display" className="text-sm text-neutral-800">
-								Codigo:
+								Código:
 							</Label>
 							<Input
 								id="codcategoria-display"

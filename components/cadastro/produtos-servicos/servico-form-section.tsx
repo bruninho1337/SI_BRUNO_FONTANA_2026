@@ -51,7 +51,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 						<input type="hidden" name="imagem_url" value={servicoEditando.imagem_url ?? ""} />
 						<div className="flex flex-col gap-2 md:col-span-2">
 							<Label htmlFor="codservico-display" className="text-sm text-neutral-800">
-								Codigo:
+								Código:
 							</Label>
 							<Input
 								id="codservico-display"

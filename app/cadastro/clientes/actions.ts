@@ -228,8 +228,8 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "E-mail deve ter entre 5 e 60 caracteres."));
 	}
 
-	if (tipo === "FISICA" && !["MASCULINO", "FEMININO"].includes(sexo)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Selecione o sexo do cliente."));
+	if (sexo && !["MASCULINO", "FEMININO"].includes(sexo)) {
+		redirect(buildRedirect(CLIENTES_PATH, "error", "Sexo do cliente invalido."));
 	}
 
 	if (!isOptionalLengthBetween(nacionalidade, 5, 20)) {

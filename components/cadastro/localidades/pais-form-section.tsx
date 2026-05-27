@@ -48,7 +48,7 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 						<input type="hidden" name="codpais" value={paisEditando.codpais} />
 						<div className={`${fieldClass} md:col-span-2`}>
 							<Label htmlFor="codpais-display" className="text-sm text-neutral-800">
-								Codigo:
+								Código:
 							</Label>
 							<Input
 								id="codpais-display"

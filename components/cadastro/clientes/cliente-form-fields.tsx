@@ -128,7 +128,7 @@ export function ClienteFormFields({
 						<input type="hidden" name="codcliente" value={String(initialData.codcliente)} />
 						<div className={fieldClass.xs}>
 							<Label htmlFor="codcliente-display" className="text-sm text-neutral-800">
-								Codigo:
+								Código:
 							</Label>
 							<Input
 								id="codcliente-display"
@@ -207,7 +207,7 @@ export function ClienteFormFields({
 
 				<div className={fieldClass.xs}>
 					<RequiredLabel htmlFor="numero" className="text-sm text-neutral-800">
-						Numero:
+						Número:
 					</RequiredLabel>
 					<Input
 						id="numero"
@@ -314,14 +314,13 @@ export function ClienteFormFields({
 				{isFisica ? (
 					<>
 						<div className={fieldClass.sm}>
-							<RequiredLabel htmlFor="sexo" className="text-sm text-neutral-800">
+							<Label htmlFor="sexo" className="text-sm text-neutral-800">
 								Sexo:
-							</RequiredLabel>
+							</Label>
 							<select
 								id="sexo"
 								name="sexo"
 								defaultValue={String(initialData?.sexo ?? "")}
-								required
 								className={inputClass}
 							>
 								<option value="">Selecione</option>

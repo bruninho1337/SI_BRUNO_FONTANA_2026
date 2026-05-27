@@ -8,6 +8,10 @@ const tabItems = [
 		label: "Categorias",
 	},
 	{
+		href: "/cadastro/produtos-servicos/marcas",
+		label: "Marcas",
+	},
+	{
 		href: "/cadastro/produtos-servicos/produtos",
 		label: "Produtos",
 	},

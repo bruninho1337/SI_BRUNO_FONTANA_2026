@@ -51,7 +51,7 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 						<input type="hidden" name="codestado" value={estadoEditando.codestado} />
 						<div className="flex flex-col gap-2 md:col-span-2">
 							<Label htmlFor="codestado-display" className="text-sm text-neutral-800">
-								Codigo:
+								Código:
 							</Label>
 							<Input
 								id="codestado-display"

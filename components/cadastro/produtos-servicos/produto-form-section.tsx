@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
+import { listarMarcasParaSelecao } from "@/lib/marcas";
 import { buscarProdutoPorId, listarCategoriasPorTipo } from "@/lib/produtos-servicos";
 
 type ProdutoFormSectionProps = {
@@ -17,8 +18,13 @@ type ProdutoFormSectionProps = {
 export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionProps) {
 	const params = await searchParams;
 	const editId = Number(params?.edit ?? "");
-	const [{ data: categorias, error }, { data: produtoEditando }] = await Promise.all([
+	const [
+		{ data: categorias, error: categoriasError },
+		{ data: marcas, error: marcasError },
+		{ data: produtoEditando },
+	] = await Promise.all([
 		listarCategoriasPorTipo(["PRODUTO", "AMBOS"]),
+		listarMarcasParaSelecao(),
 		Number.isNaN(editId) ? Promise.resolve({ data: null }) : buscarProdutoPorId(editId),
 	]);
 
@@ -26,6 +32,12 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 		categorias?.map((categoria) => ({
 			id: String(categoria.codcategoria),
 			label: categoria.nome,
+		})) ?? [];
+
+	const marcaOptions =
+		marcas?.map((marca) => ({
+			id: String(marca.codmarca),
+			label: marca.marca,
 		})) ?? [];
 
 	return (
@@ -39,8 +51,12 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 
 			<FormFeedback params={params} />
 
-			{error ? (
-				<p className="mb-4 text-sm text-red-600">Erro ao carregar categorias: {error.message}</p>
+			{categoriasError ? (
+				<p className="mb-4 text-sm text-red-600">Erro ao carregar categorias: {categoriasError.message}</p>
+			) : null}
+
+			{marcasError ? (
+				<p className="mb-4 text-sm text-red-600">Erro ao carregar marcas: {marcasError.message}</p>
 			) : null}
 
 			<form action={produtoEditando ? updateProdutoAction : createProdutoAction} className="space-y-4">
@@ -51,7 +67,7 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 						<input type="hidden" name="imagem_url" value={produtoEditando.imagem_url ?? ""} />
 						<div className="flex flex-col gap-2 md:col-span-2">
 							<Label htmlFor="codproduto-display" className="text-sm text-neutral-800">
-								Codigo:
+								Código:
 							</Label>
 							<Input
 								id="codproduto-display"
@@ -91,6 +107,19 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 					className="md:col-span-3"
 					createHref="/cadastro/produtos-servicos/categorias?mode=create"
 					createLabel="Nova categoria"
+				/>
+
+				<SearchableSelect
+					name="codmarca"
+					label="Marca"
+					searchLabel="Pesquisar marca por nome"
+					searchPlaceholder="Digite o nome da marca"
+					selectPlaceholder="Selecione uma marca"
+					options={marcaOptions}
+					defaultValue={String(produtoEditando?.codmarca ?? "")}
+					className="md:col-span-3"
+					createHref="/cadastro/produtos-servicos/marcas?mode=create"
+					createLabel="Nova marca"
 				/>
 
 				<ActiveToggle

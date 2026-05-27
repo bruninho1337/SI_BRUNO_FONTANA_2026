@@ -12,20 +12,27 @@ const navigationItems = [
 		label: "Dashboard",
 		description: "Visão geral do dia",
 	},
+];
+
+const financeiroItems = [
+	{
+		href: "/cadastro/condicoes-pagamento",
+		label: "Condicoes de Pagamento",
+	},
+	{
+		href: "/cadastro/formas-pagamento",
+		label: "Formas de Pagamento",
+	},
+];
+
+const pessoasItems = [
 	{
 		href: "/cadastro/clientes",
 		label: "Clientes",
-		description: "Lista de clientes",
 	},
 	{
 		href: "/cadastro/fornecedores",
 		label: "Fornecedores",
-		description: "Lista de fornecedores",
-	},
-	{
-		href: "/cadastro/condicoes-pagamento",
-		label: "Condicoes de Pagamento",
-		description: "Prazos e regras comerciais",
 	},
 ];
 
@@ -33,6 +40,10 @@ const produtosServicosItems = [
 	{
 		href: "/cadastro/produtos-servicos/categorias",
 		label: "Categorias",
+	},
+	{
+		href: "/cadastro/produtos-servicos/marcas",
+		label: "Marcas",
 	},
 	{
 		href: "/cadastro/produtos-servicos/produtos",
@@ -61,12 +72,24 @@ const localidadesItems = [
 
 export function DashboardSidebar() {
 	const pathname = usePathname();
+	const isFinanceiroRoute = financeiroItems.some((item) => pathname === item.href);
+	const isPessoasRoute = pessoasItems.some((item) => pathname === item.href);
 	const isProdutosServicosRoute = pathname.startsWith("/cadastro/produtos-servicos");
 	const isLocalidadesRoute = pathname.startsWith("/cadastro/localidades");
+	const [financeiroOpen, setFinanceiroOpen] = useState(isFinanceiroRoute);
+	const [pessoasOpen, setPessoasOpen] = useState(isPessoasRoute);
 	const [produtosServicosOpen, setProdutosServicosOpen] = useState(
 		isProdutosServicosRoute
 	);
 	const [localidadesOpen, setLocalidadesOpen] = useState(isLocalidadesRoute);
+
+	useEffect(() => {
+		setFinanceiroOpen(isFinanceiroRoute);
+	}, [isFinanceiroRoute]);
+
+	useEffect(() => {
+		setPessoasOpen(isPessoasRoute);
+	}, [isPessoasRoute]);
 
 	useEffect(() => {
 		setProdutosServicosOpen(isProdutosServicosRoute);
@@ -118,6 +141,108 @@ export function DashboardSidebar() {
 				<div className="rounded-2xl border border-neutral-200 bg-neutral-50">
 					<button
 						type="button"
+						onClick={() => setFinanceiroOpen((current) => !current)}
+						className={cn(
+								"flex w-full min-w-0 items-center justify-between gap-3 px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
+							isFinanceiroRoute &&
+								"rounded-t-2xl bg-neutral-900 text-white hover:bg-neutral-900"
+						)}
+					>
+						<div>
+							<p className="text-sm font-semibold">Financeiro</p>
+							<p
+								className={cn(
+									"mt-1 text-xs",
+									isFinanceiroRoute ? "text-neutral-200" : "text-neutral-500"
+								)}
+							>
+								Pagamentos e condicoes
+							</p>
+						</div>
+
+							<span className="shrink-0 text-sm font-semibold">
+							{financeiroOpen ? "-" : "+"}
+						</span>
+					</button>
+
+					{financeiroOpen ? (
+						<div className="flex flex-col gap-2 border-t border-neutral-200 px-3 py-3">
+							{financeiroItems.map((item) => {
+								const isActive = pathname === item.href;
+
+								return (
+									<Link
+										key={item.href}
+										href={item.href}
+										className={cn(
+												"rounded-xl px-3 py-2 text-sm transition break-words",
+											isActive
+												? "bg-neutral-900 text-white"
+												: "text-neutral-700 hover:bg-neutral-100"
+										)}
+									>
+										{item.label}
+									</Link>
+								);
+							})}
+						</div>
+					) : null}
+				</div>
+
+				<div className="rounded-2xl border border-neutral-200 bg-neutral-50">
+					<button
+						type="button"
+						onClick={() => setPessoasOpen((current) => !current)}
+						className={cn(
+								"flex w-full min-w-0 items-center justify-between gap-3 px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
+							isPessoasRoute &&
+								"rounded-t-2xl bg-neutral-900 text-white hover:bg-neutral-900"
+						)}
+					>
+						<div>
+							<p className="text-sm font-semibold">Pessoas</p>
+							<p
+								className={cn(
+									"mt-1 text-xs",
+									isPessoasRoute ? "text-neutral-200" : "text-neutral-500"
+								)}
+							>
+								Clientes e fornecedores
+							</p>
+						</div>
+
+							<span className="shrink-0 text-sm font-semibold">
+							{pessoasOpen ? "-" : "+"}
+						</span>
+					</button>
+
+					{pessoasOpen ? (
+						<div className="flex flex-col gap-2 border-t border-neutral-200 px-3 py-3">
+							{pessoasItems.map((item) => {
+								const isActive = pathname === item.href;
+
+								return (
+									<Link
+										key={item.href}
+										href={item.href}
+										className={cn(
+												"rounded-xl px-3 py-2 text-sm transition break-words",
+											isActive
+												? "bg-neutral-900 text-white"
+												: "text-neutral-700 hover:bg-neutral-100"
+										)}
+									>
+										{item.label}
+									</Link>
+								);
+							})}
+						</div>
+					) : null}
+				</div>
+
+				<div className="rounded-2xl border border-neutral-200 bg-neutral-50">
+					<button
+						type="button"
 						onClick={() => setProdutosServicosOpen((current) => !current)}
 						className={cn(
 								"flex w-full min-w-0 items-center justify-between gap-3 px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
@@ -140,7 +265,7 @@ export function DashboardSidebar() {
 						</div>
 
 							<span className="shrink-0 text-sm font-semibold">
-							{produtosServicosOpen ? "−" : "+"}
+							{produtosServicosOpen ? "-" : "+"}
 						</span>
 					</button>
 
@@ -190,7 +315,7 @@ export function DashboardSidebar() {
 						</div>
 
 							<span className="shrink-0 text-sm font-semibold">
-							{localidadesOpen ? "−" : "+"}
+							{localidadesOpen ? "-" : "+"}
 						</span>
 					</button>
 

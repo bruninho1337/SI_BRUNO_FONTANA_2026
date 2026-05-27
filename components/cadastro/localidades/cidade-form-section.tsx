@@ -51,7 +51,7 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 						<input type="hidden" name="codcidade" value={cidadeEditando.codcidade} />
 						<div className="flex flex-col gap-2 md:col-span-2">
 							<Label htmlFor="codcidade-display" className="text-sm text-neutral-800">
-								Codigo:
+								Código:
 							</Label>
 							<Input
 								id="codcidade-display"

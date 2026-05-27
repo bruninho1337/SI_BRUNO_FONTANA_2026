@@ -14,12 +14,18 @@ function formatarMoeda(valor: number | string | null) {
 export async function ProdutosListSection({ searchParams }: ProdutosListSectionProps) {
 	const params = await searchParams;
 	const query = String(params?.q ?? "").trim().toLowerCase();
-	const { categorias, produtos, error } = await listarProdutosComCategorias();
+	const { categorias, marcas, produtos, error } = await listarProdutosComCategorias();
 	const categoriaMap = new Map(
 		(categorias ?? []).map((categoria) => [categoria.codcategoria, categoria.nome])
 	);
+	const marcaMap = new Map((marcas ?? []).map((marca) => [marca.codmarca, marca.marca]));
 	const filtered = (produtos ?? []).filter((produto) =>
-		[produto.nome, produto.descricao, categoriaMap.get(produto.codcategoria ?? 0)].some((value) =>
+		[
+			produto.nome,
+			produto.descricao,
+			categoriaMap.get(produto.codcategoria ?? 0),
+			marcaMap.get(produto.codmarca ?? 0),
+		].some((value) =>
 			String(value ?? "").toLowerCase().includes(query)
 		)
 	);
@@ -31,7 +37,7 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 				count={filtered.length}
 				createHref="/cadastro/produtos-servicos/produtos?mode=create"
 				searchValue={params?.q}
-				searchPlaceholder="Pesquisar por produto, categoria ou descricao"
+				searchPlaceholder="Pesquisar por produto, categoria, marca ou descricao"
 			/>
 			<FormFeedback params={params} />
 
@@ -44,6 +50,7 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 							<tr className="text-left text-sm text-neutral-500">
 								<th className="pb-2 font-medium">Produto</th>
 								<th className="pb-2 font-medium">Categoria</th>
+								<th className="pb-2 font-medium">Marca</th>
 								<th className="pb-2 font-medium">Valor</th>
 								<th className="pb-2 font-medium">Estoque</th>
 								<th className="pb-2 font-medium">Desconto</th>
@@ -57,6 +64,9 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">{produto.nome}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">
 										{produto.codcategoria ? categoriaMap.get(produto.codcategoria) ?? "-" : "-"}
+									</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">
+										{produto.codmarca ? marcaMap.get(produto.codmarca) ?? "-" : "-"}
 									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatarMoeda(produto.valor)}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{produto.quantidade_estoque}</td>

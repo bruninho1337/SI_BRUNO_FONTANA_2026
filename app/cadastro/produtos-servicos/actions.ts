@@ -109,6 +109,7 @@ export async function deleteProdutoAction(formData: FormData) {
 async function saveProduto(formData: FormData, codproduto?: number) {
 	const nome = getText(formData, "nome");
 	const codcategoriaValue = getText(formData, "codcategoria");
+	const codmarcaValue = getText(formData, "codmarca");
 	const valor = parseDecimal(formData.get("valor"));
 	const quantidadeEstoque = Number(getText(formData, "quantidade_estoque") || "0");
 	const valorDesconto = parseDecimal(formData.get("valor_desconto"));
@@ -147,13 +148,14 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 
 		const { error } = codproduto
 			? await executeQuery(
-					`update public.produtos
-					set nome = $1, codcategoria = $2, valor = $3, quantidade_estoque = $4,
-						valor_desconto = $5, descricao = $6, imagem_url = $7, ativo = $8
-					where codproduto = $9`,
+				`update public.produtos
+					set nome = $1, codcategoria = $2, codmarca = $3, valor = $4, quantidade_estoque = $5,
+						valor_desconto = $6, descricao = $7, imagem_url = $8, ativo = $9
+					where codproduto = $10`,
 					[
 						nome,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
+						codmarcaValue ? Number(codmarcaValue) : null,
 						valor,
 						quantidadeEstoque,
 						valorDesconto,
@@ -165,11 +167,12 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 				)
 			: await executeQuery(
 					`insert into public.produtos (
-						nome, codcategoria, valor, quantidade_estoque, valor_desconto, descricao, imagem_url, ativo
-					) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+						nome, codcategoria, codmarca, valor, quantidade_estoque, valor_desconto, descricao, imagem_url, ativo
+					) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 					[
 						nome,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
+						codmarcaValue ? Number(codmarcaValue) : null,
 						valor,
 						quantidadeEstoque,
 						valorDesconto,

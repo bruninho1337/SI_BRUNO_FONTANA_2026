@@ -54,7 +54,7 @@ export async function CondicaoPagamentoFormSection({
 							/>
 							<div className={`${fieldClass} md:col-span-2`}>
 								<Label htmlFor="codcondicao-pagamento-display" className="text-sm text-neutral-800">
-									Codigo:
+									Código:
 								</Label>
 								<Input
 									id="codcondicao-pagamento-display"

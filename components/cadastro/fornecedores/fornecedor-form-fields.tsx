@@ -62,6 +62,7 @@ export function FornecedorFormFields({
 	const [tipo, setTipo] = useState(String(initialData?.tipo ?? "JURIDICA"));
 	const [selectErrors, setSelectErrors] = useState<Record<string, string>>({});
 	const cpfCnpjRef = useRef<HTMLInputElement>(null);
+	const isEditing = Boolean(initialData?.codfornecedor);
 	const isFisica = tipo === "FISICA";
 
 	function clearSelectError(name: string) {
@@ -111,7 +112,7 @@ export function FornecedorFormFields({
 						<input type="hidden" name="codfornecedor" value={String(initialData.codfornecedor)} />
 						<div className={fieldClass.xs}>
 							<Label htmlFor="codfornecedor-display" className="text-sm text-neutral-800">
-								Codigo:
+								Código:
 							</Label>
 							<Input
 								id="codfornecedor-display"
@@ -135,13 +136,15 @@ export function FornecedorFormFields({
 					<RequiredLabel htmlFor="tipo" className="text-sm text-neutral-800">
 						Tipo:
 					</RequiredLabel>
+					{isEditing ? <input type="hidden" name="tipo" value={tipo} /> : null}
 					<select
 						id="tipo"
-						name="tipo"
+						name={isEditing ? undefined : "tipo"}
 						required
 						value={tipo}
 						onChange={handleTipoChange}
-						className={inputClass}
+						disabled={isEditing}
+						className={`${inputClass} disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600`}
 					>
 						<option value="FISICA">Fisica</option>
 						<option value="JURIDICA">Juridica</option>
@@ -150,7 +153,7 @@ export function FornecedorFormFields({
 
 				<div className={fieldClass.lg}>
 					<RequiredLabel htmlFor="fornecedor" className="text-sm text-neutral-800">
-						{isFisica ? "Nome:" : "Razao Social:"}
+						{isFisica ? "Nome:" : "Razão Social:"}
 					</RequiredLabel>
 					<Input id="fornecedor" name="fornecedor" minLength={5} maxLength={80} required defaultValue={String(initialData?.fornecedor ?? "")} className={inputClass} />
 				</div>
@@ -189,7 +192,7 @@ export function FornecedorFormFields({
 
 				<div className={fieldClass.xs}>
 					<RequiredLabel htmlFor="numero" className="text-sm text-neutral-800">
-						Numero:
+						Número:
 					</RequiredLabel>
 					<Input id="numero" name="numero" inputMode="numeric" pattern="[0-9]*" minLength={1} maxLength={10} required defaultValue={String(initialData?.numero ?? "")} onInput={keepOnlyDigits} className={inputClass} />
 				</div>
