@@ -32,7 +32,9 @@ export async function ClienteFormSection({ searchParams }: ClienteFormSectionPro
 	const condicaoPagamentoOptions =
 		condicoesPagamento?.map((condicao) => ({
 			id: String(condicao.codcondicao_pagamento),
-			label: `${condicao.nome} (${condicao.prazo_dias} dia(s), ${condicao.parcelas}x)`,
+			label: `${condicao.nome}${
+				condicao.forma_pagamento ? ` - ${condicao.forma_pagamento}` : ""
+			} (${condicao.prazo_dias} dia(s), ${condicao.parcelas}x)`,
 		})) ?? [];
 
 	return (

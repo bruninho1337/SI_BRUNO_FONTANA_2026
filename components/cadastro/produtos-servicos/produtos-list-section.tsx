@@ -14,17 +14,24 @@ function formatarMoeda(valor: number | string | null) {
 export async function ProdutosListSection({ searchParams }: ProdutosListSectionProps) {
 	const params = await searchParams;
 	const query = String(params?.q ?? "").trim().toLowerCase();
-	const { categorias, marcas, produtos, error } = await listarProdutosComCategorias();
+	const { categorias, marcas, unidadesMedida, produtos, error } = await listarProdutosComCategorias();
 	const categoriaMap = new Map(
 		(categorias ?? []).map((categoria) => [categoria.codcategoria, categoria.nome])
 	);
 	const marcaMap = new Map((marcas ?? []).map((marca) => [marca.codmarca, marca.marca]));
+	const unidadeMedidaMap = new Map(
+		(unidadesMedida ?? []).map((unidade) => [
+			unidade.codunidade_medida,
+			`${unidade.unidade_medida} (${unidade.sigla})`,
+		])
+	);
 	const filtered = (produtos ?? []).filter((produto) =>
 		[
 			produto.nome,
 			produto.descricao,
 			categoriaMap.get(produto.codcategoria ?? 0),
 			marcaMap.get(produto.codmarca ?? 0),
+			unidadeMedidaMap.get(produto.codunidade_medida ?? 0),
 		].some((value) =>
 			String(value ?? "").toLowerCase().includes(query)
 		)
@@ -37,7 +44,7 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 				count={filtered.length}
 				createHref="/cadastro/produtos-servicos/produtos?mode=create"
 				searchValue={params?.q}
-				searchPlaceholder="Pesquisar por produto, categoria, marca ou descricao"
+				searchPlaceholder="Pesquisar por produto, categoria, marca, unidade ou descricao"
 			/>
 			<FormFeedback params={params} />
 
@@ -51,6 +58,7 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 								<th className="pb-2 font-medium">Produto</th>
 								<th className="pb-2 font-medium">Categoria</th>
 								<th className="pb-2 font-medium">Marca</th>
+								<th className="pb-2 font-medium">Unidade</th>
 								<th className="pb-2 font-medium">Valor</th>
 								<th className="pb-2 font-medium">Estoque</th>
 								<th className="pb-2 font-medium">Desconto</th>
@@ -67,6 +75,11 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">
 										{produto.codmarca ? marcaMap.get(produto.codmarca) ?? "-" : "-"}
+									</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">
+										{produto.codunidade_medida
+											? unidadeMedidaMap.get(produto.codunidade_medida) ?? "-"
+											: "-"}
 									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatarMoeda(produto.valor)}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{produto.quantidade_estoque}</td>

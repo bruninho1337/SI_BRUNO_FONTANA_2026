@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
 import { listarMarcasParaSelecao } from "@/lib/marcas";
 import { buscarProdutoPorId, listarCategoriasPorTipo } from "@/lib/produtos-servicos";
+import { listarUnidadesMedidaParaSelecao } from "@/lib/unidades-medida";
 
 type ProdutoFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;
@@ -21,10 +22,12 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 	const [
 		{ data: categorias, error: categoriasError },
 		{ data: marcas, error: marcasError },
+		{ data: unidadesMedida, error: unidadesMedidaError },
 		{ data: produtoEditando },
 	] = await Promise.all([
 		listarCategoriasPorTipo(["PRODUTO", "AMBOS"]),
 		listarMarcasParaSelecao(),
+		listarUnidadesMedidaParaSelecao(),
 		Number.isNaN(editId) ? Promise.resolve({ data: null }) : buscarProdutoPorId(editId),
 	]);
 
@@ -38,6 +41,12 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 		marcas?.map((marca) => ({
 			id: String(marca.codmarca),
 			label: marca.marca,
+		})) ?? [];
+
+	const unidadeMedidaOptions =
+		unidadesMedida?.map((unidade) => ({
+			id: String(unidade.codunidade_medida),
+			label: `${unidade.unidade_medida} (${unidade.sigla})`,
 		})) ?? [];
 
 	return (
@@ -57,6 +66,12 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 
 			{marcasError ? (
 				<p className="mb-4 text-sm text-red-600">Erro ao carregar marcas: {marcasError.message}</p>
+			) : null}
+
+			{unidadesMedidaError ? (
+				<p className="mb-4 text-sm text-red-600">
+					Erro ao carregar unidades de medida: {unidadesMedidaError.message}
+				</p>
 			) : null}
 
 			<form action={produtoEditando ? updateProdutoAction : createProdutoAction} className="space-y-4">
@@ -121,6 +136,19 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 					className="md:col-span-3"
 					createHref="/cadastro/produtos-servicos/marcas?mode=create"
 					createLabel="Nova marca"
+				/>
+
+				<SearchableSelect
+					name="codunidade_medida"
+					label="Unidade de Medida"
+					searchLabel="Pesquisar unidade de medida por nome ou sigla"
+					searchPlaceholder="Digite a unidade de medida"
+					selectPlaceholder="Selecione uma unidade"
+					options={unidadeMedidaOptions}
+					defaultValue={String(produtoEditando?.codunidade_medida ?? "")}
+					className="md:col-span-3"
+					createHref="/cadastro/produtos-servicos/unidades-medida?mode=create"
+					createLabel="Nova unidade"
 				/>
 
 				<ActiveToggle

@@ -21,20 +21,26 @@ export async function listarCategoriasPorTipo(tipos: CategoriaTipo[]) {
 }
 
 export async function listarProdutosComCategorias() {
-	const [{ data: categorias }, { data: marcas }, { data: produtos, error }] = await Promise.all([
+	const [
+		{ data: categorias },
+		{ data: marcas },
+		{ data: unidadesMedida },
+		{ data: produtos, error },
+	] = await Promise.all([
 		queryRows("select codcategoria, nome from public.categorias order by nome asc"),
 		queryRows("select codmarca, marca from public.marcas order by marca asc"),
+		queryRows("select codunidade_medida, unidade_medida, sigla from public.unidades_medida order by unidade_medida asc"),
 		queryRows(
-			"select codproduto, nome, codcategoria, codmarca, valor, quantidade_estoque, valor_desconto, descricao, imagem_url, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao from public.produtos order by nome asc"
+			"select codproduto, nome, codcategoria, codmarca, codunidade_medida, valor, quantidade_estoque, valor_desconto, descricao, imagem_url, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao from public.produtos order by nome asc"
 		),
 	]);
 
-	return { categorias, marcas, produtos, error };
+	return { categorias, marcas, unidadesMedida, produtos, error };
 }
 
 export async function buscarProdutoPorId(codproduto: number) {
 	return queryMaybeSingle(
-		"select codproduto, nome, codcategoria, codmarca, valor, quantidade_estoque, valor_desconto, descricao, imagem_url, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao from public.produtos where codproduto = $1",
+		"select codproduto, nome, codcategoria, codmarca, codunidade_medida, valor, quantidade_estoque, valor_desconto, descricao, imagem_url, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao from public.produtos where codproduto = $1",
 		[codproduto]
 	);
 }

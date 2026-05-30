@@ -371,7 +371,7 @@ export default function NFeWorkspace() {
                   <Field label="Email" placeholder="financeiro@alpha.com.br" type="email" />
                   <Field label="Telefone" placeholder="(11) 4002-8922" />
                   <Field label="CEP" placeholder="01000-000" />
-                  <Field label="Cidade / codigo" placeholder="Sao Paulo - 3550308" />
+                  <Field label="Cidade / codigo" placeholder="São Paulo - 3550308" />
                   <Field label="Codigo condicao pagamento" placeholder="3" type="number" />
                   <Field label="Condicao" placeholder="3 parcelas sem juros" />
                   <Field label="Qtd parcelas" placeholder="3" type="number" />

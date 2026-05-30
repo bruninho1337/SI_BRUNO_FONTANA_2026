@@ -12,6 +12,10 @@ const tabItems = [
 		label: "Marcas",
 	},
 	{
+		href: "/cadastro/produtos-servicos/unidades-medida",
+		label: "Unidades de Medida",
+	},
+	{
 		href: "/cadastro/produtos-servicos/produtos",
 		label: "Produtos",
 	},

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { executeQuery } from "@/lib/db";
+import { executeQuery, queryRows } from "@/lib/db";
 
 const CONDICOES_PAGAMENTO_PATH = "/cadastro/condicoes-pagamento";
 const CLIENTES_PATH = "/cadastro/clientes";
@@ -54,13 +54,40 @@ export async function deleteCondicaoPagamentoAction(formData: FormData) {
 		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Condicao de pagamento invalida para exclusao."));
 	}
 
+	const { data: clientesVinculados, error: clientesError } = await queryRows(
+		"select count(*)::int as total from public.clientes where codcondicao_pagamento = $1",
+		[codcondicaoPagamento]
+	);
+
+	if (clientesError) {
+		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", clientesError.message));
+	}
+
+	const totalClientesVinculados = Number(clientesVinculados?.[0]?.total ?? 0);
+
+	if (totalClientesVinculados > 0) {
+		redirect(
+			buildRedirect(
+				CONDICOES_PAGAMENTO_PATH,
+				"error",
+				`Esta condicao de pagamento esta vinculada a ${totalClientesVinculados} cliente(s). Troque a condicao nesses clientes ou inative este cadastro.`
+			)
+		);
+	}
+
 	const { error } = await executeQuery(
 		"delete from public.condicoes_pagamento where codcondicao_pagamento = $1",
 		[codcondicaoPagamento]
 	);
 
 	if (error) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", error.message));
+		redirect(
+			buildRedirect(
+				CONDICOES_PAGAMENTO_PATH,
+				"error",
+				"Nao foi possivel excluir esta condicao de pagamento porque ela esta vinculada a outro cadastro."
+			)
+		);
 	}
 
 	revalidatePath(CONDICOES_PAGAMENTO_PATH);
@@ -70,6 +97,7 @@ export async function deleteCondicaoPagamentoAction(formData: FormData) {
 
 async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: number) {
 	const nome = getText(formData, "nome");
+	const codformaPagamentoValue = getText(formData, "codforma_pagamento");
 	const prazoDias = Number(getText(formData, "prazo_dias") || "0");
 	const parcelas = Number(getText(formData, "parcelas") || "1");
 	const juro = parseDecimal(formData.get("juro"));
@@ -79,6 +107,10 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 
 	if (nome.length < 2 || nome.length > 80) {
 		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Nome deve ter entre 2 e 80 caracteres."));
+	}
+
+	if (!codformaPagamentoValue || Number.isNaN(Number(codformaPagamentoValue))) {
+		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Selecione uma forma de pagamento valida."));
 	}
 
 	if (Number.isNaN(prazoDias) || prazoDias < 0) {
@@ -95,12 +127,27 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 
 	const { error } = codcondicaoPagamento
 		? await executeQuery(
-				"update public.condicoes_pagamento set nome = $1, prazo_dias = $2, parcelas = $3, juro = $4, multa = $5, desconto = $6, ativo = $7 where codcondicao_pagamento = $8",
-				[nome, prazoDias, parcelas, juro, multa, desconto, ativo, codcondicaoPagamento]
+				`update public.condicoes_pagamento
+				set nome = $1, codforma_pagamento = $2, prazo_dias = $3, parcelas = $4,
+					juro = $5, multa = $6, desconto = $7, ativo = $8
+				where codcondicao_pagamento = $9`,
+				[
+					nome,
+					Number(codformaPagamentoValue),
+					prazoDias,
+					parcelas,
+					juro,
+					multa,
+					desconto,
+					ativo,
+					codcondicaoPagamento,
+				]
 			)
 		: await executeQuery(
-				"insert into public.condicoes_pagamento (nome, prazo_dias, parcelas, juro, multa, desconto, ativo) values ($1, $2, $3, $4, $5, $6, $7)",
-				[nome, prazoDias, parcelas, juro, multa, desconto, ativo]
+				`insert into public.condicoes_pagamento (
+					nome, codforma_pagamento, prazo_dias, parcelas, juro, multa, desconto, ativo
+				) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+				[nome, Number(codformaPagamentoValue), prazoDias, parcelas, juro, multa, desconto, ativo]
 			);
 
 	if (error) {

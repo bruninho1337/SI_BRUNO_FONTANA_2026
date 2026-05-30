@@ -23,6 +23,8 @@ export async function CondicoesPagamentoListSection({
 	const filtered = (condicoes ?? []).filter((condicao) =>
 		[
 			condicao.nome,
+			condicao.forma_pagamento,
+			condicao.tipo,
 			condicao.prazo_dias,
 			condicao.parcelas,
 			condicao.juro,
@@ -34,11 +36,11 @@ export async function CondicoesPagamentoListSection({
 	return (
 		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
 			<CadastroListToolbar
-				title="Condições de pagamento cadastradas"
+				title="Condicoes de pagamento cadastradas"
 				count={filtered.length}
 				createHref="/cadastro/condicoes-pagamento?mode=create"
 				searchValue={params?.q}
-				searchPlaceholder="Pesquisar por condição, prazo, parcelas, juro, multa ou desconto"
+				searchPlaceholder="Pesquisar por condicao, forma, prazo, parcelas, juro, multa ou desconto"
 			/>
 			<FormFeedback params={params} />
 
@@ -50,6 +52,7 @@ export async function CondicoesPagamentoListSection({
 						<thead>
 							<tr className="text-left text-sm text-neutral-500">
 								<th className="pb-2 font-medium">Condicao</th>
+								<th className="pb-2 font-medium">Forma</th>
 								<th className="pb-2 font-medium">Prazo</th>
 								<th className="pb-2 font-medium">Parcelas</th>
 								<th className="pb-2 font-medium">Juro</th>
@@ -62,7 +65,14 @@ export async function CondicoesPagamentoListSection({
 						<tbody>
 							{filtered.map((condicao) => (
 								<tr key={condicao.codcondicao_pagamento} className="bg-neutral-50">
-									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">{condicao.nome}</td>
+									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">
+										{condicao.nome}
+									</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">
+										{condicao.forma_pagamento
+											? `${condicao.forma_pagamento} (${condicao.tipo})`
+											: "-"}
+									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{condicao.prazo_dias} dia(s)</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{condicao.parcelas}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatDecimal(condicao.juro)}</td>

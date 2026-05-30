@@ -5,11 +5,13 @@ import {
 import { ActiveToggle } from "@/components/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
+import { SearchableSelect } from "@/components/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
 import { buscarCondicaoPagamentoPorId } from "@/lib/condicoes-pagamento";
+import { listarFormasPagamentoParaSelecao } from "@/lib/formas-pagamento";
 
 type CondicaoPagamentoFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;
@@ -24,9 +26,16 @@ export async function CondicaoPagamentoFormSection({
 }: CondicaoPagamentoFormSectionProps) {
 	const params = await searchParams;
 	const editId = Number(params?.edit ?? "");
-	const { data: condicaoEditando } = Number.isNaN(editId)
-		? { data: null }
-		: await buscarCondicaoPagamentoPorId(editId);
+	const [{ data: condicaoEditando }, { data: formasPagamento, error: formasPagamentoError }] =
+		await Promise.all([
+			Number.isNaN(editId) ? Promise.resolve({ data: null }) : buscarCondicaoPagamentoPorId(editId),
+			listarFormasPagamentoParaSelecao(),
+		]);
+	const formaPagamentoOptions =
+		formasPagamento?.map((forma) => ({
+			id: String(forma.codforma_pagamento),
+			label: `${forma.forma_pagamento} (${forma.tipo})`,
+		})) ?? [];
 
 	return (
 		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
@@ -40,6 +49,12 @@ export async function CondicaoPagamentoFormSection({
 			</div>
 
 			<FormFeedback params={params} />
+
+			{formasPagamentoError ? (
+				<p className="mb-4 text-sm text-red-600">
+					Erro ao carregar formas de pagamento: {formasPagamentoError.message}
+				</p>
+			) : null}
 
 			<form
 				action={condicaoEditando ? updateCondicaoPagamentoAction : createCondicaoPagamentoAction}
@@ -88,6 +103,20 @@ export async function CondicaoPagamentoFormSection({
 							className={inputClass}
 						/>
 					</div>
+
+					<SearchableSelect
+						name="codforma_pagamento"
+						label="Forma de Pagamento"
+						searchLabel="Pesquisar forma de pagamento"
+						searchPlaceholder="Digite a forma de pagamento"
+						selectPlaceholder="Selecione uma forma"
+						options={formaPagamentoOptions}
+						required
+						defaultValue={String(condicaoEditando?.codforma_pagamento ?? "")}
+						className="md:col-span-4"
+						createHref="/cadastro/formas-pagamento?mode=create"
+						createLabel="Nova forma"
+					/>
 
 					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="prazo_dias" className="text-sm text-neutral-800">
