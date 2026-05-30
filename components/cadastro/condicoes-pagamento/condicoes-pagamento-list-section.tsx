@@ -22,7 +22,7 @@ export async function CondicoesPagamentoListSection({
 	const { data: condicoes, error } = await listarCondicoesPagamento();
 	const filtered = (condicoes ?? []).filter((condicao) =>
 		[
-			condicao.nome,
+			condicao.condicao_pagamento,
 			condicao.forma_pagamento,
 			condicao.tipo,
 			condicao.prazo_dias,
@@ -66,7 +66,7 @@ export async function CondicoesPagamentoListSection({
 							{filtered.map((condicao) => (
 								<tr key={condicao.codcondicao_pagamento} className="bg-neutral-50">
 									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">
-										{condicao.nome}
+										{condicao.condicao_pagamento}
 									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">
 										{condicao.forma_pagamento

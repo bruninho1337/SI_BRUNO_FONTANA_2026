@@ -30,6 +30,22 @@ begin
 		from information_schema.columns
 		where table_schema = 'public'
 			and table_name = 'fornecedores'
+			and column_name = 'nome'
+	) and not exists (
+		select 1
+		from information_schema.columns
+		where table_schema = 'public'
+			and table_name = 'fornecedores'
+			and column_name = 'fornecedor'
+	) then
+		alter table public.fornecedores rename column nome to fornecedor;
+	end if;
+
+	if exists (
+		select 1
+		from information_schema.columns
+		where table_schema = 'public'
+			and table_name = 'fornecedores'
 			and column_name = 'data_criacao'
 	) and not exists (
 		select 1

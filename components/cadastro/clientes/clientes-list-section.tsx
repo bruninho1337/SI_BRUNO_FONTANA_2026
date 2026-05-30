@@ -22,7 +22,7 @@ export async function ClientesListSection({ searchParams }: ClientesListSectionP
 	const { cidades, condicoesPagamento, clientes, error } = await listarClientesComCidades();
 	const cidadeMap = new Map((cidades ?? []).map((cidade) => [cidade.codcidade, cidade.cidade]));
 	const condicaoPagamentoMap = new Map(
-		(condicoesPagamento ?? []).map((condicao) => [condicao.codcondicao_pagamento, condicao.nome])
+		(condicoesPagamento ?? []).map((condicao) => [condicao.codcondicao_pagamento, condicao.condicao_pagamento])
 	);
 	const filtered = (clientes ?? []).filter((cliente) =>
 		[

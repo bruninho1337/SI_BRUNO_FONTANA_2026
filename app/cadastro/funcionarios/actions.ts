@@ -95,6 +95,7 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 	const rg = onlyDigits(getText(formData, "rg"));
 	const dataNascimento = getText(formData, "data_nascimento");
 	const dataAdmissao = getText(formData, "data_admissao");
+	const dataDemissao = getText(formData, "data_demissao");
 	const salarioBase = parseDecimal(formData.get("salario_base"));
 	const percentualComissao = parseDecimal(formData.get("percentual_comissao"));
 	const observacoes = getText(formData, "observacoes");
@@ -136,6 +137,14 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Informe uma data de admissao valida."));
 	}
 
+	if (dataDemissao && !isValidDate(dataDemissao)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Informe uma data de demissao valida."));
+	}
+
+	if (dataDemissao && new Date(`${dataDemissao}T00:00:00`) < new Date(`${dataAdmissao}T00:00:00`)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Data de demissao nao pode ser anterior a admissao."));
+	}
+
 	if (Number.isNaN(salarioBase) || salarioBase < 0) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Salario base deve ser maior ou igual a zero."));
 	}
@@ -162,6 +171,7 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 		rg || null,
 		dataNascimento || null,
 		dataAdmissao,
+		dataDemissao || null,
 		salarioBase,
 		percentualComissao,
 		observacoes || null,
@@ -173,15 +183,15 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 				`update public.funcionarios
 				set funcionario = $1, apelido = $2, codfuncao_funcionario = $3, telefone = $4, email = $5,
 					cpf = $6, rg = $7, data_nascimento = $8, data_admissao = $9,
-					salario_base = $10, percentual_comissao = $11, observacoes = $12, ativo = $13
-				where codfuncionario = $14`,
+					data_demissao = $10, salario_base = $11, percentual_comissao = $12, observacoes = $13, ativo = $14
+				where codfuncionario = $15`,
 				[...values, codfuncionario]
 			)
 		: await executeQuery(
 				`insert into public.funcionarios (
 					funcionario, apelido, codfuncao_funcionario, telefone, email, cpf, rg, data_nascimento,
-					data_admissao, salario_base, percentual_comissao, observacoes, ativo
-				) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+					data_admissao, data_demissao, salario_base, percentual_comissao, observacoes, ativo
+				) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
 				values
 			);
 

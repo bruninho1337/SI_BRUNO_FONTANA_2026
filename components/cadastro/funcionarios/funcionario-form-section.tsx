@@ -193,45 +193,6 @@ export async function FuncionarioFormSection({
 				</div>
 
 				<div className="grid gap-4 md:grid-cols-12">
-					<div className={`${fieldClass} md:col-span-3`}>
-						<RequiredLabel htmlFor="cpf" className="text-sm text-neutral-800">
-							CPF:
-						</RequiredLabel>
-						<MaskedDocumentInput
-							id="cpf"
-							name="cpf"
-							type="text"
-							mask="cpf"
-							inputMode="numeric"
-							pattern="\d{3}\.?\d{3}\.?\d{3}-?\d{2}"
-							minLength={11}
-							maxLength={14}
-							required
-							placeholder="Ex: 000.000.000-00"
-							defaultValue={funcionario?.cpf ?? ""}
-							className={inputClass}
-						/>
-					</div>
-
-					<div className={`${fieldClass} md:col-span-3`}>
-						<Label htmlFor="rg" className="text-sm text-neutral-800">
-							RG:
-						</Label>
-						<MaskedDocumentInput
-							id="rg"
-							name="rg"
-							type="text"
-							mask="rg"
-							inputMode="numeric"
-							pattern="\d{2}\.?\d{3}\.?\d{3}-?\d?"
-							minLength={5}
-							maxLength={12}
-							placeholder="Ex: 00.000.000-0"
-							defaultValue={funcionario?.rg ?? ""}
-							className={inputClass}
-						/>
-					</div>
-
 					<DatePickerInput
 						id="data_nascimento"
 						name="data_nascimento"
@@ -247,6 +208,15 @@ export async function FuncionarioFormSection({
 						label="Admissão"
 						required
 						defaultValue={formatDateInput(funcionario?.data_admissao) || formatDateInput(new Date())}
+						className={`${fieldClass} md:col-span-3`}
+						inputClassName={inputClass}
+					/>
+
+					<DatePickerInput
+						id="data_demissao"
+						name="data_demissao"
+						label="Demissão"
+						defaultValue={formatDateInput(funcionario?.data_demissao)}
 						className={`${fieldClass} md:col-span-3`}
 						inputClassName={inputClass}
 					/>
@@ -279,6 +249,47 @@ export async function FuncionarioFormSection({
 							required
 							placeholder="Ex: 10"
 							defaultValue={formatDecimalInput(funcionario?.percentual_comissao)}
+							className={inputClass}
+						/>
+					</div>
+				</div>
+
+				<div className="grid gap-4 md:grid-cols-12">
+					<div className={`${fieldClass} md:col-span-3`}>
+						<Label htmlFor="rg" className="text-sm text-neutral-800">
+							RG:
+						</Label>
+						<MaskedDocumentInput
+							id="rg"
+							name="rg"
+							type="text"
+							mask="rg"
+							inputMode="numeric"
+							pattern="\d{2}\.?\d{3}\.?\d{3}-?\d?"
+							minLength={5}
+							maxLength={12}
+							placeholder="Ex: 00.000.000-0"
+							defaultValue={funcionario?.rg ?? ""}
+							className={inputClass}
+						/>
+					</div>
+
+					<div className={`${fieldClass} md:col-span-3`}>
+						<RequiredLabel htmlFor="cpf" className="text-sm text-neutral-800">
+							CPF:
+						</RequiredLabel>
+						<MaskedDocumentInput
+							id="cpf"
+							name="cpf"
+							type="text"
+							mask="cpf"
+							inputMode="numeric"
+							pattern="\d{3}\.?\d{3}\.?\d{3}-?\d{2}"
+							minLength={11}
+							maxLength={14}
+							required
+							placeholder="Ex: 000.000.000-00"
+							defaultValue={funcionario?.cpf ?? ""}
 							className={inputClass}
 						/>
 					</div>

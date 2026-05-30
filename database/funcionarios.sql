@@ -9,6 +9,7 @@ create table if not exists public.funcionarios (
 	rg varchar(14) check (rg is null or char_length(rg) between 5 and 14),
 	data_nascimento date,
 	data_admissao date not null default current_date,
+	data_demissao date,
 	salario_base numeric not null default 0 check (salario_base >= 0),
 	percentual_comissao numeric not null default 0 check (percentual_comissao between 0 and 100),
 	observacoes text check (observacoes is null or char_length(observacoes) <= 255),
@@ -17,6 +18,9 @@ create table if not exists public.funcionarios (
 	data_ult_alteracao timestamp not null default current_timestamp,
 	usuario_ult_alteracao integer references public.usuarios(codusuario)
 );
+
+alter table public.funcionarios
+add column if not exists data_demissao date;
 
 do $$
 begin

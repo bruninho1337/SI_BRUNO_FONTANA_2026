@@ -45,6 +45,7 @@ export async function FuncionariosListSection({
 			funcionario.email,
 			funcionario.cpf,
 			funcionario.rg,
+			funcionario.data_demissao,
 			funcionario.ativo,
 		].some((value) => String(value ?? "").toLowerCase().includes(query))
 	);
@@ -74,6 +75,7 @@ export async function FuncionariosListSection({
 								<th className="pb-2 font-medium">E-mail</th>
 								<th className="pb-2 font-medium">CPF</th>
 								<th className="pb-2 font-medium">Admissão</th>
+								<th className="pb-2 font-medium">Demissão</th>
 								<th className="pb-2 font-medium">Salário</th>
 								<th className="pb-2 font-medium">Ativo</th>
 								<th className="pb-2 text-right font-medium">Ações</th>
@@ -96,6 +98,7 @@ export async function FuncionariosListSection({
 									<td className="px-4 py-3 text-sm text-neutral-700">{funcionario.email ?? "-"}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatCpfCnpj(funcionario.cpf, 11)}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatDate(funcionario.data_admissao)}</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">{formatDate(funcionario.data_demissao)}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatCurrency(funcionario.salario_base)}</td>
 									<td className="px-4 py-3 text-sm font-semibold text-neutral-900">{funcionario.ativo}</td>
 									<td className="rounded-r-xl px-4 py-3">

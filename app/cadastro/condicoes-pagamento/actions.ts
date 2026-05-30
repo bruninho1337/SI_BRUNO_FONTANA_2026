@@ -96,7 +96,7 @@ export async function deleteCondicaoPagamentoAction(formData: FormData) {
 }
 
 async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: number) {
-	const nome = getText(formData, "nome");
+	const condicaoPagamento = getText(formData, "condicao_pagamento");
 	const codformaPagamentoValue = getText(formData, "codforma_pagamento");
 	const prazoDias = Number(getText(formData, "prazo_dias") || "0");
 	const parcelas = Number(getText(formData, "parcelas") || "1");
@@ -105,8 +105,8 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 	const desconto = parseDecimal(formData.get("desconto"));
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (nome.length < 2 || nome.length > 80) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Nome deve ter entre 2 e 80 caracteres."));
+	if (condicaoPagamento.length < 2 || condicaoPagamento.length > 80) {
+		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Condicao de pagamento deve ter entre 2 e 80 caracteres."));
 	}
 
 	if (!codformaPagamentoValue || Number.isNaN(Number(codformaPagamentoValue))) {
@@ -128,11 +128,11 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 	const { error } = codcondicaoPagamento
 		? await executeQuery(
 				`update public.condicoes_pagamento
-				set nome = $1, codforma_pagamento = $2, prazo_dias = $3, parcelas = $4,
+				set condicao_pagamento = $1, codforma_pagamento = $2, prazo_dias = $3, parcelas = $4,
 					juro = $5, multa = $6, desconto = $7, ativo = $8
 				where codcondicao_pagamento = $9`,
 				[
-					nome,
+					condicaoPagamento,
 					Number(codformaPagamentoValue),
 					prazoDias,
 					parcelas,
@@ -145,9 +145,9 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 			)
 		: await executeQuery(
 				`insert into public.condicoes_pagamento (
-					nome, codforma_pagamento, prazo_dias, parcelas, juro, multa, desconto, ativo
+					condicao_pagamento, codforma_pagamento, prazo_dias, parcelas, juro, multa, desconto, ativo
 				) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
-				[nome, Number(codformaPagamentoValue), prazoDias, parcelas, juro, multa, desconto, ativo]
+				[condicaoPagamento, Number(codformaPagamentoValue), prazoDias, parcelas, juro, multa, desconto, ativo]
 			);
 
 	if (error) {

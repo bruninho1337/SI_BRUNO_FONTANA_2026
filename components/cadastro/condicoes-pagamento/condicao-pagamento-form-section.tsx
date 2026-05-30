@@ -88,18 +88,18 @@ export async function CondicaoPagamentoFormSection({
 					/>
 
 					<div className={`${fieldClass} md:col-span-5`}>
-						<RequiredLabel htmlFor="nome" className="text-sm text-neutral-800">
-							Nome:
+						<RequiredLabel htmlFor="condicao_pagamento" className="text-sm text-neutral-800">
+							Condição de Pagamento:
 						</RequiredLabel>
 						<Input
-							id="nome"
-							name="nome"
+							id="condicao_pagamento"
+							name="condicao_pagamento"
 							type="text"
 							minLength={2}
 							maxLength={80}
 							required
 							placeholder="Ex: A vista, 30 dias, Parcelado 3x"
-							defaultValue={condicaoEditando?.nome ?? ""}
+							defaultValue={condicaoEditando?.condicao_pagamento ?? ""}
 							className={inputClass}
 						/>
 					</div>

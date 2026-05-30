@@ -144,7 +144,7 @@ export function FornecedorFormFields({
 
 				<div className="flex flex-col gap-2 md:col-span-5">
 					<RequiredLabel htmlFor="fornecedor" className="text-sm text-neutral-800">
-						{isFisica ? "Nome:" : "Razão Social:"}
+						{isFisica ? "Fornecedor:" : "Fornecedor:"}
 					</RequiredLabel>
 					<Input id="fornecedor" name="fornecedor" minLength={5} maxLength={80} required defaultValue={String(initialData?.fornecedor ?? "")} className={inputClass} />
 				</div>

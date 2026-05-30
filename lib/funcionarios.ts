@@ -13,6 +13,7 @@ const FUNCIONARIO_SELECT =
 	f.rg,
 	f.data_nascimento,
 	f.data_admissao,
+	f.data_demissao,
 	f.salario_base,
 	f.percentual_comissao,
 	f.observacoes,
