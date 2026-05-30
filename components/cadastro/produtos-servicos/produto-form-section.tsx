@@ -65,19 +65,20 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 					<>
 						<input type="hidden" name="codproduto" value={produtoEditando.codproduto} />
 						<input type="hidden" name="imagem_url" value={produtoEditando.imagem_url ?? ""} />
-						<div className="flex flex-col gap-2 md:col-span-2">
-							<Label htmlFor="codproduto-display" className="text-sm text-neutral-800">
-								Código:
-							</Label>
-							<Input
-								id="codproduto-display"
-								value={produtoEditando.codproduto}
-								readOnly
-								className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
-							/>
-						</div>
 					</>
 				) : null}
+
+				<div className="flex flex-col gap-2 md:col-span-2">
+					<Label htmlFor="codproduto-display" className="text-sm text-neutral-800">
+						Código:
+					</Label>
+					<Input
+						id="codproduto-display"
+						value={produtoEditando?.codproduto ?? ""}
+						readOnly
+						className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
+					/>
+				</div>
 
 				<div className="flex flex-col gap-2 md:col-span-5">
 					<RequiredLabel htmlFor="nome" className="text-sm text-neutral-800">

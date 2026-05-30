@@ -38,21 +38,20 @@ export async function MarcaFormSection({ searchParams }: MarcaFormSectionProps) 
 			<form action={marcaEditando ? updateMarcaAction : createMarcaAction} className="space-y-4">
 				<div className="grid gap-4 md:grid-cols-12">
 					{marcaEditando ? (
-						<>
-							<input type="hidden" name="codmarca" value={marcaEditando.codmarca} />
-							<div className="flex flex-col gap-2 md:col-span-2">
-								<Label htmlFor="codmarca-display" className="text-sm text-neutral-800">
-									Código:
-								</Label>
-								<Input
-									id="codmarca-display"
-									value={marcaEditando.codmarca}
-									readOnly
-									className={readOnlyInputClass}
-								/>
-							</div>
-						</>
+						<input type="hidden" name="codmarca" value={marcaEditando.codmarca} />
 					) : null}
+
+					<div className="flex flex-col gap-2 md:col-span-2">
+						<Label htmlFor="codmarca-display" className="text-sm text-neutral-800">
+							Código:
+						</Label>
+						<Input
+							id="codmarca-display"
+							value={marcaEditando?.codmarca ?? ""}
+							readOnly
+							className={readOnlyInputClass}
+						/>
+					</div>
 
 					<div className="flex flex-col gap-2 md:col-span-6">
 						<RequiredLabel htmlFor="marca" className="text-sm text-neutral-800">

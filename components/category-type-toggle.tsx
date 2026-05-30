@@ -15,7 +15,7 @@ type CategoryTypeToggleProps = {
 
 const options: Array<{ value: CategoriaTipo; label: string }> = [
 	{ value: "PRODUTO", label: "Produto" },
-	{ value: "SERVICO", label: "Servico" },
+	{ value: "SERVICO", label: "Serviço" },
 	{ value: "AMBOS", label: "Ambos" },
 ];
 

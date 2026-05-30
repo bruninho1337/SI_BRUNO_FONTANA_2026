@@ -32,7 +32,7 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
 			<div className="mb-6">
 				<h2 className="text-xl font-semibold text-neutral-900">
-					{paisEditando ? "Editar Pais" : "Novo Pais"}
+					{paisEditando ? "Editar País" : "Novo País"}
 				</h2>
 				<p className="mt-1 text-sm text-neutral-500">
 					Os campos automaticos do banco permanecem fora do formulario.
@@ -44,27 +44,20 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 			<form action={paisEditando ? updatePaisAction : createPaisAction} className="space-y-4">
 				<div className="grid gap-4 md:grid-cols-12">
 				{paisEditando ? (
-					<>
-						<input type="hidden" name="codpais" value={paisEditando.codpais} />
-						<div className={`${fieldClass} md:col-span-2`}>
-							<Label htmlFor="codpais-display" className="text-sm text-neutral-800">
-								Código:
-							</Label>
-							<Input
-								id="codpais-display"
-								value={paisEditando.codpais}
-								readOnly
-								className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
-							/>
-						</div>
-					</>
+					<input type="hidden" name="codpais" value={paisEditando.codpais} />
 				) : null}
 
-				<ActiveToggle
-					name="ativo"
-					defaultValue={paisEditando?.ativo === "N" ? "N" : "S"}
-					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
-				/>
+				<div className={`${fieldClass} md:col-span-2`}>
+					<Label htmlFor="codpais-display" className="text-sm text-neutral-800">
+						Código:
+					</Label>
+					<Input
+						id="codpais-display"
+						value={paisEditando?.codpais ?? ""}
+						readOnly
+						className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
+					/>
+				</div>
 
 				{camposPais.map((campo) => (
 					<div key={campo.id} className={`${fieldClass} ${campo.className}`}>
@@ -83,6 +76,12 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 						/>
 					</div>
 				))}
+
+				<ActiveToggle
+					name="ativo"
+					defaultValue={paisEditando?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+				/>
 				</div>
 
 				<AuditDates

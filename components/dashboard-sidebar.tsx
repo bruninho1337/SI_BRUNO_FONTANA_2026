@@ -16,6 +16,10 @@ const navigationItems = [
 
 const financeiroItems = [
 	{
+		href: "/cadastro/contas-pagar",
+		label: "Contas a Pagar",
+	},
+	{
 		href: "/cadastro/condicoes-pagamento",
 		label: "Condicoes de Pagamento",
 	},

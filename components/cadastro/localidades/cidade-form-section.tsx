@@ -47,27 +47,20 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 			<form action={cidadeEditando ? updateCidadeAction : createCidadeAction} className="space-y-4">
 				<div className="grid gap-4 md:grid-cols-12">
 				{cidadeEditando ? (
-					<>
-						<input type="hidden" name="codcidade" value={cidadeEditando.codcidade} />
-						<div className="flex flex-col gap-2 md:col-span-2">
-							<Label htmlFor="codcidade-display" className="text-sm text-neutral-800">
-								Código:
-							</Label>
-							<Input
-								id="codcidade-display"
-								value={cidadeEditando.codcidade}
-								readOnly
-								className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
-							/>
-						</div>
-					</>
+					<input type="hidden" name="codcidade" value={cidadeEditando.codcidade} />
 				) : null}
 
-				<ActiveToggle
-					name="ativo"
-					defaultValue={cidadeEditando?.ativo === "N" ? "N" : "S"}
-					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
-				/>
+				<div className="flex flex-col gap-2 md:col-span-2">
+					<Label htmlFor="codcidade-display" className="text-sm text-neutral-800">
+						Código:
+					</Label>
+					<Input
+						id="codcidade-display"
+						value={cidadeEditando?.codcidade ?? ""}
+						readOnly
+						className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
+					/>
+				</div>
 
 				<div className="flex flex-col gap-2 md:col-span-4">
 					<RequiredLabel htmlFor="nome-cidade" className="text-sm text-neutral-800">
@@ -98,6 +91,12 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 					className="md:col-span-5"
 					createHref="/cadastro/localidades/estados?mode=create"
 					createLabel="Novo estado"
+				/>
+
+				<ActiveToggle
+					name="ativo"
+					defaultValue={cidadeEditando?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
 				/>
 				</div>
 

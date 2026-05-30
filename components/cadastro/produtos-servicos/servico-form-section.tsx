@@ -49,19 +49,20 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 					<>
 						<input type="hidden" name="codservico" value={servicoEditando.codservico} />
 						<input type="hidden" name="imagem_url" value={servicoEditando.imagem_url ?? ""} />
-						<div className="flex flex-col gap-2 md:col-span-2">
-							<Label htmlFor="codservico-display" className="text-sm text-neutral-800">
-								Código:
-							</Label>
-							<Input
-								id="codservico-display"
-								value={servicoEditando.codservico}
-								readOnly
-								className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
-							/>
-						</div>
 					</>
 				) : null}
+
+				<div className="flex flex-col gap-2 md:col-span-2">
+					<Label htmlFor="codservico-display" className="text-sm text-neutral-800">
+						Código:
+					</Label>
+					<Input
+						id="codservico-display"
+						value={servicoEditando?.codservico ?? ""}
+						readOnly
+						className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
+					/>
+				</div>
 
 				<div className="flex flex-col gap-2 md:col-span-5">
 					<RequiredLabel htmlFor="nome" className="text-sm text-neutral-800">

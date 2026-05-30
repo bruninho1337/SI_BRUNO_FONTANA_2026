@@ -10,10 +10,10 @@ type FormasPagamentoListSectionProps = {
 const tipoLabels: Record<string, string> = {
 	DINHEIRO: "Dinheiro",
 	PIX: "PIX",
-	CARTAO_CREDITO: "Cartao de Credito",
-	CARTAO_DEBITO: "Cartao de Debito",
+	CARTAO_CREDITO: "Cartão de Crédito",
+	CARTAO_DEBITO: "Cartão de Débito",
 	BOLETO: "Boleto",
-	TRANSFERENCIA: "Transferencia",
+	TRANSFERENCIA: "Transferência",
 	OUTROS: "Outros",
 };
 

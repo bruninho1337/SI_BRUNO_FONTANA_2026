@@ -16,6 +16,7 @@ type CondicaoPagamentoFormSectionProps = {
 };
 
 const inputClass = "h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900";
+const readOnlyInputClass = "h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600";
 const fieldClass = "flex flex-col gap-2";
 
 export async function CondicaoPagamentoFormSection({
@@ -46,25 +47,24 @@ export async function CondicaoPagamentoFormSection({
 			>
 				<div className="grid gap-4 md:grid-cols-12">
 					{condicaoEditando ? (
-						<>
-							<input
-								type="hidden"
-								name="codcondicao_pagamento"
-								value={condicaoEditando.codcondicao_pagamento}
-							/>
-							<div className={`${fieldClass} md:col-span-2`}>
-								<Label htmlFor="codcondicao-pagamento-display" className="text-sm text-neutral-800">
-									Código:
-								</Label>
-								<Input
-									id="codcondicao-pagamento-display"
-									value={condicaoEditando.codcondicao_pagamento}
-									readOnly
-									className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
-								/>
-							</div>
-						</>
+						<input
+							type="hidden"
+							name="codcondicao_pagamento"
+							value={condicaoEditando.codcondicao_pagamento}
+						/>
 					) : null}
+
+					<div className={`${fieldClass} md:col-span-2`}>
+						<Label htmlFor="codcondicao-pagamento-display" className="text-sm text-neutral-800">
+							Código:
+						</Label>
+						<Input
+							id="codcondicao-pagamento-display"
+							value={condicaoEditando?.codcondicao_pagamento ?? ""}
+							readOnly
+							className={readOnlyInputClass}
+						/>
+					</div>
 
 					<ActiveToggle
 						name="ativo"
@@ -120,10 +120,8 @@ export async function CondicaoPagamentoFormSection({
 							className={inputClass}
 						/>
 					</div>
-				</div>
 
-				<div className="grid gap-4 md:grid-cols-12">
-					<div className={`${fieldClass} md:col-span-3`}>
+					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="juro" className="text-sm text-neutral-800">
 							Juro:
 						</RequiredLabel>
@@ -138,7 +136,7 @@ export async function CondicaoPagamentoFormSection({
 						/>
 					</div>
 
-					<div className={`${fieldClass} md:col-span-3`}>
+					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="multa" className="text-sm text-neutral-800">
 							Multa:
 						</RequiredLabel>
@@ -153,7 +151,7 @@ export async function CondicaoPagamentoFormSection({
 						/>
 					</div>
 
-					<div className={`${fieldClass} md:col-span-3`}>
+					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="desconto" className="text-sm text-neutral-800">
 							Desconto:
 						</RequiredLabel>

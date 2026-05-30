@@ -36,21 +36,20 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 			<form action={categoriaEditando ? updateCategoriaAction : createCategoriaAction} className="space-y-4">
 				<div className="grid gap-4 md:grid-cols-12">
 				{categoriaEditando ? (
-					<>
-						<input type="hidden" name="codcategoria" value={categoriaEditando.codcategoria} />
-						<div className="flex flex-col gap-2 md:col-span-2">
-							<Label htmlFor="codcategoria-display" className="text-sm text-neutral-800">
-								Código:
-							</Label>
-							<Input
-								id="codcategoria-display"
-								value={categoriaEditando.codcategoria}
-								readOnly
-								className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
-							/>
-						</div>
-					</>
+					<input type="hidden" name="codcategoria" value={categoriaEditando.codcategoria} />
 				) : null}
+
+				<div className="flex flex-col gap-2 md:col-span-2">
+					<Label htmlFor="codcategoria-display" className="text-sm text-neutral-800">
+						Código:
+					</Label>
+					<Input
+						id="codcategoria-display"
+						value={categoriaEditando?.codcategoria ?? ""}
+						readOnly
+						className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600"
+					/>
+				</div>
 
 				<div className="flex flex-col gap-2 md:col-span-5">
 					<RequiredLabel htmlFor="nome" className="text-sm text-neutral-800">

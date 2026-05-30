@@ -108,30 +108,21 @@ export function FornecedorFormFields({
 		<form action={action} onSubmit={validateSearchableSelects} className="space-y-5">
 			<div className="grid gap-4 md:grid-cols-12">
 				{initialData?.codfornecedor ? (
-					<>
-						<input type="hidden" name="codfornecedor" value={String(initialData.codfornecedor)} />
-						<div className={fieldClass.xs}>
-							<Label htmlFor="codfornecedor-display" className="text-sm text-neutral-800">
-								Código:
-							</Label>
-							<Input
-								id="codfornecedor-display"
-								value={String(initialData.codfornecedor)}
-								readOnly
-								className={readOnlyInputClass}
-							/>
-						</div>
-					</>
+					<input type="hidden" name="codfornecedor" value={String(initialData.codfornecedor)} />
 				) : null}
 
-				<ActiveToggle
-					name="ativo"
-					defaultValue={initialData?.ativo === "N" ? "N" : "S"}
-					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
-				/>
-			</div>
+				<div className={fieldClass.xs}>
+					<Label htmlFor="codfornecedor-display" className="text-sm text-neutral-800">
+						Código:
+					</Label>
+					<Input
+						id="codfornecedor-display"
+						value={String(initialData?.codfornecedor ?? "")}
+						readOnly
+						className={readOnlyInputClass}
+					/>
+				</div>
 
-			<div className="grid gap-4 md:grid-cols-12">
 				<div className={fieldClass.sm}>
 					<RequiredLabel htmlFor="tipo" className="text-sm text-neutral-800">
 						Tipo:
@@ -151,12 +142,18 @@ export function FornecedorFormFields({
 					</select>
 				</div>
 
-				<div className={fieldClass.lg}>
+				<div className="flex flex-col gap-2 md:col-span-5">
 					<RequiredLabel htmlFor="fornecedor" className="text-sm text-neutral-800">
 						{isFisica ? "Nome:" : "Razão Social:"}
 					</RequiredLabel>
 					<Input id="fornecedor" name="fornecedor" minLength={5} maxLength={80} required defaultValue={String(initialData?.fornecedor ?? "")} className={inputClass} />
 				</div>
+
+				<ActiveToggle
+					name="ativo"
+					defaultValue={initialData?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+				/>
 
 				{isFisica ? (
 					<div className={fieldClass.sm}>

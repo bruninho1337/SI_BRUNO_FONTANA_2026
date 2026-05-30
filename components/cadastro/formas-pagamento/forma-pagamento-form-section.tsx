@@ -22,10 +22,10 @@ const fieldClass = "flex flex-col gap-2";
 const tipoOptions = [
 	{ value: "DINHEIRO", label: "Dinheiro" },
 	{ value: "PIX", label: "PIX" },
-	{ value: "CARTAO_CREDITO", label: "Cartao de Credito" },
-	{ value: "CARTAO_DEBITO", label: "Cartao de Debito" },
+	{ value: "CARTAO_CREDITO", label: "Cartão de Crédito" },
+	{ value: "CARTAO_DEBITO", label: "Cartão de Débito" },
 	{ value: "BOLETO", label: "Boleto" },
-	{ value: "TRANSFERENCIA", label: "Transferencia" },
+	{ value: "TRANSFERENCIA", label: "Transferência" },
 	{ value: "OUTROS", label: "Outros" },
 ];
 
@@ -57,35 +57,26 @@ export async function FormaPagamentoFormSection({
 			>
 				<div className="grid gap-4 md:grid-cols-12">
 					{formaEditando ? (
-						<>
-							<input
-								type="hidden"
-								name="codforma_pagamento"
-								value={formaEditando.codforma_pagamento}
-							/>
-							<div className={`${fieldClass} md:col-span-2`}>
-								<Label htmlFor="codforma-pagamento-display" className="text-sm text-neutral-800">
-									Código:
-								</Label>
-								<Input
-									id="codforma-pagamento-display"
-									value={formaEditando.codforma_pagamento}
-									readOnly
-									className={readOnlyInputClass}
-								/>
-							</div>
-						</>
+						<input
+							type="hidden"
+							name="codforma_pagamento"
+							value={formaEditando.codforma_pagamento}
+						/>
 					) : null}
 
-					<ActiveToggle
-						name="ativo"
-						defaultValue={formaEditando?.ativo === "N" ? "N" : "S"}
-						className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
-					/>
-				</div>
+					<div className={`${fieldClass} md:col-span-2`}>
+						<Label htmlFor="codforma-pagamento-display" className="text-sm text-neutral-800">
+							Código:
+						</Label>
+						<Input
+							id="codforma-pagamento-display"
+							value={formaEditando?.codforma_pagamento ?? ""}
+							readOnly
+							className={readOnlyInputClass}
+						/>
+					</div>
 
-				<div className="grid gap-4 md:grid-cols-12">
-					<div className={`${fieldClass} md:col-span-6`}>
+					<div className={`${fieldClass} md:col-span-5`}>
 						<RequiredLabel htmlFor="forma_pagamento" className="text-sm text-neutral-800">
 							Forma de Pagamento:
 						</RequiredLabel>
@@ -102,7 +93,7 @@ export async function FormaPagamentoFormSection({
 						/>
 					</div>
 
-					<div className={`${fieldClass} md:col-span-4`}>
+					<div className={`${fieldClass} md:col-span-3`}>
 						<RequiredLabel htmlFor="tipo" className="text-sm text-neutral-800">
 							Tipo:
 						</RequiredLabel>
@@ -120,6 +111,12 @@ export async function FormaPagamentoFormSection({
 							))}
 						</select>
 					</div>
+
+					<ActiveToggle
+						name="ativo"
+						defaultValue={formaEditando?.ativo === "N" ? "N" : "S"}
+						className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+					/>
 				</div>
 
 				<div className="flex flex-col gap-2">

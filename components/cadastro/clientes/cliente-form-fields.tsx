@@ -124,30 +124,21 @@ export function ClienteFormFields({
 		<form action={action} onSubmit={validateSearchableSelects} className="space-y-5">
 			<div className="grid gap-4 md:grid-cols-12">
 				{initialData?.codcliente ? (
-					<>
-						<input type="hidden" name="codcliente" value={String(initialData.codcliente)} />
-						<div className={fieldClass.xs}>
-							<Label htmlFor="codcliente-display" className="text-sm text-neutral-800">
-								Código:
-							</Label>
-							<Input
-								id="codcliente-display"
-								value={String(initialData.codcliente)}
-								readOnly
-								className={readOnlyInputClass}
-							/>
-						</div>
-					</>
+					<input type="hidden" name="codcliente" value={String(initialData.codcliente)} />
 				) : null}
 
-				<ActiveToggle
-					name="ativo"
-					defaultValue={initialData?.ativo === "N" ? "N" : "S"}
-					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
-				/>
-			</div>
+				<div className={fieldClass.xs}>
+					<Label htmlFor="codcliente-display" className="text-sm text-neutral-800">
+						Código:
+					</Label>
+					<Input
+						id="codcliente-display"
+						value={String(initialData?.codcliente ?? "")}
+						readOnly
+						className={readOnlyInputClass}
+					/>
+				</div>
 
-			<div className="grid gap-4 md:grid-cols-12">
 				<div className={fieldClass.sm}>
 					<RequiredLabel htmlFor="tipo" className="text-sm text-neutral-800">
 						Tipo:
@@ -167,12 +158,18 @@ export function ClienteFormFields({
 					</select>
 				</div>
 
-				<div className={fieldClass.lg}>
+				<div className="flex flex-col gap-2 md:col-span-5">
 					<RequiredLabel htmlFor="cliente" className="text-sm text-neutral-800">
 						Cliente:
 					</RequiredLabel>
 					<Input id="cliente" name="cliente" minLength={5} maxLength={60} required defaultValue={String(initialData?.cliente ?? "")} className={inputClass} />
 				</div>
+
+				<ActiveToggle
+					name="ativo"
+					defaultValue={initialData?.ativo === "N" ? "N" : "S"}
+					className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
+				/>
 
 				<div className={fieldClass.sm}>
 					<Label htmlFor="apelido" className="text-sm text-neutral-800">

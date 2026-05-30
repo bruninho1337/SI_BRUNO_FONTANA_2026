@@ -5,7 +5,7 @@ export async function listarClientesComCidades() {
 		queryRows("select codcidade, cidade from public.cidades order by cidade asc"),
 		queryRows("select codcondicao_pagamento, nome from public.condicoes_pagamento order by nome asc"),
 		queryRows(
-			"select codcliente, tipo, cliente, apelido, estado_civil, endereco, numero, complemento, bairro, cep, codcidade, codcondicao_pagamento, telefone, email, sexo, nacionalidade, data_nascimento, rg_inscricao_estadual, cpf_cnpj, observacoes, ativo, data_criacao, data_atualizacao from public.clientes order by codcliente desc"
+			"select codcliente, tipo, cliente, apelido, estado_civil, endereco, numero, complemento, bairro, cep, codcidade, codcondicao_pagamento, telefone, email, sexo, nacionalidade, data_nascimento, rg_inscricao_estadual, cpf_cnpj, observacoes, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao from public.clientes order by codcliente desc"
 		),
 	]);
 
@@ -14,7 +14,7 @@ export async function listarClientesComCidades() {
 
 export async function buscarClientePorId(codcliente: number) {
 	return queryMaybeSingle(
-		"select codcliente, tipo, cliente, apelido, estado_civil, endereco, numero, complemento, bairro, cep, codcidade, codcondicao_pagamento, telefone, email, sexo, nacionalidade, data_nascimento, rg_inscricao_estadual, cpf_cnpj, observacoes, ativo, data_criacao, data_atualizacao from public.clientes where codcliente = $1",
+		"select codcliente, tipo, cliente, apelido, estado_civil, endereco, numero, complemento, bairro, cep, codcidade, codcondicao_pagamento, telefone, email, sexo, nacionalidade, data_nascimento, rg_inscricao_estadual, cpf_cnpj, observacoes, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao from public.clientes where codcliente = $1",
 		[codcliente]
 	);
 }

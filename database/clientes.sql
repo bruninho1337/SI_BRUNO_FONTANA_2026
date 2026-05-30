@@ -24,28 +24,71 @@ create table if not exists public.clientes (
 	),
 	cpf_cnpj text check (cpf_cnpj is null or char_length(cpf_cnpj) in (11, 14)),
 	observacoes text check (observacoes is null or char_length(observacoes) <= 255),
-	data_criacao timestamptz not null default now(),
-	data_atualizacao timestamptz not null default now(),
-	ativo char(1) not null default 'S' check (ativo in ('S', 'N'))
+	ativo char(1) not null default 'S' check (ativo in ('S', 'N')),
+	data_cadastro timestamp not null default current_timestamp,
+	data_ult_alteracao timestamp not null default current_timestamp,
+	usuario_ult_alteracao integer references public.usuarios(codusuario)
 );
 
-create or replace function public.set_data_atualizacao()
-returns trigger
-language plpgsql
-set search_path = ''
-as $$
+do $$
 begin
-	new.data_atualizacao = now();
-	return new;
-end;
-$$;
+	if exists (
+		select 1
+		from information_schema.columns
+		where table_schema = 'public'
+			and table_name = 'clientes'
+			and column_name = 'data_criacao'
+	) and not exists (
+		select 1
+		from information_schema.columns
+		where table_schema = 'public'
+			and table_name = 'clientes'
+			and column_name = 'data_cadastro'
+	) then
+		alter table public.clientes rename column data_criacao to data_cadastro;
+	end if;
+
+	if exists (
+		select 1
+		from information_schema.columns
+		where table_schema = 'public'
+			and table_name = 'clientes'
+			and column_name = 'data_atualizacao'
+	) and not exists (
+		select 1
+		from information_schema.columns
+		where table_schema = 'public'
+			and table_name = 'clientes'
+			and column_name = 'data_ult_alteracao'
+	) then
+		alter table public.clientes rename column data_atualizacao to data_ult_alteracao;
+	end if;
+end $$;
+
+alter table public.clientes
+add column if not exists data_cadastro timestamp not null default current_timestamp;
+
+alter table public.clientes
+add column if not exists data_ult_alteracao timestamp not null default current_timestamp;
+
+alter table public.clientes
+add column if not exists usuario_ult_alteracao integer references public.usuarios(codusuario);
+
+alter table public.clientes
+alter column data_cadastro type timestamp using data_cadastro::timestamp,
+alter column data_cadastro set default current_timestamp,
+alter column data_cadastro set not null,
+alter column data_ult_alteracao type timestamp using data_ult_alteracao::timestamp,
+alter column data_ult_alteracao set default current_timestamp,
+alter column data_ult_alteracao set not null;
 
 drop trigger if exists set_clientes_data_atualizacao on public.clientes;
+drop trigger if exists set_clientes_data_ult_alteracao on public.clientes;
 
-create trigger set_clientes_data_atualizacao
+create trigger set_clientes_data_ult_alteracao
 before update on public.clientes
 for each row
-execute function public.set_data_atualizacao();
+execute function public.set_data_ult_alteracao();
 
 alter table public.clientes
 add column if not exists codcondicao_pagamento integer;

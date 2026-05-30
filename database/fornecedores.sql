@@ -17,14 +17,68 @@ create table if not exists public.fornecedores (
 	),
 	cpf_cnpj text check (cpf_cnpj is null or char_length(cpf_cnpj) in (11, 14)),
 	observacoes text check (observacoes is null or char_length(observacoes) <= 255),
-	data_criacao timestamptz not null default now(),
-	data_atualizacao timestamptz not null default now(),
-	ativo char(1) not null default 'S' check (ativo in ('S', 'N'))
+	ativo char(1) not null default 'S' check (ativo in ('S', 'N')),
+	data_cadastro timestamp not null default current_timestamp,
+	data_ult_alteracao timestamp not null default current_timestamp,
+	usuario_ult_alteracao integer references public.usuarios(codusuario)
 );
 
-drop trigger if exists set_fornecedores_data_atualizacao on public.fornecedores;
+do $$
+begin
+	if exists (
+		select 1
+		from information_schema.columns
+		where table_schema = 'public'
+			and table_name = 'fornecedores'
+			and column_name = 'data_criacao'
+	) and not exists (
+		select 1
+		from information_schema.columns
+		where table_schema = 'public'
+			and table_name = 'fornecedores'
+			and column_name = 'data_cadastro'
+	) then
+		alter table public.fornecedores rename column data_criacao to data_cadastro;
+	end if;
 
-create trigger set_fornecedores_data_atualizacao
+	if exists (
+		select 1
+		from information_schema.columns
+		where table_schema = 'public'
+			and table_name = 'fornecedores'
+			and column_name = 'data_atualizacao'
+	) and not exists (
+		select 1
+		from information_schema.columns
+		where table_schema = 'public'
+			and table_name = 'fornecedores'
+			and column_name = 'data_ult_alteracao'
+	) then
+		alter table public.fornecedores rename column data_atualizacao to data_ult_alteracao;
+	end if;
+end $$;
+
+alter table public.fornecedores
+add column if not exists data_cadastro timestamp not null default current_timestamp;
+
+alter table public.fornecedores
+add column if not exists data_ult_alteracao timestamp not null default current_timestamp;
+
+alter table public.fornecedores
+add column if not exists usuario_ult_alteracao integer references public.usuarios(codusuario);
+
+alter table public.fornecedores
+alter column data_cadastro type timestamp using data_cadastro::timestamp,
+alter column data_cadastro set default current_timestamp,
+alter column data_cadastro set not null,
+alter column data_ult_alteracao type timestamp using data_ult_alteracao::timestamp,
+alter column data_ult_alteracao set default current_timestamp,
+alter column data_ult_alteracao set not null;
+
+drop trigger if exists set_fornecedores_data_atualizacao on public.fornecedores;
+drop trigger if exists set_fornecedores_data_ult_alteracao on public.fornecedores;
+
+create trigger set_fornecedores_data_ult_alteracao
 before update on public.fornecedores
 for each row
-execute function public.set_data_atualizacao();
+execute function public.set_data_ult_alteracao();
