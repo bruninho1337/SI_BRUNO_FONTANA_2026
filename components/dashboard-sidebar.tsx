@@ -35,6 +35,14 @@ const pessoasItems = [
 		label: "Clientes",
 	},
 	{
+		href: "/cadastro/funcionarios",
+		label: "Funcionários",
+	},
+	{
+		href: "/cadastro/funcoes-funcionarios",
+		label: "Funções de Funcionários",
+	},
+	{
 		href: "/cadastro/fornecedores",
 		label: "Fornecedores",
 	},
@@ -211,7 +219,7 @@ export function DashboardSidebar() {
 									isPessoasRoute ? "text-neutral-200" : "text-neutral-500"
 								)}
 							>
-								Clientes e fornecedores
+								Clientes, funcionarios e fornecedores
 							</p>
 						</div>
 
