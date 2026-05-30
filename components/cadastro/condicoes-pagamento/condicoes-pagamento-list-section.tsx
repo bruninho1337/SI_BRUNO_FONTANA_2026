@@ -34,11 +34,11 @@ export async function CondicoesPagamentoListSection({
 	return (
 		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
 			<CadastroListToolbar
-				title="Condicoes de pagamento cadastradas"
+				title="Condições de pagamento cadastradas"
 				count={filtered.length}
 				createHref="/cadastro/condicoes-pagamento?mode=create"
 				searchValue={params?.q}
-				searchPlaceholder="Pesquisar por condicao, prazo, parcelas, juro, multa ou desconto"
+				searchPlaceholder="Pesquisar por condição, prazo, parcelas, juro, multa ou desconto"
 			/>
 			<FormFeedback params={params} />
 

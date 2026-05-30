@@ -68,7 +68,7 @@ export async function FuncaoFuncionarioFormSection({
 
 					<div className={`${fieldClass} md:col-span-6`}>
 						<RequiredLabel htmlFor="funcao_funcionario" className="text-sm text-neutral-800">
-							Funcao:
+							Função:
 						</RequiredLabel>
 						<Input
 							id="funcao_funcionario"
@@ -92,7 +92,7 @@ export async function FuncaoFuncionarioFormSection({
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="descricao" className="text-sm text-neutral-800">
-						Descricao:
+						Descrição:
 					</Label>
 					<textarea
 						id="descricao"

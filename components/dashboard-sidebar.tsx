@@ -21,7 +21,7 @@ const financeiroItems = [
 	},
 	{
 		href: "/cadastro/condicoes-pagamento",
-		label: "Condicoes de Pagamento",
+		label: "Condições de Pagamento",
 	},
 	{
 		href: "/cadastro/formas-pagamento",

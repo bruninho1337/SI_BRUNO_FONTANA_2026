@@ -21,7 +21,7 @@ export default function CadastroFornecedoresPage({
 	return (
 		<CadastroPageShell
 			title="Fornecedores"
-			description="Consulte fornecedores fisicos ou juridicos com dados fiscais, contato e cidade."
+			description="Consulte fornecedores físicos ou jurídicos com dados fiscais, contato e cidade."
 			tabs={null}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Fornecedores cadastrados" />}>

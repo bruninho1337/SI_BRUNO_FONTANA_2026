@@ -162,7 +162,16 @@ export function ClienteFormFields({
 					<RequiredLabel htmlFor="cliente" className="text-sm text-neutral-800">
 						Cliente:
 					</RequiredLabel>
-					<Input id="cliente" name="cliente" minLength={5} maxLength={60} required defaultValue={String(initialData?.cliente ?? "")} className={inputClass} />
+					<Input
+						id="cliente"
+						name="cliente"
+						minLength={5}
+						maxLength={60}
+						required
+						placeholder={isFisica ? "Ex: João Silva" : "Ex: Barbearia Central Ltda"}
+						defaultValue={String(initialData?.cliente ?? "")}
+						className={inputClass}
+					/>
 				</div>
 
 				<ActiveToggle
@@ -175,7 +184,14 @@ export function ClienteFormFields({
 					<Label htmlFor="apelido" className="text-sm text-neutral-800">
 						Apelido:
 					</Label>
-					<Input id="apelido" name="apelido" maxLength={60} defaultValue={String(initialData?.apelido ?? "")} className={inputClass} />
+					<Input
+						id="apelido"
+						name="apelido"
+						maxLength={60}
+						placeholder={isFisica ? "Ex: João" : "Ex: Central"}
+						defaultValue={String(initialData?.apelido ?? "")}
+						className={inputClass}
+					/>
 				</div>
 
 				{isFisica ? (
@@ -197,9 +213,18 @@ export function ClienteFormFields({
 
 				<div className={fieldClass.xl}>
 					<RequiredLabel htmlFor="endereco" className="text-sm text-neutral-800">
-						Endereco:
+						Endereço:
 					</RequiredLabel>
-					<Input id="endereco" name="endereco" minLength={5} maxLength={60} required defaultValue={String(initialData?.endereco ?? "")} className={inputClass} />
+					<Input
+						id="endereco"
+						name="endereco"
+						minLength={5}
+						maxLength={60}
+						required
+						placeholder="Ex: Avenida Brasil"
+						defaultValue={String(initialData?.endereco ?? "")}
+						className={inputClass}
+					/>
 				</div>
 
 				<div className={fieldClass.xs}>
@@ -214,6 +239,7 @@ export function ClienteFormFields({
 						minLength={1}
 						maxLength={10}
 						required
+						placeholder="Ex: 123"
 						defaultValue={String(initialData?.numero ?? "")}
 						onInput={keepOnlyDigits}
 						className={inputClass}
@@ -224,14 +250,30 @@ export function ClienteFormFields({
 					<Label htmlFor="complemento" className="text-sm text-neutral-800">
 						Complemento:
 					</Label>
-					<Input id="complemento" name="complemento" maxLength={60} defaultValue={String(initialData?.complemento ?? "")} className={inputClass} />
+					<Input
+						id="complemento"
+						name="complemento"
+						maxLength={60}
+						placeholder="Ex: Sala 2"
+						defaultValue={String(initialData?.complemento ?? "")}
+						className={inputClass}
+					/>
 				</div>
 
 				<div className={fieldClass.md}>
 					<RequiredLabel htmlFor="bairro" className="text-sm text-neutral-800">
 						Bairro:
 					</RequiredLabel>
-					<Input id="bairro" name="bairro" minLength={5} maxLength={60} required defaultValue={String(initialData?.bairro ?? "")} className={inputClass} />
+					<Input
+						id="bairro"
+						name="bairro"
+						minLength={5}
+						maxLength={60}
+						required
+						placeholder="Ex: Centro"
+						defaultValue={String(initialData?.bairro ?? "")}
+						className={inputClass}
+					/>
 				</div>
 
 				<div className={fieldClass.sm}>
@@ -246,6 +288,7 @@ export function ClienteFormFields({
 							minLength={8}
 							maxLength={9}
 							required
+							placeholder="Ex: 85851-000"
 							defaultValue={formatCep(String(initialData?.cep ?? ""))}
 							onInput={(event) => formatInput(event, formatCep)}
 							className={inputClass}
@@ -270,7 +313,7 @@ export function ClienteFormFields({
 
 				<SearchableSelect
 					name="codcondicao_pagamento"
-					label="Condicao de Pagamento"
+					label="Condição de Pagamento"
 					searchLabel="Pesquisar condicao por nome"
 					searchPlaceholder="Digite o nome da condicao"
 					selectPlaceholder="Selecione uma condicao"
@@ -295,6 +338,7 @@ export function ClienteFormFields({
 						minLength={10}
 						maxLength={15}
 						required
+						placeholder="Ex: (45) 99999-9999"
 						defaultValue={formatTelefone(String(initialData?.telefone ?? ""))}
 						onInput={(event) => formatInput(event, formatTelefone)}
 						className={inputClass}
@@ -305,7 +349,17 @@ export function ClienteFormFields({
 					<RequiredLabel htmlFor="email" className="text-sm text-neutral-800">
 						E-mail:
 					</RequiredLabel>
-					<Input id="email" name="email" type="email" minLength={5} maxLength={60} required defaultValue={String(initialData?.email ?? "")} className={inputClass} />
+					<Input
+						id="email"
+						name="email"
+						type="email"
+						minLength={5}
+						maxLength={60}
+						required
+						placeholder="Ex: cliente@email.com"
+						defaultValue={String(initialData?.email ?? "")}
+						className={inputClass}
+					/>
 				</div>
 
 				{isFisica ? (
@@ -330,7 +384,15 @@ export function ClienteFormFields({
 								<Label htmlFor="nacionalidade" className="text-sm text-neutral-800">
 									Nacionalidade:
 								</Label>
-								<Input id="nacionalidade" name="nacionalidade" minLength={5} maxLength={20} defaultValue={String(initialData?.nacionalidade ?? "")} className={inputClass} />
+								<Input
+									id="nacionalidade"
+									name="nacionalidade"
+									minLength={5}
+									maxLength={20}
+									placeholder="Ex: Brasileira"
+									defaultValue={String(initialData?.nacionalidade ?? "")}
+									className={inputClass}
+								/>
 							</div>
 
 							<div className={fieldClass.sm}>
@@ -362,7 +424,7 @@ export function ClienteFormFields({
 
 				<div className={fieldClass.sm}>
 					<Label htmlFor="rg-inscricao-estadual" className="text-sm text-neutral-800">
-						{isFisica ? "RG:" : "Inscricao Estadual:"}
+						{isFisica ? "RG:" : "Inscrição Estadual:"}
 					</Label>
 					<Input
 						id="rg-inscricao-estadual"
@@ -371,6 +433,7 @@ export function ClienteFormFields({
 						pattern={isFisica ? "\\d{2}\\.?\\d{3}\\.?\\d{3}-?\\d?" : "[0-9]{5,14}"}
 						minLength={5}
 						maxLength={isFisica ? 12 : 14}
+						placeholder={isFisica ? "Ex: 00.000.000-0" : "Ex: 123456789"}
 						defaultValue={
 							isFisica
 								? formatRg(String(initialData?.rg_inscricao_estadual ?? ""))
@@ -397,6 +460,7 @@ export function ClienteFormFields({
 							pattern={isFisica ? "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}" : "\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2}"}
 							minLength={11}
 							maxLength={isFisica ? 14 : 18}
+							placeholder={isFisica ? "Ex: 000.000.000-00" : "Ex: 00.000.000/0001-00"}
 							defaultValue={formatCpfCnpj(String(initialData?.cpf_cnpj ?? ""), isFisica ? 11 : 14)}
 							onInput={(event) => formatInput(event, (value) => formatCpfCnpj(value, isFisica ? 11 : 14))}
 							className={inputClass}
@@ -406,12 +470,13 @@ export function ClienteFormFields({
 
 			<div className="flex flex-col gap-2">
 				<Label htmlFor="observacoes" className="text-sm text-neutral-800">
-					Observacoes:
+					Observações:
 				</Label>
 				<textarea
 					id="observacoes"
 					name="observacoes"
 					maxLength={255}
+					placeholder="Detalhes internos sobre preferencias, historico ou observacoes do cliente"
 					defaultValue={String(initialData?.observacoes ?? "")}
 					className="min-h-28 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
 				/>

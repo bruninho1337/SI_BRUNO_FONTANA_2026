@@ -21,7 +21,7 @@ export default function CadastroClientesPage({
 	return (
 		<CadastroPageShell
 			title="Clientes"
-			description="Consulte clientes fisicos ou juridicos com cidade, e-mail ou documento."
+			description="Consulte clientes físicos ou jurídicos com cidade, e-mail ou documento."
 			tabs={null}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Clientes cadastrados" />}>

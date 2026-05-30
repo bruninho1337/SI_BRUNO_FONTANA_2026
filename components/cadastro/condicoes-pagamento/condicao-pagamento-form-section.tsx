@@ -32,7 +32,7 @@ export async function CondicaoPagamentoFormSection({
 		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
 			<div className="mb-6">
 				<h2 className="text-xl font-semibold text-neutral-900">
-					{condicaoEditando ? "Editar Condicao de Pagamento" : "Nova Condicao de Pagamento"}
+					{condicaoEditando ? "Editar Condição de Pagamento" : "Nova Condição de Pagamento"}
 				</h2>
 				<p className="mt-1 text-sm text-neutral-500">
 					Cadastre prazos, parcelas e ajustes financeiros para clientes.

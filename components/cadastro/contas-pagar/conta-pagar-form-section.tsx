@@ -272,7 +272,7 @@ export async function ContaPagarFormSection({
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="observacoes" className="text-sm text-neutral-800">
-						Observacoes:
+						Observações:
 					</Label>
 					<textarea
 						id="observacoes"

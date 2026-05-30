@@ -66,7 +66,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 
 				<div className="flex flex-col gap-2 md:col-span-5">
 					<RequiredLabel htmlFor="nome" className="text-sm text-neutral-800">
-						Servico:
+						Serviço:
 					</RequiredLabel>
 					<Input
 						id="nome"
@@ -110,9 +110,9 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-2">
 						<RequiredLabel htmlFor="duracao_minutos" className="text-sm text-neutral-800">
-							Duracao:
+							Duração:
 						</RequiredLabel>
-						<Input id="duracao_minutos" name="duracao_minutos" type="number" required placeholder="Ex: 45" defaultValue={String(servicoEditando?.duracao_minutos ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+						<Input id="duracao_minutos" name="duracao_minutos" type="number" required placeholder="Ex: 45 (min)" defaultValue={String(servicoEditando?.duracao_minutos ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-3">
 						<Label htmlFor="valor_desconto" className="text-sm text-neutral-800">
@@ -126,7 +126,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="descricao" className="text-sm text-neutral-800">
-						Descricao:
+						Descrição:
 					</Label>
 					<textarea
 						id="descricao"

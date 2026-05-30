@@ -20,11 +20,11 @@ export default function CadastroCondicoesPagamentoPage({
 }: CadastroCondicoesPagamentoPageProps) {
 	return (
 		<CadastroPageShell
-			title="Condicoes de Pagamento"
-			description="Tela de consulta para a tabela de Condicoes de Pagamento."
+			title="Condições de Pagamento"
+			description="Tela de consulta para a tabela de Condições de Pagamento."
 			tabs={null}
 		>
-			<Suspense fallback={<CadastroSectionFallback title="Condicoes de pagamento cadastradas" />}>
+			<Suspense fallback={<CadastroSectionFallback title="Condições de pagamento cadastradas" />}>
 				<CadastroCondicoesPagamentoContent searchParams={searchParams} />
 			</Suspense>
 		</CadastroPageShell>

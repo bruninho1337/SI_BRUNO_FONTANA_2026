@@ -87,7 +87,7 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="descricao" className="text-sm text-neutral-800">
-						Descricao:
+						Descrição:
 					</Label>
 					<textarea
 						id="descricao"

@@ -182,7 +182,7 @@ export function FornecedorFormFields({
 
 				<div className={fieldClass.xl}>
 					<RequiredLabel htmlFor="endereco" className="text-sm text-neutral-800">
-						Endereco:
+						Endereço:
 					</RequiredLabel>
 					<Input id="endereco" name="endereco" minLength={5} maxLength={80} required defaultValue={String(initialData?.endereco ?? "")} className={inputClass} />
 				</div>
@@ -269,7 +269,7 @@ export function FornecedorFormFields({
 
 				<div className={fieldClass.sm}>
 					<Label htmlFor="rg_inscricao_estadual" className="text-sm text-neutral-800">
-						{isFisica ? "RG:" : "Inscricao Estadual:"}
+						{isFisica ? "RG:" : "Inscrição Estadual:"}
 					</Label>
 					<Input
 						id="rg_inscricao_estadual"
@@ -313,7 +313,7 @@ export function FornecedorFormFields({
 
 			<div className="flex flex-col gap-2">
 				<Label htmlFor="observacoes" className="text-sm text-neutral-800">
-					Observacoes:
+					Observações:
 				</Label>
 				<textarea
 					id="observacoes"

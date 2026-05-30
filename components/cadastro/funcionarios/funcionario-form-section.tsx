@@ -115,7 +115,7 @@ export async function FuncionarioFormSection({
 							minLength={5}
 							maxLength={80}
 							required
-							placeholder="Ex: Joao Silva"
+							placeholder="Ex: João Silva"
 							defaultValue={funcionario?.funcionario ?? ""}
 							className={inputClass}
 						/>
@@ -130,7 +130,7 @@ export async function FuncionarioFormSection({
 							name="apelido"
 							type="text"
 							maxLength={60}
-							placeholder="Ex: Joao"
+							placeholder="Ex: João"
 							defaultValue={funcionario?.apelido ?? ""}
 							className={inputClass}
 						/>
@@ -146,7 +146,7 @@ export async function FuncionarioFormSection({
 				<div className="grid gap-4 md:grid-cols-12">
 					<SearchableSelect
 						name="codfuncao_funcionario"
-						label="Funcao"
+						label="Função"
 						searchLabel="Pesquisar funcao"
 						searchPlaceholder="Digite a funcao do funcionario"
 						selectPlaceholder="Selecione uma funcao"
@@ -270,7 +270,7 @@ export async function FuncionarioFormSection({
 
 					<div className={`${fieldClass} md:col-span-3`}>
 						<RequiredLabel htmlFor="percentual_comissao" className="text-sm text-neutral-800">
-							Comissão %:
+							Comissão (%):
 						</RequiredLabel>
 						<Input
 							id="percentual_comissao"
@@ -286,7 +286,7 @@ export async function FuncionarioFormSection({
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="observacoes" className="text-sm text-neutral-800">
-						Observacoes:
+						Observações:
 					</Label>
 					<textarea
 						id="observacoes"
