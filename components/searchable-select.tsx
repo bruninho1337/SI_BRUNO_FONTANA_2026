@@ -23,6 +23,7 @@ type SearchableSelectProps = {
 	options: Option[];
 	required?: boolean;
 	defaultValue?: string;
+	value?: string;
 	className?: string;
 	createHref?: string;
 	createLabel?: string;
@@ -39,6 +40,7 @@ export function SearchableSelect({
 	options,
 	required = false,
 	defaultValue = "",
+	value,
 	className,
 	createHref,
 	createLabel = "Adicionar",
@@ -49,6 +51,7 @@ export function SearchableSelect({
 	const [isOpen, setIsOpen] = useState(false);
 	const [search, setSearch] = useState("");
 	const [selectedId, setSelectedId] = useState(defaultValue);
+	const currentValue = value ?? selectedId;
 
 	const filteredOptions = useMemo(() => {
 		const term = search.trim().toLowerCase();
@@ -63,9 +66,15 @@ export function SearchableSelect({
 	}, [options, search]);
 
 	const selectedOption = useMemo(
-		() => options.find((option) => option.id === selectedId),
-		[options, selectedId]
+		() => options.find((option) => option.id === currentValue),
+		[options, currentValue]
 	);
+
+	useEffect(() => {
+		if (value !== undefined) {
+			setSelectedId(value);
+		}
+	}, [value]);
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
@@ -96,7 +105,7 @@ export function SearchableSelect({
 					{label}:
 				</Label>
 			)}
-			<input name={name} value={selectedId} required={required} type="hidden" readOnly />
+			<input name={name} value={currentValue} required={required} type="hidden" readOnly />
 			<button
 				id={`${name}-trigger`}
 				type="button"
@@ -154,7 +163,7 @@ export function SearchableSelect({
 						{filteredOptions.length > 0 ? (
 							<div className="flex flex-col gap-2">
 								{filteredOptions.map((option) => {
-									const isSelected = option.id === selectedId;
+									const isSelected = option.id === currentValue;
 
 									return (
 										<button
