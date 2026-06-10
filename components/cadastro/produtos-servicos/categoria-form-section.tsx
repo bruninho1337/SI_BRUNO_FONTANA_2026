@@ -52,18 +52,18 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 				</div>
 
 				<div className="flex flex-col gap-2 md:col-span-5">
-					<RequiredLabel htmlFor="nome" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="categoria" className="text-sm text-neutral-800">
 						Categoria:
 					</RequiredLabel>
 					<Input
-						id="nome"
-						name="nome"
+						id="categoria"
+						name="categoria"
 						type="text"
 						minLength={2}
 						maxLength={80}
 						required
 						placeholder="Ex: Finalizacao"
-						defaultValue={categoriaEditando?.nome ?? ""}
+						defaultValue={categoriaEditando?.categoria ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
 					/>
 				</div>

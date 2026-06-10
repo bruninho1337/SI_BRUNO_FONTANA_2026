@@ -25,7 +25,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 	const categoriaOptions =
 		categorias?.map((categoria) => ({
 			id: String(categoria.codcategoria),
-			label: categoria.nome,
+			label: categoria.categoria,
 		})) ?? [];
 
 	return (
@@ -65,18 +65,18 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 				</div>
 
 				<div className="flex flex-col gap-2 md:col-span-5">
-					<RequiredLabel htmlFor="nome" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="servico" className="text-sm text-neutral-800">
 						Serviço:
 					</RequiredLabel>
 					<Input
-						id="nome"
-						name="nome"
+						id="servico"
+						name="servico"
 						type="text"
 						minLength={2}
 						maxLength={80}
 						required
 						placeholder="Ex: Corte social"
-						defaultValue={servicoEditando?.nome ?? ""}
+						defaultValue={servicoEditando?.servico ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
 					/>
 				</div>

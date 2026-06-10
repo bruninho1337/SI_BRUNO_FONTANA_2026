@@ -12,7 +12,7 @@ export async function CategoriasListSection({ searchParams }: CategoriasListSect
 	const query = String(params?.q ?? "").trim().toLowerCase();
 	const { data: categorias, error } = await listarCategorias();
 	const filtered = (categorias ?? []).filter((categoria) =>
-		[categoria.nome, categoria.tipo, categoria.descricao].some((value) =>
+		[categoria.categoria, categoria.tipo, categoria.descricao].some((value) =>
 			String(value ?? "").toLowerCase().includes(query)
 		)
 	);
@@ -45,7 +45,7 @@ export async function CategoriasListSection({ searchParams }: CategoriasListSect
 						<tbody>
 							{filtered.map((categoria) => (
 								<tr key={categoria.codcategoria} className="bg-neutral-50">
-									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">{categoria.nome}</td>
+									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">{categoria.categoria}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{categoria.tipo}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{categoria.descricao ?? "-"}</td>
 									<td className="px-4 py-3 text-sm font-semibold text-neutral-900">{categoria.ativo}</td>

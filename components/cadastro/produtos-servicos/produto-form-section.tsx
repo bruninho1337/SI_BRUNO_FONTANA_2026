@@ -34,7 +34,7 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 	const categoriaOptions =
 		categorias?.map((categoria) => ({
 			id: String(categoria.codcategoria),
-			label: categoria.nome,
+			label: categoria.categoria,
 		})) ?? [];
 
 	const marcaOptions =
@@ -96,18 +96,18 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 				</div>
 
 				<div className="flex flex-col gap-2 md:col-span-5">
-					<RequiredLabel htmlFor="nome" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="produto" className="text-sm text-neutral-800">
 						Produto:
 					</RequiredLabel>
 					<Input
-						id="nome"
-						name="nome"
+						id="produto"
+						name="produto"
 						type="text"
 						minLength={2}
 						maxLength={80}
 						required
 						placeholder="Ex: Pomada modeladora"
-						defaultValue={produtoEditando?.nome ?? ""}
+						defaultValue={produtoEditando?.produto ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
 					/>
 				</div>

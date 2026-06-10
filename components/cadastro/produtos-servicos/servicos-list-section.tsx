@@ -16,10 +16,10 @@ export async function ServicosListSection({ searchParams }: ServicosListSectionP
 	const query = String(params?.q ?? "").trim().toLowerCase();
 	const { categorias, servicos, error } = await listarServicosComCategorias();
 	const categoriaMap = new Map(
-		(categorias ?? []).map((categoria) => [categoria.codcategoria, categoria.nome])
+		(categorias ?? []).map((categoria) => [categoria.codcategoria, categoria.categoria])
 	);
 	const filtered = (servicos ?? []).filter((servico) =>
-		[servico.nome, servico.descricao, categoriaMap.get(servico.codcategoria ?? 0)].some((value) =>
+		[servico.servico, servico.descricao, categoriaMap.get(servico.codcategoria ?? 0)].some((value) =>
 			String(value ?? "").toLowerCase().includes(query)
 		)
 	);
@@ -54,7 +54,7 @@ export async function ServicosListSection({ searchParams }: ServicosListSectionP
 						<tbody>
 							{filtered.map((servico) => (
 								<tr key={servico.codservico} className="bg-neutral-50">
-									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">{servico.nome}</td>
+									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">{servico.servico}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">
 										{servico.codcategoria ? categoriaMap.get(servico.codcategoria) ?? "-" : "-"}
 									</td>

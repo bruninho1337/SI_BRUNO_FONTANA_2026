@@ -107,7 +107,7 @@ export async function deleteProdutoAction(formData: FormData) {
 }
 
 async function saveProduto(formData: FormData, codproduto?: number) {
-	const nome = getText(formData, "nome");
+	const produto = getText(formData, "produto");
 	const codcategoriaValue = getText(formData, "codcategoria");
 	const codmarcaValue = getText(formData, "codmarca");
 	const codunidadeMedidaValue = getText(formData, "codunidade_medida");
@@ -119,7 +119,7 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 	const imagemAtual = getText(formData, "imagem_url");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!isLengthBetween(nome, 2, 80)) {
+	if (!isLengthBetween(produto, 2, 80)) {
 		redirect(buildRedirect(PRODUTOS_PATH, "error", "Produto deve ter entre 2 e 80 caracteres."));
 	}
 
@@ -150,12 +150,12 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 		const { error } = codproduto
 			? await executeQuery(
 				`update public.produtos
-					set nome = $1, codcategoria = $2, codmarca = $3, codunidade_medida = $4,
+					set produto = $1, codcategoria = $2, codmarca = $3, codunidade_medida = $4,
 						valor = $5, quantidade_estoque = $6, valor_desconto = $7, descricao = $8,
 						imagem_url = $9, ativo = $10
 					where codproduto = $11`,
 					[
-						nome,
+						produto,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
 						codmarcaValue ? Number(codmarcaValue) : null,
 						codunidadeMedidaValue ? Number(codunidadeMedidaValue) : null,
@@ -170,11 +170,11 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 				)
 			: await executeQuery(
 					`insert into public.produtos (
-						nome, codcategoria, codmarca, codunidade_medida, valor, quantidade_estoque,
+						produto, codcategoria, codmarca, codunidade_medida, valor, quantidade_estoque,
 						valor_desconto, descricao, imagem_url, ativo
 					) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
 					[
-						nome,
+						produto,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
 						codmarcaValue ? Number(codmarcaValue) : null,
 						codunidadeMedidaValue ? Number(codunidadeMedidaValue) : null,
@@ -235,7 +235,7 @@ export async function deleteServicoAction(formData: FormData) {
 }
 
 async function saveServico(formData: FormData, codservico?: number) {
-	const nome = getText(formData, "nome");
+	const servico = getText(formData, "servico");
 	const codcategoriaValue = getText(formData, "codcategoria");
 	const duracaoMinutos = Number(getText(formData, "duracao_minutos") || "0");
 	const valor = parseDecimal(formData.get("valor"));
@@ -245,7 +245,7 @@ async function saveServico(formData: FormData, codservico?: number) {
 	const imagemAtual = getText(formData, "imagem_url");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!isLengthBetween(nome, 2, 80)) {
+	if (!isLengthBetween(servico, 2, 80)) {
 		redirect(buildRedirect(SERVICOS_PATH, "error", "Servico deve ter entre 2 e 80 caracteres."));
 	}
 
@@ -276,11 +276,11 @@ async function saveServico(formData: FormData, codservico?: number) {
 		const { error } = codservico
 			? await executeQuery(
 					`update public.servicos
-					set nome = $1, codcategoria = $2, duracao_minutos = $3, valor = $4,
+					set servico = $1, codcategoria = $2, duracao_minutos = $3, valor = $4,
 						valor_desconto = $5, descricao = $6, imagem_url = $7, ativo = $8
 					where codservico = $9`,
 					[
-						nome,
+						servico,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
 						duracaoMinutos,
 						valor,
@@ -293,10 +293,10 @@ async function saveServico(formData: FormData, codservico?: number) {
 				)
 			: await executeQuery(
 					`insert into public.servicos (
-						nome, codcategoria, duracao_minutos, valor, valor_desconto, descricao, imagem_url, ativo
+						servico, codcategoria, duracao_minutos, valor, valor_desconto, descricao, imagem_url, ativo
 					) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
 					[
-						nome,
+						servico,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
 						duracaoMinutos,
 						valor,
@@ -357,12 +357,12 @@ export async function deleteCategoriaAction(formData: FormData) {
 }
 
 async function saveCategoria(formData: FormData, codcategoria?: number) {
-	const nome = getText(formData, "nome");
+	const categoria = getText(formData, "categoria");
 	const descricao = getText(formData, "descricao");
 	const tipo = getText(formData, "tipo").toUpperCase() || "AMBOS";
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!isLengthBetween(nome, 2, 80)) {
+	if (!isLengthBetween(categoria, 2, 80)) {
 		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Categoria deve ter entre 2 e 80 caracteres."));
 	}
 
@@ -376,12 +376,12 @@ async function saveCategoria(formData: FormData, codcategoria?: number) {
 
 	const { error } = codcategoria
 		? await executeQuery(
-				"update public.categorias set nome = $1, descricao = $2, tipo = $3, ativo = $4 where codcategoria = $5",
-				[nome, descricao || null, tipo, ativo, codcategoria]
+				"update public.categorias set categoria = $1, descricao = $2, tipo = $3, ativo = $4 where codcategoria = $5",
+				[categoria, descricao || null, tipo, ativo, codcategoria]
 			)
 		: await executeQuery(
-				"insert into public.categorias (nome, descricao, tipo, ativo) values ($1, $2, $3, $4)",
-				[nome, descricao || null, tipo, ativo]
+				"insert into public.categorias (categoria, descricao, tipo, ativo) values ($1, $2, $3, $4)",
+				[categoria, descricao || null, tipo, ativo]
 			);
 
 	if (error) {

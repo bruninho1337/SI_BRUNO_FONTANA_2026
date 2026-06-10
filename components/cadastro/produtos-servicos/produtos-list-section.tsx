@@ -16,7 +16,7 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 	const query = String(params?.q ?? "").trim().toLowerCase();
 	const { categorias, marcas, unidadesMedida, produtos, error } = await listarProdutosComCategorias();
 	const categoriaMap = new Map(
-		(categorias ?? []).map((categoria) => [categoria.codcategoria, categoria.nome])
+		(categorias ?? []).map((categoria) => [categoria.codcategoria, categoria.categoria])
 	);
 	const marcaMap = new Map((marcas ?? []).map((marca) => [marca.codmarca, marca.marca]));
 	const unidadeMedidaMap = new Map(
@@ -27,7 +27,7 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 	);
 	const filtered = (produtos ?? []).filter((produto) =>
 		[
-			produto.nome,
+			produto.produto,
 			produto.descricao,
 			categoriaMap.get(produto.codcategoria ?? 0),
 			marcaMap.get(produto.codmarca ?? 0),
@@ -69,7 +69,7 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 						<tbody>
 							{filtered.map((produto) => (
 								<tr key={produto.codproduto} className="bg-neutral-50">
-									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">{produto.nome}</td>
+									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">{produto.produto}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">
 										{produto.codcategoria ? categoriaMap.get(produto.codcategoria) ?? "-" : "-"}
 									</td>
