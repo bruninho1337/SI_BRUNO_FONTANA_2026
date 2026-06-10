@@ -16,7 +16,7 @@ create table if not exists public.fornecedores (
 		rg_inscricao_estadual is null or char_length(rg_inscricao_estadual) between 5 and 14
 	),
 	cpf_cnpj text check (cpf_cnpj is null or char_length(cpf_cnpj) in (11, 14)),
-	observacoes text check (observacoes is null or char_length(observacoes) <= 255),
+	observacoes text check (observacoes is null or char_length(observacoes) <= 110),
 	ativo char(1) not null default 'S' check (ativo in ('S', 'N')),
 	data_cadastro timestamp not null default current_timestamp,
 	data_ult_alteracao timestamp not null default current_timestamp,

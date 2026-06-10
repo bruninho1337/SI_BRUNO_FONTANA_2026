@@ -169,6 +169,7 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 	const codcondicaoPagamento = Number(codcondicaoPagamentoValue);
 	const telefoneRaw = getText(formData, "telefone");
 	const telefone = onlyDigits(telefoneRaw);
+	const contato = getText(formData, "contato");
 	const email = getText(formData, "email");
 	const sexo = getText(formData, "sexo");
 	const nacionalidade = getText(formData, "nacionalidade");
@@ -224,6 +225,10 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "Telefone deve conter apenas digitos e ter 10 ou 11 numeros."));
 	}
 
+	if (contato.length > 60) {
+		redirect(buildRedirect(CLIENTES_PATH, "error", "Contato deve ter no maximo 60 caracteres."));
+	}
+
 	if (!isLengthBetween(email, 5, 60)) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "E-mail deve ter entre 5 e 60 caracteres."));
 	}
@@ -268,8 +273,8 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 		redirect(buildRedirect(CLIENTES_PATH, "error", "CNPJ invalido."));
 	}
 
-	if (observacoes.length > 255) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Observacoes devem ter no maximo 255 caracteres."));
+	if (observacoes.length > 110) {
+		redirect(buildRedirect(CLIENTES_PATH, "error", "Observacoes devem ter no maximo 110 caracteres."));
 	}
 
 	const { error } = codcliente
@@ -277,9 +282,9 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 				`update public.clientes
 				set tipo = $1, cliente = $2, apelido = $3, estado_civil = $4, endereco = $5, numero = $6,
 					complemento = $7, bairro = $8, cep = $9, codcidade = $10, codcondicao_pagamento = $11,
-					telefone = $12, email = $13, sexo = $14, nacionalidade = $15, data_nascimento = $16,
-					rg_inscricao_estadual = $17, cpf_cnpj = $18, observacoes = $19, ativo = $20
-				where codcliente = $21`,
+					telefone = $12, contato = $13, email = $14, sexo = $15, nacionalidade = $16, data_nascimento = $17,
+					rg_inscricao_estadual = $18, cpf_cnpj = $19, observacoes = $20, ativo = $21
+				where codcliente = $22`,
 				[
 					tipo,
 					cliente,
@@ -293,6 +298,7 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 					codcidade,
 					codcondicaoPagamentoValue ? codcondicaoPagamento : null,
 					telefone,
+					contato || null,
 					email,
 					tipo === "FISICA" ? sexo || null : null,
 					tipo === "FISICA" ? nacionalidade || null : null,
@@ -307,11 +313,11 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 		: await executeQuery(
 				`insert into public.clientes (
 					tipo, cliente, apelido, estado_civil, endereco, numero, complemento, bairro, cep,
-					codcidade, codcondicao_pagamento, telefone, email, sexo, nacionalidade, data_nascimento,
+					codcidade, codcondicao_pagamento, telefone, contato, email, sexo, nacionalidade, data_nascimento,
 					rg_inscricao_estadual, cpf_cnpj, observacoes, ativo
 				) values (
 					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-					$11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+					$11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
 				)`,
 				[
 					tipo,
@@ -326,6 +332,7 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 					codcidade,
 					codcondicaoPagamentoValue ? codcondicaoPagamento : null,
 					telefone,
+					contato || null,
 					email,
 					tipo === "FISICA" ? sexo || null : null,
 					tipo === "FISICA" ? nacionalidade || null : null,

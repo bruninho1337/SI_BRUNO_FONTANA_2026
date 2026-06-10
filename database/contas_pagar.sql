@@ -11,7 +11,7 @@ create table if not exists public.contas_pagar (
 	valor_pago numeric not null default 0 check (valor_pago >= 0),
 	status varchar(20) not null default 'PENDENTE' check (status in ('PENDENTE', 'PAGO', 'CANCELADO')),
 	ativo char(1) not null default 'S' check (ativo in ('S', 'N')),
-	observacoes text check (observacoes is null or char_length(observacoes) <= 255),
+	observacoes text check (observacoes is null or char_length(observacoes) <= 110),
 	data_cadastro timestamp not null default current_timestamp,
 	data_ult_alteracao timestamp not null default current_timestamp,
 	usuario_ult_alteracao integer references public.usuarios(codusuario),

@@ -83,6 +83,7 @@ export function ClienteFormFields({
 	const [tipo, setTipo] = useState(String(initialData?.tipo ?? "FISICA"));
 	const [selectErrors, setSelectErrors] = useState<Record<string, string>>({});
 	const [selectedCidadeId, setSelectedCidadeId] = useState(String(initialData?.codcidade ?? ""));
+	const [cepError, setCepError] = useState("");
 	const dataNascimentoRef = useRef<HTMLInputElement>(null);
 	const cpfCnpjRef = useRef<HTMLInputElement>(null);
 	const enderecoRef = useRef<HTMLInputElement>(null);
@@ -140,6 +141,7 @@ export function ClienteFormFields({
 		if (cep.length !== 8) {
 			lastCepRef.current = "";
 			cepAbortRef.current?.abort();
+			setCepError("");
 			return;
 		}
 
@@ -149,6 +151,7 @@ export function ClienteFormFields({
 
 		lastCepRef.current = cep;
 		cepAbortRef.current?.abort();
+		setCepError("");
 
 		const controller = new AbortController();
 		cepAbortRef.current = controller;
@@ -160,6 +163,7 @@ export function ClienteFormFields({
 			const data = (await response.json()) as ViaCepResponse;
 
 			if (!response.ok || data.erro) {
+				setCepError("CEP inválido.");
 				return;
 			}
 
@@ -390,8 +394,15 @@ export function ClienteFormFields({
 							placeholder="Ex: 85851-000"
 							defaultValue={formatCep(String(initialData?.cep ?? ""))}
 							onInput={handleCepInput}
-							className={inputClass}
+							aria-invalid={cepError ? "true" : undefined}
+							aria-describedby={cepError ? "cep-error" : undefined}
+							className={`${inputClass} ${cepError ? "border-red-500 focus-visible:ring-red-500" : ""}`}
 						/>
+						{cepError ? (
+							<p id="cep-error" className="text-sm text-red-600">
+								{cepError}
+							</p>
+						) : null}
 					</div>
 
 					<div className={fieldClass.md}>
@@ -504,6 +515,20 @@ export function ClienteFormFields({
 						/>
 					</div>
 
+					<div className={fieldClass.sm}>
+						<Label htmlFor="contato" className="text-sm text-neutral-800">
+							Contato:
+						</Label>
+						<Input
+							id="contato"
+							name="contato"
+							maxLength={60}
+							placeholder="Ex: Joao"
+							defaultValue={String(initialData?.contato ?? "")}
+							className={inputClass}
+						/>
+					</div>
+
 					<div className={fieldClass.lg}>
 						<RequiredLabel htmlFor="email" className="text-sm text-neutral-800">
 							E-mail:
@@ -593,7 +618,7 @@ export function ClienteFormFields({
 					<textarea
 						id="observacoes"
 						name="observacoes"
-						maxLength={255}
+						maxLength={110}
 						placeholder="Detalhes internos sobre preferências, histórico ou observações do cliente"
 						defaultValue={String(initialData?.observacoes ?? "")}
 						className="min-h-28 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"

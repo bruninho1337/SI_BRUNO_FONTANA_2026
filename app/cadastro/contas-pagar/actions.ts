@@ -146,8 +146,8 @@ async function saveContaPagar(formData: FormData, codcontaPagar?: number) {
 		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Informe o valor pago para contas pagas."));
 	}
 
-	if (observacoes.length > 255) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Observacoes devem ter no maximo 255 caracteres."));
+	if (observacoes.length > 110) {
+		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Observacoes devem ter no maximo 110 caracteres."));
 	}
 
 	const values = [

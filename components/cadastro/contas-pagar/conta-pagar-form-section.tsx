@@ -278,7 +278,7 @@ export async function ContaPagarFormSection({
 						id="observacoes"
 						name="observacoes"
 						placeholder="Detalhes da conta, negociação ou baixa"
-						maxLength={255}
+						maxLength={110}
 						rows={4}
 						defaultValue={contaPagar?.observacoes ?? ""}
 						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"

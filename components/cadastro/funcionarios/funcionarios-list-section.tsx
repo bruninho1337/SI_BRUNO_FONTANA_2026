@@ -42,6 +42,7 @@ export async function FuncionariosListSection({
 			funcionario.apelido,
 			funcionario.funcao_funcionario,
 			funcionario.telefone,
+			funcionario.contato,
 			funcionario.email,
 			funcionario.cpf,
 			funcionario.rg,

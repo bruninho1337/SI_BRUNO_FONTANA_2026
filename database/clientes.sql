@@ -15,6 +15,7 @@ create table if not exists public.clientes (
 	codcidade integer not null references public.cidades(codcidade),
 	codcondicao_pagamento integer references public.condicoes_pagamento(codcondicao_pagamento),
 	telefone text not null check (char_length(telefone) in (10, 11)),
+	contato text check (contato is null or char_length(contato) <= 60),
 	email text not null check (char_length(email) between 5 and 60),
 	sexo text check (sexo is null or sexo in ('MASCULINO', 'FEMININO', 'OUTROS')),
 	nacionalidade text check (nacionalidade is null or char_length(nacionalidade) between 5 and 20),
@@ -23,7 +24,7 @@ create table if not exists public.clientes (
 		rg_inscricao_estadual is null or char_length(rg_inscricao_estadual) between 5 and 14
 	),
 	cpf_cnpj text check (cpf_cnpj is null or char_length(cpf_cnpj) in (11, 14)),
-	observacoes text check (observacoes is null or char_length(observacoes) <= 255),
+	observacoes text check (observacoes is null or char_length(observacoes) <= 110),
 	ativo char(1) not null default 'S' check (ativo in ('S', 'N')),
 	data_cadastro timestamp not null default current_timestamp,
 	data_ult_alteracao timestamp not null default current_timestamp,
@@ -67,6 +68,9 @@ end $$;
 
 alter table public.clientes
 add column if not exists data_cadastro timestamp not null default current_timestamp;
+
+alter table public.clientes
+add column if not exists contato text check (contato is null or char_length(contato) <= 60);
 
 alter table public.clientes
 add column if not exists data_ult_alteracao timestamp not null default current_timestamp;

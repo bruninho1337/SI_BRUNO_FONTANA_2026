@@ -33,6 +33,7 @@ export async function ClientesListSection({ searchParams }: ClientesListSectionP
 			cidadeMap.get(cliente.codcidade),
 			condicaoPagamentoMap.get(cliente.codcondicao_pagamento),
 			cliente.telefone,
+			cliente.contato,
 			cliente.email,
 			cliente.cpf_cnpj,
 		].some((value) => String(value ?? "").toLowerCase().includes(query))

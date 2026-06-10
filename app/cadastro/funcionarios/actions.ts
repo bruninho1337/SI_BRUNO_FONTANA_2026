@@ -23,6 +23,10 @@ function onlyDigits(value: string) {
 	return value.replace(/\D/g, "");
 }
 
+function hasOnlyDigitsAndFormatting(value: string) {
+	return /^[\d\s()./+:-]+$/.test(value);
+}
+
 function parseDecimal(value: FormDataEntryValue | null) {
 	const normalized = String(value ?? "")
 		.trim()
@@ -87,12 +91,25 @@ export async function deleteFuncionarioAction(formData: FormData) {
 async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 	const funcionario = getText(formData, "funcionario");
 	const apelido = getText(formData, "apelido");
+	const estadoCivil = getText(formData, "estado_civil");
+	const endereco = getText(formData, "endereco");
+	const numero = onlyDigits(getText(formData, "numero"));
+	const complemento = getText(formData, "complemento");
+	const bairro = getText(formData, "bairro");
+	const cepRaw = getText(formData, "cep");
+	const cep = onlyDigits(cepRaw);
+	const codcidadeValue = getText(formData, "codcidade");
+	const codcidade = Number(codcidadeValue);
 	const codfuncaoFuncionarioValue = getText(formData, "codfuncao_funcionario");
 	const codfuncaoFuncionario = Number(codfuncaoFuncionarioValue);
-	const telefone = onlyDigits(getText(formData, "telefone"));
+	const telefoneRaw = getText(formData, "telefone");
+	const telefone = onlyDigits(telefoneRaw);
+	const contato = getText(formData, "contato");
 	const email = getText(formData, "email");
 	const cpf = onlyDigits(getText(formData, "cpf"));
 	const rg = onlyDigits(getText(formData, "rg"));
+	const sexo = getText(formData, "sexo");
+	const nacionalidade = getText(formData, "nacionalidade");
 	const dataNascimento = getText(formData, "data_nascimento");
 	const dataAdmissao = getText(formData, "data_admissao");
 	const dataDemissao = getText(formData, "data_demissao");
@@ -109,12 +126,44 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Apelido deve ter no maximo 60 caracteres."));
 	}
 
+	if (estadoCivil && !["SOLTEIRO", "CASADO", "SEPARADO", "DIVORCIADO", "VIUVO", "OUTRO"].includes(estadoCivil)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Estado civil invalido."));
+	}
+
+	if (!isLengthBetween(endereco, 5, 80)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Endereco deve ter entre 5 e 80 caracteres."));
+	}
+
+	if (!isLengthBetween(numero, 1, 10)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Numero deve conter entre 1 e 10 digitos."));
+	}
+
+	if (complemento.length > 60) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Complemento deve ter no maximo 60 caracteres."));
+	}
+
+	if (!isLengthBetween(bairro, 5, 60)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Bairro deve ter entre 5 e 60 caracteres."));
+	}
+
+	if (cep.length !== 8 || !hasOnlyDigitsAndFormatting(cepRaw)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CEP deve conter exatamente 8 digitos."));
+	}
+
+	if (!codcidadeValue || Number.isNaN(codcidade)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Selecione a cidade do funcionario."));
+	}
+
 	if (!codfuncaoFuncionarioValue || Number.isNaN(codfuncaoFuncionario)) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Selecione a funcao do funcionario."));
 	}
 
-	if (!isLengthBetween(telefone, 10, 11)) {
+	if (!isLengthBetween(telefone, 10, 11) || !hasOnlyDigitsAndFormatting(telefoneRaw)) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Telefone deve ter 10 ou 11 numeros."));
+	}
+
+	if (contato.length > 60) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Contato deve ter no maximo 60 caracteres."));
 	}
 
 	if (email && !isLengthBetween(email, 5, 80)) {
@@ -127,6 +176,14 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 
 	if (rg && !isLengthBetween(rg, 5, 14)) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "RG deve ter entre 5 e 14 numeros."));
+	}
+
+	if (sexo && !["MASCULINO", "FEMININO"].includes(sexo)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Sexo do funcionario invalido."));
+	}
+
+	if (nacionalidade && !isLengthBetween(nacionalidade, 5, 20)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Nacionalidade deve ter entre 5 e 20 caracteres."));
 	}
 
 	if (dataNascimento && !isValidDate(dataNascimento)) {
@@ -157,16 +214,26 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Informe um status valido para o funcionario."));
 	}
 
-	if (observacoes.length > 255) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Observacoes devem ter no maximo 255 caracteres."));
+	if (observacoes.length > 110) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Observacoes devem ter no maximo 110 caracteres."));
 	}
 
 	const values = [
 		funcionario,
 		apelido || null,
+		estadoCivil || null,
+		endereco,
+		numero,
+		complemento || null,
+		bairro,
+		cep,
+		codcidade,
 		codfuncaoFuncionario,
 		telefone,
+		contato || null,
 		email || null,
+		sexo || null,
+		nacionalidade || null,
 		cpf,
 		rg || null,
 		dataNascimento || null,
@@ -181,17 +248,24 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 	const { error } = codfuncionario
 		? await executeQuery(
 				`update public.funcionarios
-				set funcionario = $1, apelido = $2, codfuncao_funcionario = $3, telefone = $4, email = $5,
-					cpf = $6, rg = $7, data_nascimento = $8, data_admissao = $9,
-					data_demissao = $10, salario_base = $11, percentual_comissao = $12, observacoes = $13, ativo = $14
-				where codfuncionario = $15`,
+				set funcionario = $1, apelido = $2, estado_civil = $3, endereco = $4, numero = $5,
+					complemento = $6, bairro = $7, cep = $8, codcidade = $9, codfuncao_funcionario = $10,
+					telefone = $11, contato = $12, email = $13, sexo = $14, nacionalidade = $15, cpf = $16, rg = $17,
+					data_nascimento = $18, data_admissao = $19, data_demissao = $20, salario_base = $21,
+					percentual_comissao = $22, observacoes = $23, ativo = $24
+				where codfuncionario = $25`,
 				[...values, codfuncionario]
 			)
 		: await executeQuery(
 				`insert into public.funcionarios (
-					funcionario, apelido, codfuncao_funcionario, telefone, email, cpf, rg, data_nascimento,
+					funcionario, apelido, estado_civil, endereco, numero, complemento, bairro, cep, codcidade,
+					codfuncao_funcionario, telefone, contato, email, sexo, nacionalidade, cpf, rg, data_nascimento,
 					data_admissao, data_demissao, salario_base, percentual_comissao, observacoes, ativo
-				) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+				) values (
+					$1, $2, $3, $4, $5, $6, $7, $8, $9,
+					$10, $11, $12, $13, $14, $15, $16, $17,
+					$18, $19, $20, $21, $22, $23, $24
+				)`,
 				values
 			);
 

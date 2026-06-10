@@ -1,3 +1,10 @@
+-- Banco completo local PostgreSQL - Barbearia
+-- Gerado automaticamente em 2026-06-09T23:52:03.020Z
+-- Conteudo: estrutura + dados atuais + ajuste de sequences/identity.
+-- Como executar: crie um banco vazio e rode este arquivo nele.
+
+begin;
+
 create schema if not exists public;
 
 create or replace function public.set_data_ult_alteracao()
@@ -666,3 +673,80 @@ drop trigger if exists set_contas_pagar_data_ult_alteracao on public.contas_paga
 create trigger set_contas_pagar_data_ult_alteracao
 before update on public.contas_pagar
 for each row execute function public.set_data_ult_alteracao();
+
+-- Dados atuais
+
+-- public.usuarios
+-- sem registros em public.usuarios
+
+-- public.paises
+insert into public."paises" ("codpais", "pais", "sigla", "ddi", "moeda", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (1, 'Brasil', 'BR', '55', 'BRL', 'S', '2026-04-11 21:07:45.389', '2026-04-11 21:07:45.389', NULL);
+
+-- public.estados
+insert into public."estados" ("codestado", "uf", "estado", "codpais", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (1, 'PR', 'Paraná', 1, 'S', '2026-05-06 02:58:19.427', '2026-05-06 02:58:19.427', NULL);
+insert into public."estados" ("codestado", "uf", "estado", "codpais", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (2, 'SP', 'São Paulo', 1, 'S', '2026-05-28 23:06:42.019', '2026-05-28 23:06:42.019', NULL);
+
+-- public.cidades
+insert into public."cidades" ("codcidade", "cidade", "codest", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (1, 'Foz do Iguaçu', 1, 'S', '2026-05-06 02:58:35.455', '2026-05-06 02:58:35.455', NULL);
+
+-- public.formas_pagamento
+insert into public."formas_pagamento" ("codforma_pagamento", "forma_pagamento", "tipo", "descricao", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (2, 'PIX', 'PIX', 'Forma de pagamento PIX.', 'S', '2026-05-27 01:07:27.768', '2026-05-27 01:07:27.768', NULL);
+insert into public."formas_pagamento" ("codforma_pagamento", "forma_pagamento", "tipo", "descricao", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (3, 'Cartão de Crédito', 'CARTAO_CREDITO', 'Forma de pagamento no cartão de crédito.', 'S', '2026-05-30 00:45:28.546', '2026-05-30 00:45:28.546', NULL);
+insert into public."formas_pagamento" ("codforma_pagamento", "forma_pagamento", "tipo", "descricao", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (4, 'Cartão de Débito', 'CARTAO_DEBITO', 'Forma de pagamento no débito.', 'S', '2026-05-30 18:12:20.808', '2026-05-30 18:12:20.808', NULL);
+
+-- public.condicoes_pagamento
+insert into public."condicoes_pagamento" ("codcondicao_pagamento", "condicao_pagamento", "prazo_dias", "parcelas", "juro", "multa", "desconto", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao", "codforma_pagamento") values (4, 'À vista', 0, 1, '0', '0', '0', 'S', '2026-05-30 18:06:37.766', '2026-05-30 18:06:37.766', NULL, 2);
+
+-- public.categorias
+insert into public."categorias" ("codcategoria", "nome", "descricao", "tipo", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (1, 'Finalização', 'Produtos e serviços utilizados para modelar, fixar e dar acabamento ao cabelo após o corte, garantindo estilo e durabilidade do penteado.', 'PRODUTO', 'S', '2026-04-11 22:05:39.203', '2026-04-11 22:05:39.203', NULL);
+insert into public."categorias" ("codcategoria", "nome", "descricao", "tipo", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (2, 'Cabelo', 'Serviços relacionados ao cabelo.', 'SERVICO', 'S', '2026-05-16 19:20:00.872', '2026-05-16 19:20:00.872', NULL);
+
+-- public.marcas
+insert into public."marcas" ("codmarca", "marca", "descricao", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (3, 'Don Alcides', 'Marca de pomadas capilar.', 'S', '2026-05-27 01:06:25.280', '2026-05-27 01:06:25.280', NULL);
+
+-- public.unidades_medida
+insert into public."unidades_medida" ("codunidade_medida", "unidade_medida", "sigla", "descricao", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (1, 'Unidade', 'UN', 'Produto vendido por unidade', 'S', '2026-05-30 17:50:54.996', '2026-05-30 17:50:54.996', NULL);
+insert into public."unidades_medida" ("codunidade_medida", "unidade_medida", "sigla", "descricao", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (2, 'Mililitro', 'ML', 'Produto medido em mililitros', 'S', '2026-05-30 17:50:54.996', '2026-05-30 17:50:54.996', NULL);
+insert into public."unidades_medida" ("codunidade_medida", "unidade_medida", "sigla", "descricao", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (3, 'Grama', 'G', 'Produto medido em gramas', 'S', '2026-05-30 17:50:54.996', '2026-05-30 17:50:54.996', NULL);
+
+-- public.produtos
+insert into public."produtos" ("codproduto", "nome", "codcategoria", "valor", "quantidade_estoque", "valor_desconto", "descricao", "imagem_url", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao", "codmarca", "codunidade_medida") values (3, 'Corte Social', NULL, '10828', 50, '8', NULL, NULL, 'S', '2026-05-20 00:14:43.795', '2026-05-30 18:08:20.670', NULL, NULL, 1);
+insert into public."produtos" ("codproduto", "nome", "codcategoria", "valor", "quantidade_estoque", "valor_desconto", "descricao", "imagem_url", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao", "codmarca", "codunidade_medida") values (2, 'Pomada Modeladora', 1, '399', 40, '12', 'test de desc', 'https://lbiuoahiddvhryxtqdgy.supabase.co/storage/v1/object/public/upload/produtos/1776984543035-foto-teia-11.png', 'S', '2026-04-24 01:49:02.459', '2026-05-30 18:08:45.967', NULL, NULL, 3);
+
+-- public.servicos
+insert into public."servicos" ("codservico", "nome", "codcategoria", "duracao_minutos", "valor", "valor_desconto", "descricao", "imagem_url", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (1, 'Corte Social', 2, 30, '35.5', '5', 'Serviço de corte social.', NULL, 'S', '2026-05-16 19:20:40.927', '2026-05-16 19:20:40.927', NULL);
+
+-- public.clientes
+insert into public."clientes" ("codcliente", "tipo", "cliente", "apelido", "estado_civil", "endereco", "numero", "complemento", "bairro", "cep", "codcidade", "codcondicao_pagamento", "telefone", "email", "sexo", "nacionalidade", "data_nascimento", "rg_inscricao_estadual", "cpf_cnpj", "observacoes", "data_cadastro", "data_ult_alteracao", "ativo", "usuario_ult_alteracao", "contato") values ('5', 'FISICA', 'Bruno Fontana', 'Bruno', 'SOLTEIRO', 'Avenida Parati', '1521', 'Cond. Moradas da Vila', 'Vila A', '85860450', 1, 4, '45999057378', 'brunofontana895@gmail.com', 'MASCULINO', 'Brasileiro', '2005-05-27 03:00:00.000', '123456789', '01374606944', 'teste de observacao aaa', '2026-05-20 00:56:32.854', '2026-05-30 18:06:53.230', 'S', NULL, NULL);
+
+-- public.fornecedores
+-- sem registros em public.fornecedores
+
+-- public.funcoes_funcionarios
+insert into public."funcoes_funcionarios" ("codfuncao_funcionario", "funcao_funcionario", "descricao", "ativo", "data_cadastro", "data_ult_alteracao", "usuario_ult_alteracao") values (1, 'Barbeiro', 'Teste descrição.', 'S', '2026-05-30 16:59:09.939', '2026-05-30 16:59:09.939', NULL);
+
+-- public.funcionarios
+-- sem registros em public.funcionarios
+
+-- public.contas_pagar
+-- sem registros em public.contas_pagar
+
+-- Ajuste das sequences/identity apos inserir IDs explicitos
+select setval(pg_get_serial_sequence('public.usuarios', 'codusuario'), coalesce((select max("codusuario") from public."usuarios"), 1), exists(select 1 from public."usuarios"));
+select setval(pg_get_serial_sequence('public.paises', 'codpais'), coalesce((select max("codpais") from public."paises"), 1), exists(select 1 from public."paises"));
+select setval(pg_get_serial_sequence('public.estados', 'codestado'), coalesce((select max("codestado") from public."estados"), 1), exists(select 1 from public."estados"));
+select setval(pg_get_serial_sequence('public.cidades', 'codcidade'), coalesce((select max("codcidade") from public."cidades"), 1), exists(select 1 from public."cidades"));
+select setval(pg_get_serial_sequence('public.formas_pagamento', 'codforma_pagamento'), coalesce((select max("codforma_pagamento") from public."formas_pagamento"), 1), exists(select 1 from public."formas_pagamento"));
+select setval(pg_get_serial_sequence('public.condicoes_pagamento', 'codcondicao_pagamento'), coalesce((select max("codcondicao_pagamento") from public."condicoes_pagamento"), 1), exists(select 1 from public."condicoes_pagamento"));
+select setval(pg_get_serial_sequence('public.categorias', 'codcategoria'), coalesce((select max("codcategoria") from public."categorias"), 1), exists(select 1 from public."categorias"));
+select setval(pg_get_serial_sequence('public.marcas', 'codmarca'), coalesce((select max("codmarca") from public."marcas"), 1), exists(select 1 from public."marcas"));
+select setval(pg_get_serial_sequence('public.unidades_medida', 'codunidade_medida'), coalesce((select max("codunidade_medida") from public."unidades_medida"), 1), exists(select 1 from public."unidades_medida"));
+select setval(pg_get_serial_sequence('public.produtos', 'codproduto'), coalesce((select max("codproduto") from public."produtos"), 1), exists(select 1 from public."produtos"));
+select setval(pg_get_serial_sequence('public.servicos', 'codservico'), coalesce((select max("codservico") from public."servicos"), 1), exists(select 1 from public."servicos"));
+select setval(pg_get_serial_sequence('public.clientes', 'codcliente'), coalesce((select max("codcliente") from public."clientes"), 1), exists(select 1 from public."clientes"));
+select setval(pg_get_serial_sequence('public.fornecedores', 'codfornecedor'), coalesce((select max("codfornecedor") from public."fornecedores"), 1), exists(select 1 from public."fornecedores"));
+select setval(pg_get_serial_sequence('public.funcoes_funcionarios', 'codfuncao_funcionario'), coalesce((select max("codfuncao_funcionario") from public."funcoes_funcionarios"), 1), exists(select 1 from public."funcoes_funcionarios"));
+select setval(pg_get_serial_sequence('public.funcionarios', 'codfuncionario'), coalesce((select max("codfuncionario") from public."funcionarios"), 1), exists(select 1 from public."funcionarios"));
+select setval(pg_get_serial_sequence('public.contas_pagar', 'codconta_pagar'), coalesce((select max("codconta_pagar") from public."contas_pagar"), 1), exists(select 1 from public."contas_pagar"));
+
+commit;

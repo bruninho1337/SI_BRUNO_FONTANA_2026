@@ -145,8 +145,8 @@ async function saveFornecedor(formData: FormData, codfornecedor?: number) {
 		redirect(buildRedirect(FORNECEDORES_PATH, "error", "CPF deve conter 11 digitos ou CNPJ deve conter 14 digitos."));
 	}
 
-	if (observacoes.length > 255) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Observacoes devem ter no maximo 255 caracteres."));
+	if (observacoes.length > 110) {
+		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Observacoes devem ter no maximo 110 caracteres."));
 	}
 
 	const values = [
