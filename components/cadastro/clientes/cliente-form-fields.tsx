@@ -25,15 +25,6 @@ type Option = {
 	label: string;
 };
 
-type ViaCepResponse = {
-	erro?: boolean;
-	logradouro?: string;
-	complemento?: string;
-	bairro?: string;
-	localidade?: string;
-	uf?: string;
-};
-
 type ClienteFormFieldsProps = {
 	cidadeOptions: Option[];
 	condicaoPagamentoOptions: Option[];
@@ -65,14 +56,6 @@ function formatInput(
 	input.value = formatter(input.value);
 }
 
-function normalizeText(value: string) {
-	return value
-		.normalize("NFD")
-		.replace(/[\u0300-\u036f]/g, "")
-		.toLowerCase()
-		.trim();
-}
-
 export function ClienteFormFields({
 	cidadeOptions,
 	condicaoPagamentoOptions,
@@ -83,15 +66,8 @@ export function ClienteFormFields({
 	const [tipo, setTipo] = useState(String(initialData?.tipo ?? "FISICA"));
 	const [selectErrors, setSelectErrors] = useState<Record<string, string>>({});
 	const [selectedCidadeId, setSelectedCidadeId] = useState(String(initialData?.codcidade ?? ""));
-	const [cepError, setCepError] = useState("");
 	const dataNascimentoRef = useRef<HTMLInputElement>(null);
 	const cpfCnpjRef = useRef<HTMLInputElement>(null);
-	const enderecoRef = useRef<HTMLInputElement>(null);
-	const complementoRef = useRef<HTMLInputElement>(null);
-	const bairroRef = useRef<HTMLInputElement>(null);
-	const numeroRef = useRef<HTMLInputElement>(null);
-	const lastCepRef = useRef("");
-	const cepAbortRef = useRef<AbortController | null>(null);
 	const isEditing = Boolean(initialData?.codcliente);
 	const isFisica = tipo === "FISICA";
 
@@ -118,79 +94,8 @@ export function ClienteFormFields({
 		});
 	}
 
-	function selectCidadeByViaCep(localidade?: string, uf?: string) {
-		if (!localidade || !uf) {
-			return;
-		}
-
-		const cidadeNormalizada = normalizeText(localidade);
-		const ufNormalizada = normalizeText(uf);
-		const cidade = cidadeOptions.find((option) => {
-			const labelNormalizada = normalizeText(option.label);
-
-			return labelNormalizada.startsWith(cidadeNormalizada) && labelNormalizada.endsWith(`- ${ufNormalizada}`);
-		});
-
-		if (cidade) {
-			setSelectedCidadeId(cidade.id);
-			clearSelectError("codcidade");
-		}
-	}
-
-	async function fillAddressFromCep(cep: string) {
-		if (cep.length !== 8) {
-			lastCepRef.current = "";
-			cepAbortRef.current?.abort();
-			setCepError("");
-			return;
-		}
-
-		if (cep === lastCepRef.current) {
-			return;
-		}
-
-		lastCepRef.current = cep;
-		cepAbortRef.current?.abort();
-		setCepError("");
-
-		const controller = new AbortController();
-		cepAbortRef.current = controller;
-
-		try {
-			const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
-				signal: controller.signal,
-			});
-			const data = (await response.json()) as ViaCepResponse;
-
-			if (!response.ok || data.erro) {
-				setCepError("CEP inválido.");
-				return;
-			}
-
-			if (enderecoRef.current && data.logradouro) {
-				enderecoRef.current.value = data.logradouro;
-			}
-
-			if (complementoRef.current && data.complemento) {
-				complementoRef.current.value = data.complemento;
-			}
-
-			if (bairroRef.current && data.bairro) {
-				bairroRef.current.value = data.bairro;
-			}
-
-			selectCidadeByViaCep(data.localidade, data.uf);
-			numeroRef.current?.focus();
-		} catch (error) {
-			if (error instanceof DOMException && error.name === "AbortError") {
-				return;
-			}
-		}
-	}
-
 	function handleCepInput(event: React.FormEvent<HTMLInputElement>) {
 		formatInput(event, formatCep);
-		void fillAddressFromCep(onlyDigits(event.currentTarget.value));
 	}
 
 	function validateSearchableSelects(event: React.FormEvent<HTMLFormElement>) {
@@ -379,120 +284,109 @@ export function ClienteFormFields({
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-12">
-					<div className={fieldClass.sm}>
-						<RequiredLabel htmlFor="cep" className="text-sm text-neutral-800">
-							CEP:
-						</RequiredLabel>
-						<Input
-							id="cep"
-							name="cep"
-							inputMode="numeric"
-							pattern="\d{5}-?\d{3}"
-							minLength={8}
-							maxLength={9}
-							required
-							placeholder="Ex: 85851-000"
-							defaultValue={formatCep(String(initialData?.cep ?? ""))}
-							onInput={handleCepInput}
-							aria-invalid={cepError ? "true" : undefined}
-							aria-describedby={cepError ? "cep-error" : undefined}
-							className={`${inputClass} ${cepError ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-						/>
-						{cepError ? (
-							<p id="cep-error" className="text-sm text-red-600">
-								{cepError}
-							</p>
-						) : null}
-					</div>
-
-					<div className={fieldClass.md}>
-						<RequiredLabel htmlFor="endereco" className="text-sm text-neutral-800">
-							Endereço:
-						</RequiredLabel>
-						<Input
-							id="endereco"
-							ref={enderecoRef}
-							name="endereco"
-							minLength={5}
-							maxLength={60}
-							required
-							placeholder="Ex: Avenida Brasil"
-							defaultValue={String(initialData?.endereco ?? "")}
-							className={inputClass}
-						/>
-					</div>
-
-					<div className={fieldClass.xs}>
-						<RequiredLabel htmlFor="numero" className="text-sm text-neutral-800">
-							Número:
-						</RequiredLabel>
-						<Input
-							id="numero"
-							ref={numeroRef}
-							name="numero"
-							inputMode="numeric"
-							pattern="[0-9]*"
-							minLength={1}
-							maxLength={10}
-							required
-							placeholder="Ex: 123"
-							defaultValue={String(initialData?.numero ?? "")}
-							onInput={keepOnlyDigits}
-							className={inputClass}
-						/>
-					</div>
-
-					<div className={fieldClass.md}>
-						<Label htmlFor="complemento" className="text-sm text-neutral-800">
-							Complemento:
-						</Label>
-						<Input
-							id="complemento"
-							ref={complementoRef}
-							name="complemento"
-							maxLength={60}
-							placeholder="Ex: Sala 2"
-							defaultValue={String(initialData?.complemento ?? "")}
-							className={inputClass}
-						/>
-					</div>
-
-					<div className={fieldClass.md}>
-						<RequiredLabel htmlFor="bairro" className="text-sm text-neutral-800">
-							Bairro:
-						</RequiredLabel>
-						<Input
-							id="bairro"
-							ref={bairroRef}
-							name="bairro"
-							minLength={5}
-							maxLength={60}
-							required
-							placeholder="Ex: Centro"
-							defaultValue={String(initialData?.bairro ?? "")}
-							className={inputClass}
-						/>
-					</div>
-
-					<SearchableSelect
-						name="codcidade"
-						label="Cidade"
-						searchLabel="Pesquisar cidade por nome"
-						searchPlaceholder="Digite o nome da cidade"
-						selectPlaceholder="Selecione uma cidade"
-						options={cidadeOptions}
+				<div className={fieldClass.md}>
+					<RequiredLabel htmlFor="endereco" className="text-sm text-neutral-800">
+						Endereco:
+					</RequiredLabel>
+					<Input
+						id="endereco"
+						name="endereco"
+						minLength={5}
+						maxLength={60}
 						required
-						defaultValue={String(initialData?.codcidade ?? "")}
-						value={selectedCidadeId}
-						className="md:col-span-5"
-						createHref="/cadastro/localidades/cidades?mode=create"
-						createLabel="Nova cidade"
-						error={selectErrors.codcidade}
-						onValueChange={(value) => {
-							setSelectedCidadeId(value);
-							clearSelectError("codcidade");
-						}}
+						placeholder="Ex: Avenida Brasil"
+						defaultValue={String(initialData?.endereco ?? "")}
+						className={inputClass}
 					/>
+				</div>
+
+				<div className={fieldClass.xs}>
+					<RequiredLabel htmlFor="numero" className="text-sm text-neutral-800">
+						Numero:
+					</RequiredLabel>
+					<Input
+						id="numero"
+						name="numero"
+						inputMode="numeric"
+						pattern="[0-9]*"
+						minLength={1}
+						maxLength={10}
+						required
+						placeholder="Ex: 123"
+						defaultValue={String(initialData?.numero ?? "")}
+						onInput={keepOnlyDigits}
+						className={inputClass}
+					/>
+				</div>
+
+				<div className={fieldClass.sm}>
+					<RequiredLabel htmlFor="cep" className="text-sm text-neutral-800">
+						CEP:
+					</RequiredLabel>
+					<Input
+						id="cep"
+						name="cep"
+						inputMode="numeric"
+						pattern="\d{5}-?\d{3}"
+						minLength={8}
+						maxLength={9}
+						required
+						placeholder="Ex: 85851-000"
+						defaultValue={formatCep(String(initialData?.cep ?? ""))}
+						onInput={handleCepInput}
+						className={inputClass}
+					/>
+				</div>
+
+				<div className={fieldClass.md}>
+					<Label htmlFor="complemento" className="text-sm text-neutral-800">
+						Complemento:
+					</Label>
+					<Input
+						id="complemento"
+						name="complemento"
+						maxLength={60}
+						placeholder="Ex: Sala 2"
+						defaultValue={String(initialData?.complemento ?? "")}
+						className={inputClass}
+					/>
+				</div>
+
+				<div className={fieldClass.md}>
+					<RequiredLabel htmlFor="bairro" className="text-sm text-neutral-800">
+						Bairro:
+					</RequiredLabel>
+					<Input
+						id="bairro"
+						name="bairro"
+						minLength={5}
+						maxLength={60}
+						required
+						placeholder="Ex: Centro"
+						defaultValue={String(initialData?.bairro ?? "")}
+						className={inputClass}
+					/>
+				</div>
+
+				<SearchableSelect
+					name="codcidade"
+					label="Cidade"
+					searchLabel="Pesquisar cidade por nome"
+					searchPlaceholder="Digite o nome da cidade"
+					selectPlaceholder="Selecione uma cidade"
+					options={cidadeOptions}
+					required
+					defaultValue={String(initialData?.codcidade ?? "")}
+					value={selectedCidadeId}
+					className="md:col-span-5"
+					createHref="/cadastro/localidades/cidades?mode=create"
+					createLabel="Nova cidade"
+					error={selectErrors.codcidade}
+					onValueChange={(value) => {
+						setSelectedCidadeId(value);
+						clearSelectError("codcidade");
+					}}
+				/>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-12">
@@ -523,7 +417,7 @@ export function ClienteFormFields({
 							id="contato"
 							name="contato"
 							maxLength={60}
-							placeholder="Ex: Joao"
+							placeholder="Ex: João"
 							defaultValue={String(initialData?.contato ?? "")}
 							className={inputClass}
 						/>

@@ -23,15 +23,6 @@ type Option = {
 	label: string;
 };
 
-type ViaCepResponse = {
-	erro?: boolean;
-	logradouro?: string;
-	complemento?: string;
-	bairro?: string;
-	localidade?: string;
-	uf?: string;
-};
-
 type FornecedorFormFieldsProps = {
 	cidadeOptions: Option[];
 	action: (formData: FormData) => Promise<void>;
@@ -61,14 +52,6 @@ function formatInput(
 	input.value = formatter(input.value);
 }
 
-function normalizeText(value: string) {
-	return value
-		.normalize("NFD")
-		.replace(/[\u0300-\u036f]/g, "")
-		.toLowerCase()
-		.trim();
-}
-
 export function FornecedorFormFields({
 	cidadeOptions,
 	action,
@@ -78,14 +61,7 @@ export function FornecedorFormFields({
 	const [tipo, setTipo] = useState(String(initialData?.tipo ?? "JURIDICA"));
 	const [selectErrors, setSelectErrors] = useState<Record<string, string>>({});
 	const [selectedCidadeId, setSelectedCidadeId] = useState(String(initialData?.codcidade ?? ""));
-	const [cepError, setCepError] = useState("");
 	const cpfCnpjRef = useRef<HTMLInputElement>(null);
-	const enderecoRef = useRef<HTMLInputElement>(null);
-	const complementoRef = useRef<HTMLInputElement>(null);
-	const bairroRef = useRef<HTMLInputElement>(null);
-	const numeroRef = useRef<HTMLInputElement>(null);
-	const lastCepRef = useRef("");
-	const cepAbortRef = useRef<AbortController | null>(null);
 	const isEditing = Boolean(initialData?.codfornecedor);
 	const isFisica = tipo === "FISICA";
 
@@ -101,79 +77,9 @@ export function FornecedorFormFields({
 		});
 	}
 
-	function selectCidadeByViaCep(localidade?: string, uf?: string) {
-		if (!localidade || !uf) {
-			return;
-		}
-
-		const cidadeNormalizada = normalizeText(localidade);
-		const ufNormalizada = normalizeText(uf);
-		const cidade = cidadeOptions.find((option) => {
-			const labelNormalizada = normalizeText(option.label);
-
-			return labelNormalizada.startsWith(cidadeNormalizada) && labelNormalizada.endsWith(`- ${ufNormalizada}`);
-		});
-
-		if (cidade) {
-			setSelectedCidadeId(cidade.id);
-			clearSelectError("codcidade");
-		}
-	}
-
-	async function fillAddressFromCep(cep: string) {
-		if (cep.length !== 8) {
-			lastCepRef.current = "";
-			cepAbortRef.current?.abort();
-			setCepError("");
-			return;
-		}
-
-		if (cep === lastCepRef.current) {
-			return;
-		}
-
-		lastCepRef.current = cep;
-		cepAbortRef.current?.abort();
-		setCepError("");
-
-		const controller = new AbortController();
-		cepAbortRef.current = controller;
-
-		try {
-			const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
-				signal: controller.signal,
-			});
-			const data = (await response.json()) as ViaCepResponse;
-
-			if (!response.ok || data.erro) {
-				setCepError("CEP inválido.");
-				return;
-			}
-
-			if (enderecoRef.current && data.logradouro) {
-				enderecoRef.current.value = data.logradouro;
-			}
-
-			if (complementoRef.current && data.complemento) {
-				complementoRef.current.value = data.complemento;
-			}
-
-			if (bairroRef.current && data.bairro) {
-				bairroRef.current.value = data.bairro;
-			}
-
-			selectCidadeByViaCep(data.localidade, data.uf);
-			numeroRef.current?.focus();
-		} catch (error) {
-			if (error instanceof DOMException && error.name === "AbortError") {
-				return;
-			}
-		}
-	}
 
 	function handleCepInput(event: React.FormEvent<HTMLInputElement>) {
 		formatInput(event, formatCep);
-		void fillAddressFromCep(onlyDigits(event.currentTarget.value));
 	}
 
 	function validateSearchableSelects(event: React.FormEvent<HTMLFormElement>) {
@@ -251,7 +157,7 @@ export function FornecedorFormFields({
 						minLength={5}
 						maxLength={80}
 						required
-						placeholder={isFisica ? "Ex: Joao Silva" : "Ex: Barbearia Central Ltda"}
+						placeholder={isFisica ? "Ex: João Silva" : "Ex: Barbearia Central Ltda"}
 						defaultValue={String(initialData?.fornecedor ?? "")}
 						className={inputClass}
 					/>
@@ -265,39 +171,12 @@ export function FornecedorFormFields({
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-12">
-				<div className={fieldClass.sm}>
-					<RequiredLabel htmlFor="cep" className="text-sm text-neutral-800">
-						CEP:
-					</RequiredLabel>
-					<Input
-						id="cep"
-						name="cep"
-						inputMode="numeric"
-						pattern="\d{5}-?\d{3}"
-						minLength={8}
-						maxLength={9}
-						required
-						placeholder="Ex: 85851-000"
-						defaultValue={formatCep(String(initialData?.cep ?? ""))}
-						onInput={handleCepInput}
-						aria-invalid={cepError ? "true" : undefined}
-						aria-describedby={cepError ? "cep-error" : undefined}
-						className={`${inputClass} ${cepError ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-					/>
-					{cepError ? (
-						<p id="cep-error" className="text-sm text-red-600">
-							{cepError}
-						</p>
-					) : null}
-				</div>
-
 				<div className={fieldClass.md}>
 					<RequiredLabel htmlFor="endereco" className="text-sm text-neutral-800">
 						Endereco:
 					</RequiredLabel>
 					<Input
 						id="endereco"
-						ref={enderecoRef}
 						name="endereco"
 						minLength={5}
 						maxLength={80}
@@ -314,7 +193,6 @@ export function FornecedorFormFields({
 					</RequiredLabel>
 					<Input
 						id="numero"
-						ref={numeroRef}
 						name="numero"
 						inputMode="numeric"
 						pattern="[0-9]*"
@@ -328,13 +206,31 @@ export function FornecedorFormFields({
 					/>
 				</div>
 
+				<div className={fieldClass.sm}>
+					<RequiredLabel htmlFor="cep" className="text-sm text-neutral-800">
+						CEP:
+					</RequiredLabel>
+					<Input
+						id="cep"
+						name="cep"
+						inputMode="numeric"
+						pattern="\d{5}-?\d{3}"
+						minLength={8}
+						maxLength={9}
+						required
+						placeholder="Ex: 85851-000"
+						defaultValue={formatCep(String(initialData?.cep ?? ""))}
+						onInput={handleCepInput}
+						className={inputClass}
+					/>
+				</div>
+
 				<div className={fieldClass.md}>
 					<Label htmlFor="complemento" className="text-sm text-neutral-800">
 						Complemento:
 					</Label>
 					<Input
 						id="complemento"
-						ref={complementoRef}
 						name="complemento"
 						maxLength={60}
 						placeholder="Ex: Sala 2"
@@ -349,7 +245,6 @@ export function FornecedorFormFields({
 					</RequiredLabel>
 					<Input
 						id="bairro"
-						ref={bairroRef}
 						name="bairro"
 						minLength={5}
 						maxLength={60}
@@ -409,7 +304,7 @@ export function FornecedorFormFields({
 						id="contato"
 						name="contato"
 						maxLength={60}
-						placeholder="Ex: Joao"
+						placeholder="Ex: João"
 						defaultValue={String(initialData?.contato ?? "")}
 						className={inputClass}
 					/>
