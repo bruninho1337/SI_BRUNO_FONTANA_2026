@@ -1,5 +1,12 @@
 import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 
+export type ParcelaCondicaoPagamento = {
+	num_parcela: number;
+	dias_vencimento: number;
+	codforma_pagamento: number;
+	percentual: number | string;
+};
+
 export async function listarCondicoesPagamento() {
 	return queryRows(
 		`select cp.codcondicao_pagamento, cp.condicao_pagamento, cp.codforma_pagamento, fp.forma_pagamento, fp.tipo,
@@ -28,6 +35,16 @@ export async function buscarCondicaoPagamentoPorId(codcondicaoPagamento: number)
 			desconto, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao
 		from public.condicoes_pagamento
 		where codcondicao_pagamento = $1`,
+		[codcondicaoPagamento]
+	);
+}
+
+export async function listarParcelasCondicaoPagamento(codcondicaoPagamento: number) {
+	return queryRows<ParcelaCondicaoPagamento>(
+		`select num_parcela, dias_vencimento, codforma_pagamento, percentual
+		from public.condicoes_pagamento_parcelas
+		where codcondicao_pagamento = $1
+		order by num_parcela asc`,
 		[codcondicaoPagamento]
 	);
 }

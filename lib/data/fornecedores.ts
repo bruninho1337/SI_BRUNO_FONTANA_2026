@@ -1,7 +1,7 @@
 import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 
 const FORNECEDOR_SELECT =
-	"codfornecedor, tipo, fornecedor, nome_fantasia, contato, endereco, numero, complemento, bairro, cep, codcidade, telefone, email, rg_inscricao_estadual, cpf_cnpj, observacoes, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao";
+	"codfornecedor, tipo, fornecedor, nome_fantasia, contato, endereco, numero, complemento, bairro, cep, codcidade, codcondicao_pagamento, telefone, email, rg_inscricao_estadual, cpf_cnpj, observacoes, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao";
 
 export async function listarFornecedoresComCidades() {
 	const [{ data: cidades }, { data: fornecedores, error }] = await Promise.all([

@@ -5,12 +5,15 @@ import {
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { SearchableSelect } from "@/components/forms/searchable-select";
+import { ParcelasCondicaoFields } from "@/components/cadastro/condicoes-pagamento/parcelas-condicao-fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
-import { buscarCondicaoPagamentoPorId } from "@/lib/data/condicoes-pagamento";
+import {
+	buscarCondicaoPagamentoPorId,
+	listarParcelasCondicaoPagamento,
+} from "@/lib/data/condicoes-pagamento";
 import { listarFormasPagamentoParaSelecao } from "@/lib/data/formas-pagamento";
 
 type CondicaoPagamentoFormSectionProps = {
@@ -26,9 +29,15 @@ export async function CondicaoPagamentoFormSection({
 }: CondicaoPagamentoFormSectionProps) {
 	const params = await searchParams;
 	const editId = Number(params?.edit ?? "");
-	const [{ data: condicaoEditando }, { data: formasPagamento, error: formasPagamentoError }] =
-		await Promise.all([
+	const [
+		{ data: condicaoEditando },
+		{ data: parcelasCondicao },
+		{ data: formasPagamento, error: formasPagamentoError },
+	] = await Promise.all([
 			Number.isNaN(editId) ? Promise.resolve({ data: null }) : buscarCondicaoPagamentoPorId(editId),
+			Number.isNaN(editId)
+				? Promise.resolve({ data: [] })
+				: listarParcelasCondicaoPagamento(editId),
 			listarFormasPagamentoParaSelecao(),
 		]);
 	const formaPagamentoOptions =
@@ -103,53 +112,9 @@ export async function CondicaoPagamentoFormSection({
 							className={inputClass}
 						/>
 					</div>
+				</div>
 
-					<SearchableSelect
-						name="codforma_pagamento"
-						label="Forma de Pagamento"
-						searchLabel="Pesquisar forma de pagamento"
-						searchPlaceholder="Digite a forma de pagamento"
-						selectPlaceholder="Selecione uma forma"
-						options={formaPagamentoOptions}
-						required
-						defaultValue={String(condicaoEditando?.codforma_pagamento ?? "")}
-						className="md:col-span-4"
-						createHref="/cadastro/formas-pagamento?mode=create"
-						createLabel="Nova forma"
-					/>
-
-					<div className={`${fieldClass} md:col-span-2`}>
-						<RequiredLabel htmlFor="prazo_dias" className="text-sm text-neutral-800">
-							Prazo:
-						</RequiredLabel>
-						<Input
-							id="prazo_dias"
-							name="prazo_dias"
-							type="number"
-							min={0}
-							required
-							placeholder="Ex: 30"
-							defaultValue={String(condicaoEditando?.prazo_dias ?? 0)}
-							className={inputClass}
-						/>
-					</div>
-
-					<div className={`${fieldClass} md:col-span-2`}>
-						<RequiredLabel htmlFor="parcelas" className="text-sm text-neutral-800">
-							Parcelas:
-						</RequiredLabel>
-						<Input
-							id="parcelas"
-							name="parcelas"
-							type="number"
-							min={1}
-							required
-							placeholder="Ex: 1"
-							defaultValue={String(condicaoEditando?.parcelas ?? 1)}
-							className={inputClass}
-						/>
-					</div>
-
+				<div className="grid gap-4 md:grid-cols-12">
 					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="juro" className="text-sm text-neutral-800">
 							Juro:
@@ -195,6 +160,11 @@ export async function CondicaoPagamentoFormSection({
 						/>
 					</div>
 				</div>
+
+				<ParcelasCondicaoFields
+					formaPagamentoOptions={formaPagamentoOptions}
+					initialParcelas={parcelasCondicao ?? undefined}
+				/>
 
 				<AuditDates
 					createdAt={condicaoEditando?.data_criacao}

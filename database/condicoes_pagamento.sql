@@ -56,6 +56,48 @@ alter table public.condicoes_pagamento
 	add constraint condicoes_pagamento_codforma_pagamento_fkey
 	foreign key (codforma_pagamento) references public.formas_pagamento(codforma_pagamento);
 
+create table if not exists public.condicoes_pagamento_parcelas (
+	codcondicao_pagamento integer not null,
+	num_parcela integer not null check (num_parcela >= 1),
+	dias_vencimento integer not null check (dias_vencimento >= 0),
+	codforma_pagamento integer not null,
+	percentual numeric(7,4) not null check (percentual > 0 and percentual <= 100),
+	constraint condicoes_pagamento_parcelas_pkey
+		primary key (codcondicao_pagamento, num_parcela),
+	constraint condicoes_pagamento_parcelas_condicao_fkey
+		foreign key (codcondicao_pagamento)
+		references public.condicoes_pagamento(codcondicao_pagamento)
+		on delete cascade,
+	constraint condicoes_pagamento_parcelas_forma_fkey
+		foreign key (codforma_pagamento)
+		references public.formas_pagamento(codforma_pagamento)
+);
+
+create index if not exists condicoes_pagamento_parcelas_forma_idx
+	on public.condicoes_pagamento_parcelas (codforma_pagamento);
+
+insert into public.condicoes_pagamento_parcelas (
+	codcondicao_pagamento,
+	num_parcela,
+	dias_vencimento,
+	codforma_pagamento,
+	percentual
+)
+select
+	cp.codcondicao_pagamento,
+	parcela.num_parcela,
+	cp.prazo_dias * parcela.num_parcela,
+	cp.codforma_pagamento,
+	case
+		when parcela.num_parcela = cp.parcelas
+			then 100 - round(100.0 / cp.parcelas, 4) * (cp.parcelas - 1)
+		else round(100.0 / cp.parcelas, 4)
+	end
+from public.condicoes_pagamento cp
+cross join lateral generate_series(1, cp.parcelas) as parcela(num_parcela)
+where cp.codforma_pagamento is not null
+on conflict (codcondicao_pagamento, num_parcela) do nothing;
+
 create or replace function public.set_data_ult_alteracao()
 returns trigger
 language plpgsql

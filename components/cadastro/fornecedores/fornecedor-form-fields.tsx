@@ -25,6 +25,7 @@ type Option = {
 
 type FornecedorFormFieldsProps = {
 	cidadeOptions: Option[];
+	condicaoPagamentoOptions: Option[];
 	action: (formData: FormData) => Promise<void>;
 	initialData?: Record<string, string | number | null>;
 	submitLabel?: string;
@@ -54,6 +55,7 @@ function formatInput(
 
 export function FornecedorFormFields({
 	cidadeOptions,
+	condicaoPagamentoOptions,
 	action,
 	initialData,
 	submitLabel = "Salvar fornecedor",
@@ -169,6 +171,26 @@ export function FornecedorFormFields({
 					className="w-fit md:col-span-2 md:col-start-11 md:justify-self-end"
 				/>
 			</div>
+
+			{!isFisica ? (
+				<div className="grid gap-4 md:grid-cols-12">
+					<div className={fieldClass.md}>
+						<Label htmlFor="nome_fantasia" className="text-sm text-neutral-800">
+							Nome Fantasia:
+						</Label>
+						<Input
+							id="nome_fantasia"
+							name="nome_fantasia"
+							maxLength={80}
+							placeholder="Ex: Barbearia Central"
+							defaultValue={String(initialData?.nome_fantasia ?? "")}
+							className={inputClass}
+						/>
+					</div>
+				</div>
+			) : (
+				<input type="hidden" name="nome_fantasia" value="" />
+			)}
 
 			<div className="grid gap-4 md:grid-cols-12">
 				<div className={fieldClass.md}>
@@ -376,23 +398,20 @@ export function FornecedorFormFields({
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-12">
-				{!isFisica ? (
-					<div className={fieldClass.md}>
-						<Label htmlFor="nome_fantasia" className="text-sm text-neutral-800">
-							Nome Fantasia:
-						</Label>
-						<Input
-							id="nome_fantasia"
-							name="nome_fantasia"
-							maxLength={80}
-							placeholder="Ex: Barbearia Central"
-							defaultValue={String(initialData?.nome_fantasia ?? "")}
-							className={inputClass}
-						/>
-					</div>
-				) : (
-					<input type="hidden" name="nome_fantasia" value="" />
-				)}
+				<SearchableSelect
+					name="codcondicao_pagamento"
+					label="Condição de Pagamento"
+					searchLabel="Pesquisar condição por nome"
+					searchPlaceholder="Digite o nome da condição"
+					selectPlaceholder="Selecione uma condição"
+					options={condicaoPagamentoOptions}
+					defaultValue={String(initialData?.codcondicao_pagamento ?? "")}
+					className="md:col-span-5"
+					createHref="/cadastro/condicoes-pagamento?mode=create"
+					createLabel="Nova condição"
+					error={selectErrors.codcondicao_pagamento}
+					onValueChange={() => clearSelectError("codcondicao_pagamento")}
+				/>
 			</div>
 
 			<div className="flex flex-col gap-2">

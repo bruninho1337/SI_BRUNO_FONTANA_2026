@@ -2,6 +2,7 @@ import { createFornecedorAction, updateFornecedorAction } from "@/app/cadastro/f
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { FornecedorFormFields } from "@/components/cadastro/fornecedores/fornecedor-form-fields";
 import { buscarFornecedorPorId } from "@/lib/data/fornecedores";
+import { listarCondicoesPagamentoParaSelecao } from "@/lib/data/condicoes-pagamento";
 import { listarCidadesComEstados } from "@/lib/data/localidades";
 
 type FornecedorFormSectionProps = {
@@ -11,8 +12,13 @@ type FornecedorFormSectionProps = {
 export async function FornecedorFormSection({ searchParams }: FornecedorFormSectionProps) {
 	const params = await searchParams;
 	const editId = Number(params?.edit ?? "");
-	const [{ cidades, estados, error: cidadesError }, { data: fornecedor }] = await Promise.all([
+	const [
+		{ cidades, estados, error: cidadesError },
+		{ data: condicoesPagamento, error: condicoesPagamentoError },
+		{ data: fornecedor },
+	] = await Promise.all([
 		listarCidadesComEstados(),
+		listarCondicoesPagamentoParaSelecao(),
 		Number.isNaN(editId) ? Promise.resolve({ data: null }) : buscarFornecedorPorId(editId),
 	]);
 	const estadoMap = new Map(
@@ -22,6 +28,13 @@ export async function FornecedorFormSection({ searchParams }: FornecedorFormSect
 		cidades?.map((cidade) => ({
 			id: String(cidade.codcidade),
 			label: `${cidade.cidade}${estadoMap.get(cidade.codest) ? ` - ${estadoMap.get(cidade.codest)}` : ""}`,
+		})) ?? [];
+	const condicaoPagamentoOptions =
+		condicoesPagamento?.map((condicao) => ({
+			id: String(condicao.codcondicao_pagamento),
+			label: `${condicao.condicao_pagamento}${
+				condicao.forma_pagamento ? ` - ${condicao.forma_pagamento}` : ""
+			} (${condicao.prazo_dias} dia(s), ${condicao.parcelas}x)`,
 		})) ?? [];
 
 	return (
@@ -41,9 +54,14 @@ export async function FornecedorFormSection({ searchParams }: FornecedorFormSect
 				<p className="mb-4 text-sm text-red-600">Erro ao carregar cidades: {cidadesError.message}</p>
 			) : null}
 
+			{condicoesPagamentoError ? (
+				<p className="mb-4 text-sm text-red-600">Erro ao carregar condicoes de pagamento: {condicoesPagamentoError.message}</p>
+			) : null}
+
 			<FornecedorFormFields
 				action={fornecedor ? updateFornecedorAction : createFornecedorAction}
 				cidadeOptions={cidadeOptions}
+				condicaoPagamentoOptions={condicaoPagamentoOptions}
 				initialData={fornecedor ?? undefined}
 				submitLabel={fornecedor ? "Atualizar fornecedor" : "Salvar fornecedor"}
 			/>

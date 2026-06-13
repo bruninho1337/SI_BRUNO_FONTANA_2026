@@ -10,6 +10,7 @@ create table if not exists public.fornecedores (
 	bairro text not null check (char_length(bairro) between 5 and 60),
 	cep text not null check (char_length(cep) = 8),
 	codcidade integer not null references public.cidades(codcidade),
+	codcondicao_pagamento integer,
 	telefone text not null check (char_length(telefone) in (10, 11)),
 	email text not null check (char_length(email) between 5 and 80),
 	rg_inscricao_estadual text check (
@@ -82,6 +83,17 @@ add column if not exists data_ult_alteracao timestamp not null default current_t
 
 alter table public.fornecedores
 add column if not exists usuario_ult_alteracao integer references public.usuarios(codusuario);
+
+alter table public.fornecedores
+add column if not exists codcondicao_pagamento integer;
+
+alter table public.fornecedores
+drop constraint if exists fk_fornecedores_condicoes_pagamento;
+
+alter table public.fornecedores
+add constraint fk_fornecedores_condicoes_pagamento
+foreign key (codcondicao_pagamento)
+references public.condicoes_pagamento(codcondicao_pagamento);
 
 alter table public.fornecedores
 alter column data_cadastro type timestamp using data_cadastro::timestamp,

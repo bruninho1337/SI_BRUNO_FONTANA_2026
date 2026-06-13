@@ -16,6 +16,7 @@ type Option = {
 
 type SearchableSelectProps = {
 	name: string;
+	id?: string;
 	label: string;
 	searchLabel: string;
 	searchPlaceholder: string;
@@ -33,6 +34,7 @@ type SearchableSelectProps = {
 
 export function SearchableSelect({
 	name,
+	id,
 	label,
 	searchLabel,
 	searchPlaceholder,
@@ -48,6 +50,7 @@ export function SearchableSelect({
 	onValueChange,
 }: SearchableSelectProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
+	const fieldId = id ?? name;
 	const [isOpen, setIsOpen] = useState(false);
 	const [search, setSearch] = useState("");
 	const [selectedId, setSelectedId] = useState(defaultValue);
@@ -97,20 +100,20 @@ export function SearchableSelect({
 	return (
 		<div ref={containerRef} className={cn("space-y-2", className)}>
 			{required ? (
-				<RequiredLabel htmlFor={`${name}-trigger`} className="text-sm text-neutral-800">
+				<RequiredLabel htmlFor={`${fieldId}-trigger`} className="text-sm text-neutral-800">
 					{label}:
 				</RequiredLabel>
 			) : (
-				<Label htmlFor={`${name}-trigger`} className="text-sm text-neutral-800">
+				<Label htmlFor={`${fieldId}-trigger`} className="text-sm text-neutral-800">
 					{label}:
 				</Label>
 			)}
 			<input name={name} value={currentValue} required={required} type="hidden" readOnly />
 			<button
-				id={`${name}-trigger`}
+				id={`${fieldId}-trigger`}
 				type="button"
 				data-invalid={error ? "true" : undefined}
-				aria-describedby={error ? `${name}-error` : undefined}
+				aria-describedby={error ? `${fieldId}-error` : undefined}
 				onClick={() => setIsOpen((current) => !current)}
 				className={cn(
 					"flex h-11 w-full items-center justify-between rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring",
@@ -129,19 +132,19 @@ export function SearchableSelect({
 				</span>
 			</button>
 			{error ? (
-				<p id={`${name}-error`} className="text-sm text-red-600">
+				<p id={`${fieldId}-error`} className="text-sm text-red-600">
 					{error}
 				</p>
 			) : null}
 
 			{isOpen ? (
 				<div className="rounded-2xl border border-neutral-300 bg-white p-3 shadow-lg">
-					<Label htmlFor={`${name}-search`} className="text-xs text-neutral-500">
+					<Label htmlFor={`${fieldId}-search`} className="text-xs text-neutral-500">
 						{searchLabel}
 					</Label>
 					<div className="mt-2 flex gap-2">
 						<Input
-							id={`${name}-search`}
+							id={`${fieldId}-search`}
 							value={search}
 							onChange={(event) => setSearch(event.target.value)}
 							placeholder={searchPlaceholder}

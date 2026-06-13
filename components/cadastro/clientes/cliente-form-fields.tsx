@@ -189,7 +189,7 @@ export function ClienteFormFields({
 			<div className="grid gap-4 md:grid-cols-12">
 					<div className={fieldClass.sm}>
 						<Label htmlFor="apelido" className="text-sm text-neutral-800">
-							Apelido:
+							{isFisica ? "Apelido:" : "Nome Fantasia:"}
 						</Label>
 						<Input
 							id="apelido"

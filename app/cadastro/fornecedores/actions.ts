@@ -82,6 +82,8 @@ async function saveFornecedor(formData: FormData, codfornecedor?: number) {
 	const rgInscricaoEstadual = onlyDigits(rgInscricaoEstadualRaw);
 	const cpfCnpjRaw = getText(formData, "cpf_cnpj");
 	const cpfCnpj = onlyDigits(cpfCnpjRaw);
+	const codcondicaoPagamentoValue = getText(formData, "codcondicao_pagamento");
+	const codcondicaoPagamento = Number(codcondicaoPagamentoValue);
 	const observacoes = getText(formData, "observacoes");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
@@ -145,6 +147,10 @@ async function saveFornecedor(formData: FormData, codfornecedor?: number) {
 		redirect(buildRedirect(FORNECEDORES_PATH, "error", "CPF deve conter 11 digitos ou CNPJ deve conter 14 digitos."));
 	}
 
+	if (codcondicaoPagamentoValue && Number.isNaN(codcondicaoPagamento)) {
+		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Condicao de pagamento invalida."));
+	}
+
 	if (observacoes.length > 110) {
 		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Observacoes devem ter no maximo 110 caracteres."));
 	}
@@ -164,6 +170,7 @@ async function saveFornecedor(formData: FormData, codfornecedor?: number) {
 		email,
 		rgInscricaoEstadual || null,
 		cpfCnpj || null,
+		codcondicaoPagamentoValue ? codcondicaoPagamento : null,
 		observacoes || null,
 		ativo,
 	];
@@ -174,17 +181,18 @@ async function saveFornecedor(formData: FormData, codfornecedor?: number) {
 				set tipo = $1, fornecedor = $2, nome_fantasia = $3, contato = $4, endereco = $5,
 					numero = $6, complemento = $7, bairro = $8, cep = $9, codcidade = $10,
 					telefone = $11, email = $12, rg_inscricao_estadual = $13, cpf_cnpj = $14,
-					observacoes = $15, ativo = $16
-				where codfornecedor = $17`,
+					codcondicao_pagamento = $15, observacoes = $16, ativo = $17
+				where codfornecedor = $18`,
 				[...values, codfornecedor]
 			)
 		: await executeQuery(
 				`insert into public.fornecedores (
 					tipo, fornecedor, nome_fantasia, contato, endereco, numero, complemento, bairro,
-					cep, codcidade, telefone, email, rg_inscricao_estadual, cpf_cnpj, observacoes, ativo
+					cep, codcidade, telefone, email, rg_inscricao_estadual, cpf_cnpj,
+					codcondicao_pagamento, observacoes, ativo
 				) values (
 					$1, $2, $3, $4, $5, $6, $7, $8,
-					$9, $10, $11, $12, $13, $14, $15, $16
+					$9, $10, $11, $12, $13, $14, $15, $16, $17
 				)`,
 				values
 			);
