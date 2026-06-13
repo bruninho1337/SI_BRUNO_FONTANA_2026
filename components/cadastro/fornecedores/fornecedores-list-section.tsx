@@ -1,8 +1,8 @@
 import { deleteFornecedorAction } from "@/app/cadastro/fornecedores/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { formatTelefone } from "@/lib/formatters";
-import { listarFornecedoresComCidades } from "@/lib/fornecedores";
+import { formatTelefone } from "@/lib/shared/formatters";
+import { listarFornecedoresComCidades } from "@/lib/data/fornecedores";
 
 type FornecedoresListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

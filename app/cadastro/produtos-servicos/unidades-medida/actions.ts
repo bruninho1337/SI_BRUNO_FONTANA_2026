@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { executeQuery } from "@/lib/db";
+import { executeQuery } from "@/lib/database/db";
 
 const UNIDADES_MEDIDA_PATH = "/cadastro/produtos-servicos/unidades-medida";
 const PRODUTOS_PATH = "/cadastro/produtos-servicos/produtos";

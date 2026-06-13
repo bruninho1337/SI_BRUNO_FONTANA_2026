@@ -1,13 +1,13 @@
 import { createCategoriaAction, updateCategoriaAction } from "@/app/cadastro/produtos-servicos/actions";
-import { ActiveToggle } from "@/components/active-toggle";
+import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { CategoryTypeToggle } from "@/components/category-type-toggle";
+import { CategoryTypeToggle } from "@/components/cadastro/produtos-servicos/category-type-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
-import { buscarCategoriaPorId } from "@/lib/produtos-servicos";
+import { buscarCategoriaPorId } from "@/lib/data/produtos-servicos";
 
 type CategoriaFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;

@@ -1,4 +1,4 @@
-import { queryMaybeSingle, queryRows } from "@/lib/db";
+import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 
 export async function listarPaises() {
 	return queryRows("select codpais, pais, sigla, ddi, moeda, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao from public.paises order by pais asc");

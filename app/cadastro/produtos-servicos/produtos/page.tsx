@@ -4,7 +4,7 @@ import { CadastroPageShell } from "@/components/cadastro/cadastro-page-shell";
 import { CadastroSectionFallback } from "@/components/cadastro/cadastro-section-fallback";
 import { ProdutoFormSection } from "@/components/cadastro/produtos-servicos/produto-form-section";
 import { ProdutosListSection } from "@/components/cadastro/produtos-servicos/produtos-list-section";
-import { ProdutosServicosTabs } from "@/components/produtos-servicos-tabs";
+import { ProdutosServicosTabs } from "@/components/cadastro/produtos-servicos/produtos-servicos-tabs";
 
 type CadastroProdutosPageProps = {
 	searchParams?: Promise<{

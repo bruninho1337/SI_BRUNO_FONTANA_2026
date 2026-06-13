@@ -1,4 +1,4 @@
-import { queryMaybeSingle, queryRows } from "@/lib/db";
+import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 
 const FUNCAO_FUNCIONARIO_SELECT =
 	"codfuncao_funcionario, funcao_funcionario, descricao, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao";

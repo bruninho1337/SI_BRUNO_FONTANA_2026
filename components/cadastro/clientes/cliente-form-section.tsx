@@ -1,9 +1,9 @@
 import { createClienteAction, updateClienteAction } from "@/app/cadastro/clientes/actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { ClienteFormFields } from "@/components/cadastro/clientes/cliente-form-fields";
-import { buscarClientePorId } from "@/lib/clientes";
-import { listarCondicoesPagamentoParaSelecao } from "@/lib/condicoes-pagamento";
-import { listarCidadesComEstados } from "@/lib/localidades";
+import { buscarClientePorId } from "@/lib/data/clientes";
+import { listarCondicoesPagamentoParaSelecao } from "@/lib/data/condicoes-pagamento";
+import { listarCidadesComEstados } from "@/lib/data/localidades";
 
 type ClienteFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;

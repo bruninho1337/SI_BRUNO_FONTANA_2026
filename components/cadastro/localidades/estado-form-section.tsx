@@ -1,13 +1,13 @@
 import { createEstadoAction, updateEstadoAction } from "@/app/cadastro/localidades/actions";
-import { ActiveToggle } from "@/components/active-toggle";
+import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { SearchableSelect } from "@/components/searchable-select";
+import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
-import { buscarEstadoPorId, listarPaisesParaSelecao } from "@/lib/localidades";
+import { buscarEstadoPorId, listarPaisesParaSelecao } from "@/lib/data/localidades";
 
 type EstadoFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;

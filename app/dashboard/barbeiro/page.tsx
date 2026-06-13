@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { DashboardCurrentDate } from "@/components/dashboard-current-date";
-import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { DashboardCurrentDate } from "@/components/layout/dashboard-current-date";
+import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { Button } from "@/components/ui/button";
 
 export default function BarbeiroDashboardPage() {

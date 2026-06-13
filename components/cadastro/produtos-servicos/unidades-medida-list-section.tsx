@@ -1,7 +1,7 @@
 import { deleteUnidadeMedidaAction } from "@/app/cadastro/produtos-servicos/unidades-medida/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { listarUnidadesMedida } from "@/lib/unidades-medida";
+import { listarUnidadesMedida } from "@/lib/data/unidades-medida";
 
 type UnidadesMedidaListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

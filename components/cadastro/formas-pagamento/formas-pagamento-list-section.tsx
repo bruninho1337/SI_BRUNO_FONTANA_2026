@@ -1,7 +1,7 @@
 import { deleteFormaPagamentoAction } from "@/app/cadastro/formas-pagamento/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { listarFormasPagamento } from "@/lib/formas-pagamento";
+import { listarFormasPagamento } from "@/lib/data/formas-pagamento";
 
 type FormasPagamentoListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

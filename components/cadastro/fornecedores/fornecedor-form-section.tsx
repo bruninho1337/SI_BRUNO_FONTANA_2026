@@ -1,8 +1,8 @@
 import { createFornecedorAction, updateFornecedorAction } from "@/app/cadastro/fornecedores/actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { FornecedorFormFields } from "@/components/cadastro/fornecedores/fornecedor-form-fields";
-import { buscarFornecedorPorId } from "@/lib/fornecedores";
-import { listarCidadesComEstados } from "@/lib/localidades";
+import { buscarFornecedorPorId } from "@/lib/data/fornecedores";
+import { listarCidadesComEstados } from "@/lib/data/localidades";
 
 type FornecedorFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;

@@ -1,8 +1,8 @@
 import { deleteFuncionarioAction } from "@/app/cadastro/funcionarios/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { formatCpfCnpj, formatTelefone } from "@/lib/formatters";
-import { listarFuncionarios } from "@/lib/funcionarios";
+import { formatCpfCnpj, formatTelefone } from "@/lib/shared/formatters";
+import { listarFuncionarios } from "@/lib/data/funcionarios";
 
 type FuncionariosListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
-import { ActiveToggle } from "@/components/active-toggle";
+import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
-import { DatePickerInput } from "@/components/date-picker-input";
-import { SearchableSelect } from "@/components/searchable-select";
+import { DatePickerInput } from "@/components/forms/date-picker-input";
+import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ import {
 	formatRg,
 	formatTelefone,
 	onlyDigits,
-} from "@/lib/formatters";
+} from "@/lib/shared/formatters";
 
 type Option = {
 	id: string;

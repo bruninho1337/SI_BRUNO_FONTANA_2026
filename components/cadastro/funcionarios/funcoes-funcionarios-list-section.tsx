@@ -1,7 +1,7 @@
 import { deleteFuncaoFuncionarioAction } from "@/app/cadastro/funcoes-funcionarios/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { listarFuncoesFuncionarios } from "@/lib/funcoes-funcionarios";
+import { listarFuncoesFuncionarios } from "@/lib/data/funcoes-funcionarios";
 
 type FuncoesFuncionariosListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

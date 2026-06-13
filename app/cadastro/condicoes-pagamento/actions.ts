@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { executeQuery, queryRows } from "@/lib/db";
+import { executeQuery, queryRows } from "@/lib/database/db";
 
 const CONDICOES_PAGAMENTO_PATH = "/cadastro/condicoes-pagamento";
 const CLIENTES_PATH = "/cadastro/clientes";

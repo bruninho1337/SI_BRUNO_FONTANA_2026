@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { executeQuery } from "@/lib/db";
+import { executeQuery } from "@/lib/database/db";
 
 const FUNCOES_FUNCIONARIOS_PATH = "/cadastro/funcoes-funcionarios";
 const FUNCIONARIOS_PATH = "/cadastro/funcionarios";

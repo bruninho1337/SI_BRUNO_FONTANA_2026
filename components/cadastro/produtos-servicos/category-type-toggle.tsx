@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { RequiredLabel } from "@/components/ui/required-label";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 type CategoriaTipo = "PRODUTO" | "SERVICO" | "AMBOS";
 

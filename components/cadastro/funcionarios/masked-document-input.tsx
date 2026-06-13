@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { formatCpfCnpj, formatRg } from "@/lib/formatters";
+import { formatCpfCnpj, formatRg } from "@/lib/shared/formatters";
 
 type MaskedDocumentInputProps = React.ComponentProps<typeof Input> & {
 	mask: "cpf" | "rg";

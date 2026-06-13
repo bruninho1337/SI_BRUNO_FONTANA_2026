@@ -4,7 +4,7 @@ import { CadastroPageShell } from "@/components/cadastro/cadastro-page-shell";
 import { CadastroSectionFallback } from "@/components/cadastro/cadastro-section-fallback";
 import { UnidadeMedidaFormSection } from "@/components/cadastro/produtos-servicos/unidade-medida-form-section";
 import { UnidadesMedidaListSection } from "@/components/cadastro/produtos-servicos/unidades-medida-list-section";
-import { ProdutosServicosTabs } from "@/components/produtos-servicos-tabs";
+import { ProdutosServicosTabs } from "@/components/cadastro/produtos-servicos/produtos-servicos-tabs";
 
 type CadastroUnidadesMedidaPageProps = {
 	searchParams?: Promise<{

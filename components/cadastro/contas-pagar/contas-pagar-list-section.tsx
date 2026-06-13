@@ -1,7 +1,7 @@
 import { deleteContaPagarAction } from "@/app/cadastro/contas-pagar/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { listarContasPagar } from "@/lib/contas-pagar";
+import { listarContasPagar } from "@/lib/data/contas-pagar";
 
 type ContasPagarListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

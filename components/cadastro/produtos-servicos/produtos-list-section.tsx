@@ -1,7 +1,7 @@
 import { deleteProdutoAction } from "@/app/cadastro/produtos-servicos/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { listarProdutosComCategorias } from "@/lib/produtos-servicos";
+import { listarProdutosComCategorias } from "@/lib/data/produtos-servicos";
 
 type ProdutosListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

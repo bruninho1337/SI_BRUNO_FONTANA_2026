@@ -1,4 +1,4 @@
-import { queryMaybeSingle, queryRows } from "@/lib/db";
+import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 
 const MARCA_SELECT =
 	"codmarca, marca, descricao, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao";

@@ -1,7 +1,7 @@
 import { deletePaisAction } from "@/app/cadastro/localidades/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { listarPaises } from "@/lib/localidades";
+import { listarPaises } from "@/lib/data/localidades";
 
 type PaisesListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

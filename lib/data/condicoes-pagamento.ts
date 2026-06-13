@@ -1,4 +1,4 @@
-import { queryMaybeSingle, queryRows } from "@/lib/db";
+import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 
 export async function listarCondicoesPagamento() {
 	return queryRows(

@@ -4,9 +4,9 @@ import {
 } from "@/app/cadastro/funcionarios/actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { FuncionarioFormFields } from "@/components/cadastro/funcionarios/funcionario-form-fields";
-import { listarFuncoesFuncionariosParaSelecao } from "@/lib/funcoes-funcionarios";
-import { buscarFuncionarioPorId } from "@/lib/funcionarios";
-import { listarCidadesComEstados } from "@/lib/localidades";
+import { listarFuncoesFuncionariosParaSelecao } from "@/lib/data/funcoes-funcionarios";
+import { buscarFuncionarioPorId } from "@/lib/data/funcionarios";
+import { listarCidadesComEstados } from "@/lib/data/localidades";
 
 type FuncionarioFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;

@@ -1,8 +1,8 @@
 import { deleteClienteAction } from "@/app/cadastro/clientes/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { listarClientesComCidades } from "@/lib/clientes";
-import { formatTelefone } from "@/lib/formatters";
+import { listarClientesComCidades } from "@/lib/data/clientes";
+import { formatTelefone } from "@/lib/shared/formatters";
 
 type ClientesListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

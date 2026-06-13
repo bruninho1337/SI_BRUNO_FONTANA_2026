@@ -1,7 +1,7 @@
 import { deleteMarcaAction } from "@/app/cadastro/produtos-servicos/marcas/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { listarMarcas } from "@/lib/marcas";
+import { listarMarcas } from "@/lib/data/marcas";
 
 type MarcasListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

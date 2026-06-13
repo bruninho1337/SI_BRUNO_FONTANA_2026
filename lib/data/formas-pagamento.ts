@@ -1,4 +1,4 @@
-import { queryMaybeSingle, queryRows } from "@/lib/db";
+import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 
 const FORMAS_PAGAMENTO_SELECT =
 	"codforma_pagamento, forma_pagamento, tipo, descricao, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao";

@@ -1,7 +1,7 @@
 import { deleteCondicaoPagamentoAction } from "@/app/cadastro/condicoes-pagamento/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { listarCondicoesPagamento } from "@/lib/condicoes-pagamento";
+import { listarCondicoesPagamento } from "@/lib/data/condicoes-pagamento";
 
 type CondicoesPagamentoListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

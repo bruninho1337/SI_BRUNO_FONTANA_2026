@@ -3,7 +3,7 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 
-import { NavigationLoading } from "@/components/navigation-loading";
+import { NavigationLoading } from "@/components/layout/navigation-loading";
 
 import "./globals.css";
 

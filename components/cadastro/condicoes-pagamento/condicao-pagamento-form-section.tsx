@@ -2,16 +2,16 @@ import {
 	createCondicaoPagamentoAction,
 	updateCondicaoPagamentoAction,
 } from "@/app/cadastro/condicoes-pagamento/actions";
-import { ActiveToggle } from "@/components/active-toggle";
+import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { SearchableSelect } from "@/components/searchable-select";
+import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
-import { buscarCondicaoPagamentoPorId } from "@/lib/condicoes-pagamento";
-import { listarFormasPagamentoParaSelecao } from "@/lib/formas-pagamento";
+import { buscarCondicaoPagamentoPorId } from "@/lib/data/condicoes-pagamento";
+import { listarFormasPagamentoParaSelecao } from "@/lib/data/formas-pagamento";
 
 type CondicaoPagamentoFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;

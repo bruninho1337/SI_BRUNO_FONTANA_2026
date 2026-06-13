@@ -1,14 +1,14 @@
 import { createServicoAction, updateServicoAction } from "@/app/cadastro/produtos-servicos/actions";
-import { ActiveToggle } from "@/components/active-toggle";
+import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { SearchableSelect } from "@/components/searchable-select";
-import { StorageImageUpload } from "@/components/storage-image-upload";
+import { SearchableSelect } from "@/components/forms/searchable-select";
+import { StorageImageUpload } from "@/components/forms/storage-image-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
-import { buscarServicoPorId, listarCategoriasPorTipo } from "@/lib/produtos-servicos";
+import { buscarServicoPorId, listarCategoriasPorTipo } from "@/lib/data/produtos-servicos";
 
 type ServicoFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;

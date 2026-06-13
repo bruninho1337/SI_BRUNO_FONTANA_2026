@@ -1,7 +1,7 @@
 import { deleteEstadoAction } from "@/app/cadastro/localidades/actions";
 import { CadastroListToolbar, CadastroRowActions } from "@/components/cadastro/cadastro-list-actions";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { listarEstadosComPaises } from "@/lib/localidades";
+import { listarEstadosComPaises } from "@/lib/data/localidades";
 
 type EstadosListSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; q?: string }>;

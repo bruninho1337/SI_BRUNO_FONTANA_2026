@@ -7,7 +7,7 @@ import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 type Option = {
 	id: string;

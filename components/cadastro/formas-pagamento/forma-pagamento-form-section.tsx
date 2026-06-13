@@ -2,14 +2,14 @@ import {
 	createFormaPagamentoAction,
 	updateFormaPagamentoAction,
 } from "@/app/cadastro/formas-pagamento/actions";
-import { ActiveToggle } from "@/components/active-toggle";
+import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
-import { buscarFormaPagamentoPorId } from "@/lib/formas-pagamento";
+import { buscarFormaPagamentoPorId } from "@/lib/data/formas-pagamento";
 
 type FormaPagamentoFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;

@@ -2,18 +2,18 @@ import {
 	createContaPagarAction,
 	updateContaPagarAction,
 } from "@/app/cadastro/contas-pagar/actions";
-import { ActiveToggle } from "@/components/active-toggle";
+import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { DatePickerInput } from "@/components/date-picker-input";
-import { SearchableSelect } from "@/components/searchable-select";
+import { DatePickerInput } from "@/components/forms/date-picker-input";
+import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
-import { buscarContaPagarPorId } from "@/lib/contas-pagar";
-import { listarFormasPagamentoParaSelecao } from "@/lib/formas-pagamento";
-import { listarFornecedoresParaSelecao } from "@/lib/fornecedores";
+import { buscarContaPagarPorId } from "@/lib/data/contas-pagar";
+import { listarFormasPagamentoParaSelecao } from "@/lib/data/formas-pagamento";
+import { listarFornecedoresParaSelecao } from "@/lib/data/fornecedores";
 
 type ContaPagarFormSectionProps = {
 	searchParams?: Promise<{ success?: string; error?: string; edit?: string }>;

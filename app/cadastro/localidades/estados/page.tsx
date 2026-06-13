@@ -4,7 +4,7 @@ import { CadastroPageShell } from "@/components/cadastro/cadastro-page-shell";
 import { CadastroSectionFallback } from "@/components/cadastro/cadastro-section-fallback";
 import { EstadoFormSection } from "@/components/cadastro/localidades/estado-form-section";
 import { EstadosListSection } from "@/components/cadastro/localidades/estados-list-section";
-import { LocalidadesTabs } from "@/components/localidades-tabs";
+import { LocalidadesTabs } from "@/components/cadastro/localidades/localidades-tabs";
 
 type CadastroEstadosPageProps = {
 	searchParams?: Promise<{

@@ -1,4 +1,4 @@
-import { queryMaybeSingle, queryRows } from "@/lib/db";
+import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 
 const CONTAS_PAGAR_SELECT = `
 	cp.codconta_pagar,
