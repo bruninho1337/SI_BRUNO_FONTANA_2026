@@ -117,7 +117,7 @@ export async function CondicaoPagamentoFormSection({
 				<div className="grid gap-4 md:grid-cols-12">
 					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="juro" className="text-sm text-neutral-800">
-							Juro:
+							Juro (%):
 						</RequiredLabel>
 						<Input
 							id="juro"
@@ -132,7 +132,7 @@ export async function CondicaoPagamentoFormSection({
 
 					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="multa" className="text-sm text-neutral-800">
-							Multa:
+							Multa (%):
 						</RequiredLabel>
 						<Input
 							id="multa"
@@ -147,7 +147,7 @@ export async function CondicaoPagamentoFormSection({
 
 					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="desconto" className="text-sm text-neutral-800">
-							Desconto:
+							Desconto (%):
 						</RequiredLabel>
 						<Input
 							id="desconto"
