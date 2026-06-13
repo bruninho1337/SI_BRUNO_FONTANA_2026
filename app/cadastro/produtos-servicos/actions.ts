@@ -362,8 +362,8 @@ async function saveCategoria(formData: FormData, codcategoria?: number) {
 	const tipo = getText(formData, "tipo").toUpperCase() || "AMBOS";
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!isLengthBetween(categoria, 2, 80)) {
-		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Categoria deve ter entre 2 e 80 caracteres."));
+	if (!isLengthBetween(categoria, 2, 50)) {
+		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Categoria deve ter entre 2 e 50 caracteres."));
 	}
 
 	if (!["PRODUTO", "SERVICO", "AMBOS"].includes(tipo)) {

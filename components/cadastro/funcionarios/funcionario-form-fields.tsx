@@ -154,7 +154,7 @@ export function FuncionarioFormFields({
 						id="funcionario"
 						name="funcionario"
 						minLength={5}
-						maxLength={80}
+						maxLength={60}
 						required
 						placeholder="Ex: João Silva"
 						defaultValue={String(initialData?.funcionario ?? "")}
@@ -177,7 +177,7 @@ export function FuncionarioFormFields({
 					<Input
 						id="apelido"
 						name="apelido"
-						maxLength={60}
+						maxLength={35}
 						placeholder="Ex: João"
 						defaultValue={String(initialData?.apelido ?? "")}
 						className={inputClass}

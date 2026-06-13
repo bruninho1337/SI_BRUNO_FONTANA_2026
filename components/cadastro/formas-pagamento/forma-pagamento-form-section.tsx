@@ -85,7 +85,7 @@ export async function FormaPagamentoFormSection({
 							name="forma_pagamento"
 							type="text"
 							minLength={2}
-							maxLength={80}
+							maxLength={50}
 							required
 							placeholder="Ex: PIX, Dinheiro, Cartão de Crédito"
 							defaultValue={formaEditando?.forma_pagamento ?? ""}

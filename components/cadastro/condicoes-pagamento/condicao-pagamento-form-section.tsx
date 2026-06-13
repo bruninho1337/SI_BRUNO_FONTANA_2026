@@ -96,7 +96,7 @@ export async function CondicaoPagamentoFormSection({
 							name="condicao_pagamento"
 							type="text"
 							minLength={2}
-							maxLength={80}
+							maxLength={50}
 							required
 							placeholder="Ex: A vista, 30 dias, Parcelado 3x"
 							defaultValue={condicaoEditando?.condicao_pagamento ?? ""}

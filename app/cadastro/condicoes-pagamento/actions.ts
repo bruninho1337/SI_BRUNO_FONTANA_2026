@@ -105,8 +105,8 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 	const desconto = parseDecimal(formData.get("desconto"));
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (condicaoPagamento.length < 2 || condicaoPagamento.length > 80) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Condicao de pagamento deve ter entre 2 e 80 caracteres."));
+	if (condicaoPagamento.length < 2 || condicaoPagamento.length > 50) {
+		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Condicao de pagamento deve ter entre 2 e 50 caracteres."));
 	}
 
 	if (!codformaPagamentoValue || Number.isNaN(Number(codformaPagamentoValue))) {

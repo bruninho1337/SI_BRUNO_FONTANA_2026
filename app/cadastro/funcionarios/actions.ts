@@ -118,12 +118,12 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 	const observacoes = getText(formData, "observacoes");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!isLengthBetween(funcionario, 5, 80)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Funcionário deve ter entre 5 e 80 caracteres."));
+	if (!isLengthBetween(funcionario, 5, 60)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Funcionário deve ter entre 5 e 60 caracteres."));
 	}
 
-	if (apelido.length > 60) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Apelido deve ter no maximo 60 caracteres."));
+	if (apelido.length > 35) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Apelido deve ter no maximo 35 caracteres."));
 	}
 
 	if (estadoCivil && !["SOLTEIRO", "CASADO", "SEPARADO", "DIVORCIADO", "VIUVO", "OUTRO"].includes(estadoCivil)) {

@@ -73,8 +73,8 @@ async function saveFormaPagamento(formData: FormData, codformaPagamento?: number
 	const descricao = getText(formData, "descricao");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!isLengthBetween(formaPagamento, 2, 80)) {
-		redirect(buildRedirect(FORMAS_PAGAMENTO_PATH, "error", "Forma de pagamento deve ter entre 2 e 80 caracteres."));
+	if (!isLengthBetween(formaPagamento, 2, 50)) {
+		redirect(buildRedirect(FORMAS_PAGAMENTO_PATH, "error", "Forma de pagamento deve ter entre 2 e 50 caracteres."));
 	}
 
 	if (!tiposFormaPagamento.includes(tipo)) {

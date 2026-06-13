@@ -60,7 +60,7 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 						name="categoria"
 						type="text"
 						minLength={2}
-						maxLength={80}
+						maxLength={50}
 						required
 						placeholder="Ex: Finalizacao"
 						defaultValue={categoriaEditando?.categoria ?? ""}
