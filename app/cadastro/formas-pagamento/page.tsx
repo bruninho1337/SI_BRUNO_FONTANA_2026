@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { CadastroPageShell } from "@/components/cadastro/cadastro-page-shell";
 import { CadastroSectionFallback } from "@/components/cadastro/cadastro-section-fallback";
+import { FinanceiroTabs } from "@/components/cadastro/financeiro/financeiro-tabs";
 import { FormaPagamentoFormSection } from "@/components/cadastro/formas-pagamento/forma-pagamento-form-section";
 import { FormasPagamentoListSection } from "@/components/cadastro/formas-pagamento/formas-pagamento-list-section";
 
@@ -22,7 +23,7 @@ export default function CadastroFormasPagamentoPage({
 		<CadastroPageShell
 			title="Formas de Pagamento"
 			description="Cadastre os meios aceitos para recebimentos e pagamentos."
-			tabs={null}
+			tabs={<FinanceiroTabs currentPath="/cadastro/formas-pagamento" />}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Formas de pagamento cadastradas" />}>
 				<CadastroFormasPagamentoContent searchParams={searchParams} />

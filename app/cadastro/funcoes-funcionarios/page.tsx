@@ -4,6 +4,7 @@ import { CadastroPageShell } from "@/components/cadastro/cadastro-page-shell";
 import { CadastroSectionFallback } from "@/components/cadastro/cadastro-section-fallback";
 import { FuncaoFuncionarioFormSection } from "@/components/cadastro/funcionarios/funcao-funcionario-form-section";
 import { FuncoesFuncionariosListSection } from "@/components/cadastro/funcionarios/funcoes-funcionarios-list-section";
+import { PessoasTabs } from "@/components/cadastro/pessoas/pessoas-tabs";
 
 type CadastroFuncoesFuncionariosPageProps = {
 	searchParams?: Promise<{
@@ -22,7 +23,7 @@ export default function CadastroFuncoesFuncionariosPage({
 		<CadastroPageShell
 			title="Funções de Funcionários"
 			description="Cadastre cargos e funções para vincular aos funcionários."
-			tabs={null}
+			tabs={<PessoasTabs currentPath="/cadastro/funcoes-funcionarios" />}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Funções cadastradas" />}>
 				<CadastroFuncoesFuncionariosContent searchParams={searchParams} />

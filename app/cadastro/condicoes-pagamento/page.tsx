@@ -4,6 +4,7 @@ import { CadastroPageShell } from "@/components/cadastro/cadastro-page-shell";
 import { CadastroSectionFallback } from "@/components/cadastro/cadastro-section-fallback";
 import { CondicaoPagamentoFormSection } from "@/components/cadastro/condicoes-pagamento/condicao-pagamento-form-section";
 import { CondicoesPagamentoListSection } from "@/components/cadastro/condicoes-pagamento/condicoes-pagamento-list-section";
+import { FinanceiroTabs } from "@/components/cadastro/financeiro/financeiro-tabs";
 
 type CadastroCondicoesPagamentoPageProps = {
 	searchParams?: Promise<{
@@ -22,7 +23,7 @@ export default function CadastroCondicoesPagamentoPage({
 		<CadastroPageShell
 			title="Condições de Pagamento"
 			description="Tela de consulta para a tabela de Condições de Pagamento."
-			tabs={null}
+			tabs={<FinanceiroTabs currentPath="/cadastro/condicoes-pagamento" />}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Condições de pagamento cadastradas" />}>
 				<CadastroCondicoesPagamentoContent searchParams={searchParams} />

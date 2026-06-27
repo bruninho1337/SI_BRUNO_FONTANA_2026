@@ -4,6 +4,7 @@ import { CadastroPageShell } from "@/components/cadastro/cadastro-page-shell";
 import { CadastroSectionFallback } from "@/components/cadastro/cadastro-section-fallback";
 import { ClienteFormSection } from "@/components/cadastro/clientes/cliente-form-section";
 import { ClientesListSection } from "@/components/cadastro/clientes/clientes-list-section";
+import { PessoasTabs } from "@/components/cadastro/pessoas/pessoas-tabs";
 
 type CadastroClientesPageProps = {
 	searchParams?: Promise<{
@@ -22,7 +23,7 @@ export default function CadastroClientesPage({
 		<CadastroPageShell
 			title="Clientes"
 			description="Consulte clientes físicos ou jurídicos com cidade, e-mail ou documento."
-			tabs={null}
+			tabs={<PessoasTabs currentPath="/cadastro/clientes" />}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Clientes cadastrados" />}>
 				<CadastroClientesContent searchParams={searchParams} />

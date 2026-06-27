@@ -4,6 +4,7 @@ import { CadastroPageShell } from "@/components/cadastro/cadastro-page-shell";
 import { CadastroSectionFallback } from "@/components/cadastro/cadastro-section-fallback";
 import { ContaPagarFormSection } from "@/components/cadastro/contas-pagar/conta-pagar-form-section";
 import { ContasPagarListSection } from "@/components/cadastro/contas-pagar/contas-pagar-list-section";
+import { FinanceiroTabs } from "@/components/cadastro/financeiro/financeiro-tabs";
 
 type CadastroContasPagarPageProps = {
 	searchParams?: Promise<{
@@ -22,7 +23,7 @@ export default function CadastroContasPagarPage({
 		<CadastroPageShell
 			title="Contas a Pagar"
 			description="Controle contas, fornecedores, vencimentos, pagamentos e status financeiro."
-			tabs={null}
+			tabs={<FinanceiroTabs currentPath="/cadastro/contas-pagar" />}
 		>
 			<Suspense fallback={<CadastroSectionFallback title="Contas a pagar cadastradas" />}>
 				<CadastroContasPagarContent searchParams={searchParams} />
