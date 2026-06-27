@@ -1,10 +1,7 @@
 "use server";
 
-import { randomUUID } from "crypto";
-import { mkdir, unlink, writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import path from "path";
 
 import { executeQuery } from "@/lib/database/db";
 
@@ -39,40 +36,6 @@ function parseDecimal(value: FormDataEntryValue | null) {
 
 function isLengthBetween(value: string, min: number, max: number) {
 	return value.length >= min && value.length <= max;
-}
-
-function sanitizeFileName(fileName: string) {
-	return fileName
-		.normalize("NFD")
-		.replace(/[\u0300-\u036f]/g, "")
-		.replace(/[^a-zA-Z0-9.-]/g, "-")
-		.replace(/-+/g, "-")
-		.toLowerCase();
-}
-
-async function uploadImageIfPresent(file: File | null, folder: "produtos" | "servicos") {
-	if (!file || file.size === 0) {
-		return null;
-	}
-
-	if (!file.type.startsWith("image/")) {
-		throw new Error("Selecione um arquivo de imagem valido.");
-	}
-
-	const safeName = sanitizeFileName(file.name);
-	const fileName = `${Date.now()}-${randomUUID()}-${safeName}`;
-	const relativePath = path.posix.join("uploads", folder, fileName);
-	const uploadDir = path.join(process.cwd(), "public", "uploads", folder);
-	const filePath = path.join(uploadDir, fileName);
-	const fileBuffer = Buffer.from(await file.arrayBuffer());
-
-	await mkdir(uploadDir, { recursive: true });
-	await writeFile(filePath, fileBuffer);
-
-	return {
-		path: filePath,
-		publicUrl: `/${relativePath}`,
-	};
 }
 
 export async function createProdutoAction(formData: FormData) {
@@ -114,8 +77,6 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 	const valor = parseDecimal(formData.get("valor"));
 	const quantidadeEstoque = Number(getText(formData, "quantidade_estoque") || "0");
 	const valorDesconto = parseDecimal(formData.get("valor_desconto"));
-	const imagemArquivo = formData.get("imagem_arquivo");
-	const imagemAtual = getText(formData, "imagem_url");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(produto, 2, 80)) {
@@ -134,62 +95,43 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 		redirect(buildRedirect(PRODUTOS_PATH, "error", "O desconto do produto precisa estar entre 0 e o valor informado."));
 	}
 
-	let uploadedImage: Awaited<ReturnType<typeof uploadImageIfPresent>> = null;
-
-	try {
-		uploadedImage = await uploadImageIfPresent(
-			imagemArquivo instanceof File ? imagemArquivo : null,
-			"produtos"
-		);
-
-		const { error } = codproduto
-			? await executeQuery(
+	const { error } = codproduto
+		? await executeQuery(
 				`update public.produtos
 					set produto = $1, codcategoria = $2, codmarca = $3, codunidade_medida = $4,
-						valor = $5, quantidade_estoque = $6, valor_desconto = $7,
-						imagem_url = $8, ativo = $9
-					where codproduto = $10`,
-					[
-						produto,
-						codcategoriaValue ? Number(codcategoriaValue) : null,
-						codmarcaValue ? Number(codmarcaValue) : null,
-						codunidadeMedidaValue ? Number(codunidadeMedidaValue) : null,
-						valor,
-						quantidadeEstoque,
-						valorDesconto,
-						uploadedImage?.publicUrl ?? (imagemAtual || null),
-						ativo,
-						codproduto,
-					]
-				)
-			: await executeQuery(
-					`insert into public.produtos (
-						produto, codcategoria, codmarca, codunidade_medida, valor, quantidade_estoque,
-						valor_desconto, imagem_url, ativo
-					) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-					[
-						produto,
-						codcategoriaValue ? Number(codcategoriaValue) : null,
-						codmarcaValue ? Number(codmarcaValue) : null,
-						codunidadeMedidaValue ? Number(codunidadeMedidaValue) : null,
-						valor,
-						quantidadeEstoque,
-						valorDesconto,
-						uploadedImage?.publicUrl ?? (imagemAtual || null),
-						ativo,
-					]
-				);
+						valor = $5, quantidade_estoque = $6, valor_desconto = $7, ativo = $8
+					where codproduto = $9`,
+				[
+					produto,
+					codcategoriaValue ? Number(codcategoriaValue) : null,
+					codmarcaValue ? Number(codmarcaValue) : null,
+					codunidadeMedidaValue ? Number(codunidadeMedidaValue) : null,
+					valor,
+					quantidadeEstoque,
+					valorDesconto,
+					ativo,
+					codproduto,
+				]
+			)
+		: await executeQuery(
+				`insert into public.produtos (
+					produto, codcategoria, codmarca, codunidade_medida, valor, quantidade_estoque,
+					valor_desconto, ativo
+				) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+				[
+					produto,
+					codcategoriaValue ? Number(codcategoriaValue) : null,
+					codmarcaValue ? Number(codmarcaValue) : null,
+					codunidadeMedidaValue ? Number(codunidadeMedidaValue) : null,
+					valor,
+					quantidadeEstoque,
+					valorDesconto,
+					ativo,
+				]
+			);
 
-		if (error) {
-			if (uploadedImage) {
-				await unlink(uploadedImage.path).catch(() => undefined);
-			}
-
-			redirect(buildRedirect(PRODUTOS_PATH, "error", error.message));
-		}
-	} catch (error) {
-		const message = error instanceof Error ? error.message : "Nao foi possivel salvar o produto.";
-		redirect(buildRedirect(PRODUTOS_PATH, "error", message));
+	if (error) {
+		redirect(buildRedirect(PRODUTOS_PATH, "error", error.message));
 	}
 
 	revalidatePath(PRODUTOS_PATH);
@@ -233,8 +175,6 @@ async function saveServico(formData: FormData, codservico?: number) {
 	const duracaoMinutos = Number(getText(formData, "duracao_minutos") || "0");
 	const valor = parseDecimal(formData.get("valor"));
 	const valorDesconto = parseDecimal(formData.get("valor_desconto"));
-	const imagemArquivo = formData.get("imagem_arquivo");
-	const imagemAtual = getText(formData, "imagem_url");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(servico, 2, 80)) {
@@ -253,56 +193,38 @@ async function saveServico(formData: FormData, codservico?: number) {
 		redirect(buildRedirect(SERVICOS_PATH, "error", "O desconto do servico precisa estar entre 0 e o valor informado."));
 	}
 
-	let uploadedImage: Awaited<ReturnType<typeof uploadImageIfPresent>> = null;
-
-	try {
-		uploadedImage = await uploadImageIfPresent(
-			imagemArquivo instanceof File ? imagemArquivo : null,
-			"servicos"
-		);
-
-		const { error } = codservico
-				? await executeQuery(
+	const { error } = codservico
+		? await executeQuery(
 					`update public.servicos
 					set servico = $1, codcategoria = $2, duracao_minutos = $3, valor = $4,
-						valor_desconto = $5, imagem_url = $6, ativo = $7
-					where codservico = $8`,
+						valor_desconto = $5, ativo = $6
+					where codservico = $7`,
 					[
 						servico,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
 						duracaoMinutos,
 						valor,
 						valorDesconto,
-						uploadedImage?.publicUrl ?? (imagemAtual || null),
 						ativo,
 						codservico,
 					]
 				)
-				: await executeQuery(
+		: await executeQuery(
 					`insert into public.servicos (
-						servico, codcategoria, duracao_minutos, valor, valor_desconto, imagem_url, ativo
-					) values ($1, $2, $3, $4, $5, $6, $7)`,
+						servico, codcategoria, duracao_minutos, valor, valor_desconto, ativo
+					) values ($1, $2, $3, $4, $5, $6)`,
 					[
 						servico,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
 						duracaoMinutos,
 						valor,
 						valorDesconto,
-						uploadedImage?.publicUrl ?? (imagemAtual || null),
 						ativo,
 					]
 				);
 
-		if (error) {
-			if (uploadedImage) {
-				await unlink(uploadedImage.path).catch(() => undefined);
-			}
-
-			redirect(buildRedirect(SERVICOS_PATH, "error", error.message));
-		}
-	} catch (error) {
-		const message = error instanceof Error ? error.message : "Nao foi possivel salvar o servico.";
-		redirect(buildRedirect(SERVICOS_PATH, "error", message));
+	if (error) {
+		redirect(buildRedirect(SERVICOS_PATH, "error", error.message));
 	}
 
 	revalidatePath(SERVICOS_PATH);

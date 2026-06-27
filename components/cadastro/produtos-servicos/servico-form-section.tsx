@@ -3,7 +3,6 @@ import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { SearchableSelect } from "@/components/forms/searchable-select";
-import { StorageImageUpload } from "@/components/forms/storage-image-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,10 +45,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 			<form action={servicoEditando ? updateServicoAction : createServicoAction} className="space-y-4">
 				<div className="grid gap-4 md:grid-cols-12">
 				{servicoEditando ? (
-					<>
-						<input type="hidden" name="codservico" value={servicoEditando.codservico} />
-						<input type="hidden" name="imagem_url" value={servicoEditando.imagem_url ?? ""} />
-					</>
+					<input type="hidden" name="codservico" value={servicoEditando.codservico} />
 				) : null}
 
 				<div className="flex flex-col gap-2 md:col-span-2">
@@ -121,8 +117,6 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 						<Input id="valor_desconto" name="valor_desconto" type="text" placeholder="Ex: 5,00" defaultValue={String(servicoEditando?.valor_desconto ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 				</div>
-
-				<StorageImageUpload name="imagem_arquivo" label="Imagem" folder="servicos" />
 
 				<AuditDates
 					createdAt={servicoEditando?.data_criacao}

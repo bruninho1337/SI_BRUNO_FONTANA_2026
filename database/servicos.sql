@@ -5,7 +5,6 @@ create table if not exists public.servicos (
 	duracao_minutos integer not null check (duracao_minutos > 0),
 	valor numeric not null default 0 check (valor >= 0),
 	valor_desconto numeric default 0 check (valor_desconto >= 0),
-	imagem_url text,
 	ativo char(1) not null default 'S' check (ativo in ('S', 'N')),
 	data_cadastro timestamp not null default current_timestamp,
 	data_ult_alteracao timestamp not null default current_timestamp,
@@ -50,6 +49,9 @@ alter table public.servicos
 
 alter table public.servicos
 	drop column if exists descricao;
+
+alter table public.servicos
+	drop column if exists imagem_url;
 
 create or replace function public.set_data_ult_alteracao()
 returns trigger
