@@ -124,21 +124,6 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 
 				<StorageImageUpload name="imagem_arquivo" label="Imagem" folder="servicos" />
 
-				<div className="flex flex-col gap-2">
-					<Label htmlFor="descricao" className="text-sm text-neutral-800">
-						Descrição:
-					</Label>
-					<textarea
-						id="descricao"
-						name="descricao"
-						placeholder="Descreva rapidamente o servico"
-						maxLength={255}
-						rows={4}
-						defaultValue={servicoEditando?.descricao ?? ""}
-						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
-					/>
-				</div>
-
 				<AuditDates
 					createdAt={servicoEditando?.data_criacao}
 					updatedAt={servicoEditando?.data_atualizacao}

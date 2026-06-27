@@ -58,15 +58,10 @@ export async function deleteMarcaAction(formData: FormData) {
 
 async function saveMarca(formData: FormData, codmarca?: number) {
 	const marca = getText(formData, "marca");
-	const descricao = getText(formData, "descricao");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(marca, 2, 80)) {
 		redirect(buildRedirect(MARCAS_PATH, "error", "Marca deve ter entre 2 e 80 caracteres."));
-	}
-
-	if (descricao.length > 255) {
-		redirect(buildRedirect(MARCAS_PATH, "error", "Descricao deve ter no maximo 255 caracteres."));
 	}
 
 	if (!["S", "N"].includes(ativo)) {
@@ -75,12 +70,12 @@ async function saveMarca(formData: FormData, codmarca?: number) {
 
 	const { error } = codmarca
 		? await executeQuery(
-				"update public.marcas set marca = $1, descricao = $2, ativo = $3 where codmarca = $4",
-				[marca, descricao || null, ativo, codmarca]
+				"update public.marcas set marca = $1, ativo = $2 where codmarca = $3",
+				[marca, ativo, codmarca]
 			)
 		: await executeQuery(
-				"insert into public.marcas (marca, descricao, ativo) values ($1, $2, $3)",
-				[marca, descricao || null, ativo]
+				"insert into public.marcas (marca, ativo) values ($1, $2)",
+				[marca, ativo]
 			);
 
 	if (error) {

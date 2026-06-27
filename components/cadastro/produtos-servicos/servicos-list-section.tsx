@@ -19,7 +19,7 @@ export async function ServicosListSection({ searchParams }: ServicosListSectionP
 		(categorias ?? []).map((categoria) => [categoria.codcategoria, categoria.categoria])
 	);
 	const filtered = (servicos ?? []).filter((servico) =>
-		[servico.servico, servico.descricao, categoriaMap.get(servico.codcategoria ?? 0)].some((value) =>
+		[servico.servico, categoriaMap.get(servico.codcategoria ?? 0)].some((value) =>
 			String(value ?? "").toLowerCase().includes(query)
 		)
 	);
@@ -31,7 +31,7 @@ export async function ServicosListSection({ searchParams }: ServicosListSectionP
 				count={filtered.length}
 				createHref="/cadastro/produtos-servicos/servicos?mode=create"
 				searchValue={params?.q}
-				searchPlaceholder="Pesquisar por servico, categoria ou descricao"
+				searchPlaceholder="Pesquisar por servico ou categoria"
 			/>
 			<FormFeedback params={params} />
 

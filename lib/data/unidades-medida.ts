@@ -1,7 +1,7 @@
 import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 
 const UNIDADE_MEDIDA_SELECT =
-	"codunidade_medida, unidade_medida, sigla, descricao, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao";
+	"codunidade_medida, unidade_medida, sigla, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao";
 
 export async function listarUnidadesMedida() {
 	return queryRows(

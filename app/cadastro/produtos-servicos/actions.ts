@@ -114,7 +114,6 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 	const valor = parseDecimal(formData.get("valor"));
 	const quantidadeEstoque = Number(getText(formData, "quantidade_estoque") || "0");
 	const valorDesconto = parseDecimal(formData.get("valor_desconto"));
-	const descricao = getText(formData, "descricao");
 	const imagemArquivo = formData.get("imagem_arquivo");
 	const imagemAtual = getText(formData, "imagem_url");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
@@ -135,10 +134,6 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 		redirect(buildRedirect(PRODUTOS_PATH, "error", "O desconto do produto precisa estar entre 0 e o valor informado."));
 	}
 
-	if (descricao.length > 255) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", "Descricao deve ter no maximo 255 caracteres."));
-	}
-
 	let uploadedImage: Awaited<ReturnType<typeof uploadImageIfPresent>> = null;
 
 	try {
@@ -151,9 +146,9 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 			? await executeQuery(
 				`update public.produtos
 					set produto = $1, codcategoria = $2, codmarca = $3, codunidade_medida = $4,
-						valor = $5, quantidade_estoque = $6, valor_desconto = $7, descricao = $8,
-						imagem_url = $9, ativo = $10
-					where codproduto = $11`,
+						valor = $5, quantidade_estoque = $6, valor_desconto = $7,
+						imagem_url = $8, ativo = $9
+					where codproduto = $10`,
 					[
 						produto,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
@@ -162,7 +157,6 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 						valor,
 						quantidadeEstoque,
 						valorDesconto,
-						descricao || null,
 						uploadedImage?.publicUrl ?? (imagemAtual || null),
 						ativo,
 						codproduto,
@@ -171,8 +165,8 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 			: await executeQuery(
 					`insert into public.produtos (
 						produto, codcategoria, codmarca, codunidade_medida, valor, quantidade_estoque,
-						valor_desconto, descricao, imagem_url, ativo
-					) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+						valor_desconto, imagem_url, ativo
+					) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 					[
 						produto,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
@@ -181,7 +175,6 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 						valor,
 						quantidadeEstoque,
 						valorDesconto,
-						descricao || null,
 						uploadedImage?.publicUrl ?? (imagemAtual || null),
 						ativo,
 					]
@@ -240,7 +233,6 @@ async function saveServico(formData: FormData, codservico?: number) {
 	const duracaoMinutos = Number(getText(formData, "duracao_minutos") || "0");
 	const valor = parseDecimal(formData.get("valor"));
 	const valorDesconto = parseDecimal(formData.get("valor_desconto"));
-	const descricao = getText(formData, "descricao");
 	const imagemArquivo = formData.get("imagem_arquivo");
 	const imagemAtual = getText(formData, "imagem_url");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
@@ -261,10 +253,6 @@ async function saveServico(formData: FormData, codservico?: number) {
 		redirect(buildRedirect(SERVICOS_PATH, "error", "O desconto do servico precisa estar entre 0 e o valor informado."));
 	}
 
-	if (descricao.length > 255) {
-		redirect(buildRedirect(SERVICOS_PATH, "error", "Descricao deve ter no maximo 255 caracteres."));
-	}
-
 	let uploadedImage: Awaited<ReturnType<typeof uploadImageIfPresent>> = null;
 
 	try {
@@ -274,34 +262,32 @@ async function saveServico(formData: FormData, codservico?: number) {
 		);
 
 		const { error } = codservico
-			? await executeQuery(
+				? await executeQuery(
 					`update public.servicos
 					set servico = $1, codcategoria = $2, duracao_minutos = $3, valor = $4,
-						valor_desconto = $5, descricao = $6, imagem_url = $7, ativo = $8
-					where codservico = $9`,
+						valor_desconto = $5, imagem_url = $6, ativo = $7
+					where codservico = $8`,
 					[
 						servico,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
 						duracaoMinutos,
 						valor,
 						valorDesconto,
-						descricao || null,
 						uploadedImage?.publicUrl ?? (imagemAtual || null),
 						ativo,
 						codservico,
 					]
 				)
-			: await executeQuery(
+				: await executeQuery(
 					`insert into public.servicos (
-						servico, codcategoria, duracao_minutos, valor, valor_desconto, descricao, imagem_url, ativo
-					) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+						servico, codcategoria, duracao_minutos, valor, valor_desconto, imagem_url, ativo
+					) values ($1, $2, $3, $4, $5, $6, $7)`,
 					[
 						servico,
 						codcategoriaValue ? Number(codcategoriaValue) : null,
 						duracaoMinutos,
 						valor,
 						valorDesconto,
-						descricao || null,
 						uploadedImage?.publicUrl ?? (imagemAtual || null),
 						ativo,
 					]

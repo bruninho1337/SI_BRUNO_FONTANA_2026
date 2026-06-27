@@ -28,7 +28,6 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 	const filtered = (produtos ?? []).filter((produto) =>
 		[
 			produto.produto,
-			produto.descricao,
 			categoriaMap.get(produto.codcategoria ?? 0),
 			marcaMap.get(produto.codmarca ?? 0),
 			unidadeMedidaMap.get(produto.codunidade_medida ?? 0),
@@ -44,7 +43,7 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 				count={filtered.length}
 				createHref="/cadastro/produtos-servicos/produtos?mode=create"
 				searchValue={params?.q}
-				searchPlaceholder="Pesquisar por produto, categoria, marca, unidade ou descricao"
+				searchPlaceholder="Pesquisar por produto, categoria, marca ou unidade"
 			/>
 			<FormFeedback params={params} />
 

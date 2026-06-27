@@ -106,21 +106,6 @@ export async function UnidadeMedidaFormSection({
 					/>
 				</div>
 
-				<div className="flex flex-col gap-2">
-					<Label htmlFor="descricao" className="text-sm text-neutral-800">
-						Descricao:
-					</Label>
-					<textarea
-						id="descricao"
-						name="descricao"
-						placeholder="Descreva rapidamente a unidade de medida"
-						maxLength={255}
-						rows={4}
-						defaultValue={unidadeEditando?.descricao ?? ""}
-						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
-					/>
-				</div>
-
 				<AuditDates
 					createdAt={unidadeEditando?.data_criacao}
 					updatedAt={unidadeEditando?.data_atualizacao}

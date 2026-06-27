@@ -12,7 +12,7 @@ export async function MarcasListSection({ searchParams }: MarcasListSectionProps
 	const query = String(params?.q ?? "").trim().toLowerCase();
 	const { data: marcas, error } = await listarMarcas();
 	const filtered = (marcas ?? []).filter((marca) =>
-		[marca.marca, marca.descricao].some((value) =>
+		[marca.marca].some((value) =>
 			String(value ?? "").toLowerCase().includes(query)
 		)
 	);
@@ -24,7 +24,7 @@ export async function MarcasListSection({ searchParams }: MarcasListSectionProps
 				count={filtered.length}
 				createHref="/cadastro/produtos-servicos/marcas?mode=create"
 				searchValue={params?.q}
-				searchPlaceholder="Pesquisar por marca ou descricao"
+				searchPlaceholder="Pesquisar por marca"
 			/>
 			<FormFeedback params={params} />
 
@@ -36,7 +36,6 @@ export async function MarcasListSection({ searchParams }: MarcasListSectionProps
 						<thead>
 							<tr className="text-left text-sm text-neutral-500">
 								<th className="pb-2 font-medium">Marca</th>
-								<th className="pb-2 font-medium">Descricao</th>
 								<th className="pb-2 font-medium">Ativo</th>
 								<th className="pb-2 text-right font-medium">Acoes</th>
 							</tr>
@@ -45,7 +44,6 @@ export async function MarcasListSection({ searchParams }: MarcasListSectionProps
 							{filtered.map((marca) => (
 								<tr key={marca.codmarca} className="bg-neutral-50">
 									<td className="rounded-l-xl px-4 py-3 text-sm text-neutral-900">{marca.marca}</td>
-									<td className="px-4 py-3 text-sm text-neutral-700">{marca.descricao ?? "-"}</td>
 									<td className="px-4 py-3 text-sm font-semibold text-neutral-900">{marca.ativo}</td>
 									<td className="rounded-r-xl px-4 py-3">
 										<CadastroRowActions

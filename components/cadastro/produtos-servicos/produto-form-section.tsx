@@ -181,21 +181,6 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 
 				<StorageImageUpload name="imagem_arquivo" label="Imagem" folder="produtos" />
 
-				<div className="flex flex-col gap-2">
-					<Label htmlFor="descricao" className="text-sm text-neutral-800">
-						Descrição:
-					</Label>
-					<textarea
-						id="descricao"
-						name="descricao"
-						placeholder="Descreva rapidamente o produto"
-						maxLength={255}
-						rows={4}
-						defaultValue={produtoEditando?.descricao ?? ""}
-						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
-					/>
-				</div>
-
 				<AuditDates
 					createdAt={produtoEditando?.data_criacao}
 					updatedAt={produtoEditando?.data_atualizacao}

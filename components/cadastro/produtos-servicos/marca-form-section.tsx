@@ -77,21 +77,6 @@ export async function MarcaFormSection({ searchParams }: MarcaFormSectionProps) 
 					/>
 				</div>
 
-				<div className="flex flex-col gap-2">
-					<Label htmlFor="descricao" className="text-sm text-neutral-800">
-						Descrição:
-					</Label>
-					<textarea
-						id="descricao"
-						name="descricao"
-						placeholder="Descreva rapidamente a marca"
-						maxLength={255}
-						rows={4}
-						defaultValue={marcaEditando?.descricao ?? ""}
-						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
-					/>
-				</div>
-
 				<AuditDates
 					createdAt={marcaEditando?.data_criacao}
 					updatedAt={marcaEditando?.data_atualizacao}

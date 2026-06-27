@@ -14,7 +14,7 @@ export async function UnidadesMedidaListSection({
 	const query = String(params?.q ?? "").trim().toLowerCase();
 	const { data: unidades, error } = await listarUnidadesMedida();
 	const filtered = (unidades ?? []).filter((unidade) =>
-		[unidade.unidade_medida, unidade.sigla, unidade.descricao].some((value) =>
+		[unidade.unidade_medida, unidade.sigla].some((value) =>
 			String(value ?? "").toLowerCase().includes(query)
 		)
 	);
@@ -26,7 +26,7 @@ export async function UnidadesMedidaListSection({
 				count={filtered.length}
 				createHref="/cadastro/produtos-servicos/unidades-medida?mode=create"
 				searchValue={params?.q}
-				searchPlaceholder="Pesquisar por unidade, sigla ou descricao"
+				searchPlaceholder="Pesquisar por unidade ou sigla"
 			/>
 			<FormFeedback params={params} />
 
@@ -39,7 +39,6 @@ export async function UnidadesMedidaListSection({
 							<tr className="text-left text-sm text-neutral-500">
 								<th className="pb-2 font-medium">Unidade</th>
 								<th className="pb-2 font-medium">Sigla</th>
-								<th className="pb-2 font-medium">Descricao</th>
 								<th className="pb-2 font-medium">Ativo</th>
 								<th className="pb-2 text-right font-medium">Acoes</th>
 							</tr>
@@ -51,7 +50,6 @@ export async function UnidadesMedidaListSection({
 										{unidade.unidade_medida}
 									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{unidade.sigla}</td>
-									<td className="px-4 py-3 text-sm text-neutral-700">{unidade.descricao ?? "-"}</td>
 									<td className="px-4 py-3 text-sm font-semibold text-neutral-900">{unidade.ativo}</td>
 									<td className="rounded-r-xl px-4 py-3">
 										<CadastroRowActions

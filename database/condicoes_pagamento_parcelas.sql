@@ -20,21 +20,3 @@ create table if not exists public.condicoes_pagamento_parcelas (
 
 create index if not exists condicoes_pagamento_parcelas_forma_idx
 	on public.condicoes_pagamento_parcelas (codforma_pagamento);
-
-comment on table public.condicoes_pagamento_parcelas is
-	'Parcelas que compoem uma condicao de pagamento.';
-
-comment on column public.condicoes_pagamento_parcelas.codcondicao_pagamento is
-	'Condicao de pagamento da parcela. Faz parte da chave primaria.';
-
-comment on column public.condicoes_pagamento_parcelas.num_parcela is
-	'Numero sequencial da parcela. Faz parte da chave primaria.';
-
-comment on column public.condicoes_pagamento_parcelas.dias_vencimento is
-	'Quantidade de dias para o vencimento da parcela.';
-
-comment on column public.condicoes_pagamento_parcelas.codforma_pagamento is
-	'Forma utilizada para pagar a parcela.';
-
-comment on column public.condicoes_pagamento_parcelas.percentual is
-	'Percentual do valor total correspondente a parcela.';

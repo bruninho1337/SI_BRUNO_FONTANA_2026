@@ -5,7 +5,6 @@ create table if not exists public.servicos (
 	duracao_minutos integer not null check (duracao_minutos > 0),
 	valor numeric not null default 0 check (valor >= 0),
 	valor_desconto numeric default 0 check (valor_desconto >= 0),
-	descricao text check (descricao is null or char_length(descricao) <= 255),
 	imagem_url text,
 	ativo char(1) not null default 'S' check (ativo in ('S', 'N')),
 	data_cadastro timestamp not null default current_timestamp,
@@ -45,6 +44,12 @@ alter table public.servicos
 alter table public.servicos
 	add constraint servicos_servico_check
 	check (char_length(servico) between 2 and 50);
+
+alter table public.servicos
+	drop constraint if exists servicos_descricao_check;
+
+alter table public.servicos
+	drop column if exists descricao;
 
 create or replace function public.set_data_ult_alteracao()
 returns trigger

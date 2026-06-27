@@ -7,7 +7,6 @@ create table if not exists public.produtos (
 	valor numeric not null default 0 check (valor >= 0),
 	quantidade_estoque integer not null default 0 check (quantidade_estoque >= 0),
 	valor_desconto numeric default 0 check (valor_desconto >= 0),
-	descricao text check (descricao is null or char_length(descricao) <= 100),
 	imagem_url text,
 	ativo char(1) not null default 'S' check (ativo in ('S', 'N')),
 	data_cadastro timestamp not null default current_timestamp,
@@ -30,8 +29,7 @@ alter table public.produtos
 	drop constraint if exists produtos_descricao_check;
 
 alter table public.produtos
-	add constraint produtos_descricao_check
-	check (descricao is null or char_length(descricao) <= 100);
+	drop column if exists descricao;
 
 do $$
 begin

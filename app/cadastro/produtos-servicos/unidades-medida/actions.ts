@@ -62,7 +62,6 @@ export async function deleteUnidadeMedidaAction(formData: FormData) {
 async function saveUnidadeMedida(formData: FormData, codunidadeMedida?: number) {
 	const unidadeMedida = getText(formData, "unidade_medida");
 	const sigla = getText(formData, "sigla").toUpperCase();
-	const descricao = getText(formData, "descricao");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(unidadeMedida, 2, 80)) {
@@ -73,10 +72,6 @@ async function saveUnidadeMedida(formData: FormData, codunidadeMedida?: number) 
 		redirect(buildRedirect(UNIDADES_MEDIDA_PATH, "error", "Sigla deve ter entre 1 e 10 caracteres."));
 	}
 
-	if (descricao.length > 255) {
-		redirect(buildRedirect(UNIDADES_MEDIDA_PATH, "error", "Descricao deve ter no maximo 255 caracteres."));
-	}
-
 	if (!["S", "N"].includes(ativo)) {
 		redirect(buildRedirect(UNIDADES_MEDIDA_PATH, "error", "Informe um status valido para a unidade de medida."));
 	}
@@ -84,13 +79,13 @@ async function saveUnidadeMedida(formData: FormData, codunidadeMedida?: number) 
 	const { error } = codunidadeMedida
 		? await executeQuery(
 				`update public.unidades_medida
-				set unidade_medida = $1, sigla = $2, descricao = $3, ativo = $4
-				where codunidade_medida = $5`,
-				[unidadeMedida, sigla, descricao || null, ativo, codunidadeMedida]
+				set unidade_medida = $1, sigla = $2, ativo = $3
+				where codunidade_medida = $4`,
+				[unidadeMedida, sigla, ativo, codunidadeMedida]
 			)
 		: await executeQuery(
-				"insert into public.unidades_medida (unidade_medida, sigla, descricao, ativo) values ($1, $2, $3, $4)",
-				[unidadeMedida, sigla, descricao || null, ativo]
+				"insert into public.unidades_medida (unidade_medida, sigla, ativo) values ($1, $2, $3)",
+				[unidadeMedida, sigla, ativo]
 			);
 
 	if (error) {
