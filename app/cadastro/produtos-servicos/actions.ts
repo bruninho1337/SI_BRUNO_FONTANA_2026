@@ -75,8 +75,8 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 	const codmarcaValue = getText(formData, "codmarca");
 	const codunidadeMedidaValue = getText(formData, "codunidade_medida");
 	const valor = parseDecimal(formData.get("valor"));
-	const precoCusto = parseDecimal(formData.get("preco_custo"));
-	const quantidadeEstoque = Number(getText(formData, "quantidade_estoque") || "0");
+	const precoCusto = codproduto ? 0 : parseDecimal(formData.get("preco_custo"));
+	const quantidadeEstoque = codproduto ? 0 : Number(getText(formData, "quantidade_estoque") || "0");
 	const valorDesconto = parseDecimal(formData.get("valor_desconto"));
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
@@ -104,16 +104,14 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 		? await executeQuery(
 				`update public.produtos
 					set produto = $1, codcategoria = $2, codmarca = $3, codunidade_medida = $4,
-						valor = $5, preco_custo = $6, quantidade_estoque = $7, valor_desconto = $8, ativo = $9
-					where codproduto = $10`,
+						valor = $5, valor_desconto = $6, ativo = $7
+					where codproduto = $8`,
 				[
 					produto,
 					codcategoriaValue ? Number(codcategoriaValue) : null,
 					codmarcaValue ? Number(codmarcaValue) : null,
 					codunidadeMedidaValue ? Number(codunidadeMedidaValue) : null,
 					valor,
-					precoCusto,
-					quantidadeEstoque,
 					valorDesconto,
 					ativo,
 					codproduto,
