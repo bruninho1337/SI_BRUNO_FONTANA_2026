@@ -161,11 +161,17 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 						</RequiredLabel>
 						<Input id="valor" name="valor" type="text" required placeholder="Ex: 39,90" defaultValue={String(produtoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
+					<div className="flex flex-col gap-2 md:col-span-3">
+						<RequiredLabel htmlFor="preco_custo" className="text-sm text-neutral-800">
+							Preco de custo:
+						</RequiredLabel>
+						<Input id="preco_custo" name="preco_custo" type="text" required placeholder="Ex: 24,90" defaultValue={String(produtoEditando?.preco_custo ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+					</div>
 					<div className="flex flex-col gap-2 md:col-span-2">
 						<RequiredLabel htmlFor="quantidade_estoque" className="text-sm text-neutral-800">
 							Estoque:
 						</RequiredLabel>
-						<Input id="quantidade_estoque" name="quantidade_estoque" type="number" required placeholder="Ex: 12" defaultValue={String(produtoEditando?.quantidade_estoque ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+						<Input id="quantidade_estoque" name="quantidade_estoque" type="number" min={0} required placeholder="Ex: 12" defaultValue={String(produtoEditando?.quantidade_estoque ?? 0)} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-3">
 						<Label htmlFor="valor_desconto" className="text-sm text-neutral-800">

@@ -75,6 +75,7 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 	const codmarcaValue = getText(formData, "codmarca");
 	const codunidadeMedidaValue = getText(formData, "codunidade_medida");
 	const valor = parseDecimal(formData.get("valor"));
+	const precoCusto = parseDecimal(formData.get("preco_custo"));
 	const quantidadeEstoque = Number(getText(formData, "quantidade_estoque") || "0");
 	const valorDesconto = parseDecimal(formData.get("valor_desconto"));
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
@@ -85,6 +86,10 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 
 	if (Number.isNaN(valor) || valor < 0) {
 		redirect(buildRedirect(PRODUTOS_PATH, "error", "Informe um valor valido para o produto."));
+	}
+
+	if (Number.isNaN(precoCusto) || precoCusto < 0) {
+		redirect(buildRedirect(PRODUTOS_PATH, "error", "Informe um preco de custo valido para o produto."));
 	}
 
 	if (Number.isNaN(quantidadeEstoque) || quantidadeEstoque < 0) {
@@ -99,14 +104,15 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 		? await executeQuery(
 				`update public.produtos
 					set produto = $1, codcategoria = $2, codmarca = $3, codunidade_medida = $4,
-						valor = $5, quantidade_estoque = $6, valor_desconto = $7, ativo = $8
-					where codproduto = $9`,
+						valor = $5, preco_custo = $6, quantidade_estoque = $7, valor_desconto = $8, ativo = $9
+					where codproduto = $10`,
 				[
 					produto,
 					codcategoriaValue ? Number(codcategoriaValue) : null,
 					codmarcaValue ? Number(codmarcaValue) : null,
 					codunidadeMedidaValue ? Number(codunidadeMedidaValue) : null,
 					valor,
+					precoCusto,
 					quantidadeEstoque,
 					valorDesconto,
 					ativo,
@@ -115,15 +121,16 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 			)
 		: await executeQuery(
 				`insert into public.produtos (
-					produto, codcategoria, codmarca, codunidade_medida, valor, quantidade_estoque,
+					produto, codcategoria, codmarca, codunidade_medida, valor, preco_custo, quantidade_estoque,
 					valor_desconto, ativo
-				) values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+				) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 				[
 					produto,
 					codcategoriaValue ? Number(codcategoriaValue) : null,
 					codmarcaValue ? Number(codmarcaValue) : null,
 					codunidadeMedidaValue ? Number(codunidadeMedidaValue) : null,
 					valor,
+					precoCusto,
 					quantidadeEstoque,
 					valorDesconto,
 					ativo,

@@ -9,7 +9,7 @@ export type ParcelaCondicaoPagamento = {
 
 export async function listarCondicoesPagamento() {
 	return queryRows(
-		`select cp.codcondicao_pagamento, cp.condicao_pagamento, cp.codforma_pagamento, fp.forma_pagamento, fp.tipo,
+		`select cp.codcondicao_pagamento, cp.condicao_pagamento, cp.codforma_pagamento, fp.forma_pagamento,
 			cp.prazo_dias, cp.parcelas, cp.juro, cp.multa, cp.desconto, cp.ativo,
 			cp.data_cadastro as data_criacao, cp.data_ult_alteracao as data_atualizacao
 		from public.condicoes_pagamento cp
@@ -20,7 +20,7 @@ export async function listarCondicoesPagamento() {
 
 export async function listarCondicoesPagamentoParaSelecao() {
 	return queryRows(
-		`select cp.codcondicao_pagamento, cp.condicao_pagamento, cp.codforma_pagamento, fp.forma_pagamento, fp.tipo,
+		`select cp.codcondicao_pagamento, cp.condicao_pagamento, cp.codforma_pagamento, fp.forma_pagamento,
 			cp.prazo_dias, cp.parcelas
 		from public.condicoes_pagamento cp
 		left join public.formas_pagamento fp on fp.codforma_pagamento = cp.codforma_pagamento

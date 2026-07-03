@@ -18,9 +18,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: "Barber Chaplin",
 		description: "Bem-vindo à Barber Chaplin!",
-		images: [
-			"https://lbiuoahiddvhryxtqdgy.supabase.co/storage/v1/object/public/Arquivos/346373102_1690131428116152_3489076833452730986_n.jpg",
-		],
+		images: ["/opengraph-image.png"],
 	},
 };
 

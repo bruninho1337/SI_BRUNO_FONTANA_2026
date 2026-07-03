@@ -19,16 +19,6 @@ const inputClass = "h-11 rounded-xl border border-neutral-300 bg-white px-4 text
 const readOnlyInputClass = "h-11 rounded-xl border border-neutral-300 bg-neutral-100 px-4 text-neutral-600";
 const fieldClass = "flex flex-col gap-2";
 
-const tipoOptions = [
-	{ value: "DINHEIRO", label: "Dinheiro" },
-	{ value: "PIX", label: "PIX" },
-	{ value: "CARTAO_CREDITO", label: "Cartão de Crédito" },
-	{ value: "CARTAO_DEBITO", label: "Cartão de Débito" },
-	{ value: "BOLETO", label: "Boleto" },
-	{ value: "TRANSFERENCIA", label: "Transferência" },
-	{ value: "OUTROS", label: "Outros" },
-];
-
 export async function FormaPagamentoFormSection({
 	searchParams,
 }: FormaPagamentoFormSectionProps) {
@@ -66,7 +56,7 @@ export async function FormaPagamentoFormSection({
 
 					<div className={`${fieldClass} md:col-span-2`}>
 						<Label htmlFor="codforma-pagamento-display" className="text-sm text-neutral-800">
-							Código:
+							Codigo:
 						</Label>
 						<Input
 							id="codforma-pagamento-display"
@@ -76,7 +66,7 @@ export async function FormaPagamentoFormSection({
 						/>
 					</div>
 
-					<div className={`${fieldClass} md:col-span-5`}>
+					<div className={`${fieldClass} md:col-span-7`}>
 						<RequiredLabel htmlFor="forma_pagamento" className="text-sm text-neutral-800">
 							Forma de Pagamento:
 						</RequiredLabel>
@@ -87,29 +77,10 @@ export async function FormaPagamentoFormSection({
 							minLength={2}
 							maxLength={50}
 							required
-							placeholder="Ex: PIX, Dinheiro, Cartão de Crédito"
+							placeholder="Ex: PIX, Dinheiro, Cartao de Credito"
 							defaultValue={formaEditando?.forma_pagamento ?? ""}
 							className={inputClass}
 						/>
-					</div>
-
-					<div className={`${fieldClass} md:col-span-3`}>
-						<RequiredLabel htmlFor="tipo" className="text-sm text-neutral-800">
-							Tipo:
-						</RequiredLabel>
-						<select
-							id="tipo"
-							name="tipo"
-							required
-							defaultValue={formaEditando?.tipo ?? "OUTROS"}
-							className={inputClass}
-						>
-							{tipoOptions.map((option) => (
-								<option key={option.value} value={option.value}>
-									{option.label}
-								</option>
-							))}
-						</select>
 					</div>
 
 					<ActiveToggle
@@ -121,7 +92,7 @@ export async function FormaPagamentoFormSection({
 
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="descricao" className="text-sm text-neutral-800">
-						Descrição:
+						Descricao:
 					</Label>
 					<textarea
 						id="descricao"

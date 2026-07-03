@@ -68,7 +68,7 @@ export async function ContaPagarFormSection({
 	const formaPagamentoOptions =
 		formasPagamento?.map((forma) => ({
 			id: String(forma.codforma_pagamento),
-			label: `${forma.forma_pagamento} (${forma.tipo})`,
+			label: forma.forma_pagamento,
 		})) ?? [];
 
 	return (

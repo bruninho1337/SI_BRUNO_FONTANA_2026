@@ -73,7 +73,7 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 						minLength={2}
 						maxLength={60}
 						required
-						placeholder="Ex: São Paulo"
+						placeholder="Ex: SÃO PAULO"
 						defaultValue={estadoEditando?.estado ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
 					/>

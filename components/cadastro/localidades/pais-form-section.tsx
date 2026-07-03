@@ -9,7 +9,7 @@ import { RequiredLabel } from "@/components/ui/required-label";
 import { buscarPaisPorId } from "@/lib/data/localidades";
 
 const camposPais = [
-	{ id: "pais", label: "Pais", placeholder: "Ex: Brasil", type: "text", maxLength: 60, className: "md:col-span-4" },
+	{ id: "pais", label: "Pais", placeholder: "Ex: BRASIL", type: "text", maxLength: 60, className: "md:col-span-4" },
 	{ id: "sigla", label: "Sigla", placeholder: "Ex: BR", type: "text", maxLength: 5, className: "md:col-span-2" },
 	{ id: "ddi", label: "DDI", placeholder: "Ex: 55", type: "text", maxLength: 5, className: "md:col-span-2" },
 	{ id: "moeda", label: "Moeda", placeholder: "Ex: BRL", type: "text", maxLength: 10, className: "md:col-span-2" },

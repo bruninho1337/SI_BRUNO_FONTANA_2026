@@ -1,7 +1,7 @@
 import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 
 const FORMAS_PAGAMENTO_SELECT =
-	"codforma_pagamento, forma_pagamento, tipo, descricao, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao";
+	"codforma_pagamento, forma_pagamento, descricao, ativo, data_cadastro as data_criacao, data_ult_alteracao as data_atualizacao";
 
 export async function listarFormasPagamento() {
 	return queryRows(
@@ -11,7 +11,7 @@ export async function listarFormasPagamento() {
 
 export async function listarFormasPagamentoParaSelecao() {
 	return queryRows(
-		"select codforma_pagamento, forma_pagamento, tipo from public.formas_pagamento where ativo = 'S' order by forma_pagamento asc"
+		"select codforma_pagamento, forma_pagamento from public.formas_pagamento where ativo = 'S' order by forma_pagamento asc"
 	);
 }
 

@@ -59,6 +59,7 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 								<th className="pb-2 font-medium">Marca</th>
 								<th className="pb-2 font-medium">Unidade</th>
 								<th className="pb-2 font-medium">Valor</th>
+								<th className="pb-2 font-medium">Custo</th>
 								<th className="pb-2 font-medium">Estoque</th>
 								<th className="pb-2 font-medium">Desconto</th>
 								<th className="pb-2 font-medium">Ativo</th>
@@ -81,6 +82,7 @@ export async function ProdutosListSection({ searchParams }: ProdutosListSectionP
 											: "-"}
 									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatarMoeda(produto.valor)}</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">{formatarMoeda(produto.preco_custo)}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{produto.quantidade_estoque}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatarMoeda(produto.valor_desconto)}</td>
 									<td className="px-4 py-3 text-sm font-semibold text-neutral-900">{produto.ativo}</td>

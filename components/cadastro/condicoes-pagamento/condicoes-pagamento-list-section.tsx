@@ -21,11 +21,10 @@ export async function CondicoesPagamentoListSection({
 	const query = String(params?.q ?? "").trim().toLowerCase();
 	const { data: condicoes, error } = await listarCondicoesPagamento();
 	const filtered = (condicoes ?? []).filter((condicao) =>
-		[
-			condicao.condicao_pagamento,
-			condicao.forma_pagamento,
-			condicao.tipo,
-			condicao.prazo_dias,
+			[
+				condicao.condicao_pagamento,
+				condicao.forma_pagamento,
+				condicao.prazo_dias,
 			condicao.parcelas,
 			condicao.juro,
 			condicao.multa,
@@ -69,9 +68,7 @@ export async function CondicoesPagamentoListSection({
 										{condicao.condicao_pagamento}
 									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">
-										{condicao.forma_pagamento
-											? `${condicao.forma_pagamento} (${condicao.tipo})`
-											: "-"}
+										{condicao.forma_pagamento ?? "-"}
 									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{condicao.prazo_dias} dia(s)</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{condicao.parcelas}</td>

@@ -5,6 +5,7 @@ create table if not exists public.produtos (
 	codmarca integer references public.marcas(codmarca),
 	codunidade_medida integer references public.unidades_medida(codunidade_medida),
 	valor numeric not null default 0 check (valor >= 0),
+	preco_custo numeric not null default 0 check (preco_custo >= 0),
 	quantidade_estoque integer not null default 0 check (quantidade_estoque >= 0),
 	valor_desconto numeric default 0 check (valor_desconto >= 0),
 	ativo char(1) not null default 'S' check (ativo in ('S', 'N')),
@@ -57,6 +58,9 @@ alter table public.produtos
 
 alter table public.produtos
 	add column if not exists codunidade_medida integer;
+
+alter table public.produtos
+	add column if not exists preco_custo numeric not null default 0 check (preco_custo >= 0);
 
 alter table public.produtos
 	drop constraint if exists produtos_codmarca_fkey;

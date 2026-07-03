@@ -43,7 +43,7 @@ export async function CondicaoPagamentoFormSection({
 	const formaPagamentoOptions =
 		formasPagamento?.map((forma) => ({
 			id: String(forma.codforma_pagamento),
-			label: `${forma.forma_pagamento} (${forma.tipo})`,
+			label: forma.forma_pagamento,
 		})) ?? [];
 
 	return (
@@ -107,7 +107,7 @@ export async function CondicaoPagamentoFormSection({
 							minLength={2}
 							maxLength={50}
 							required
-							placeholder="Ex: A vista, 30 dias, Parcelado 3x"
+							placeholder="Ex: À VISTA, 30 DIAS, PARCELADO 3X"
 							defaultValue={condicaoEditando?.condicao_pagamento ?? ""}
 							className={inputClass}
 						/>
