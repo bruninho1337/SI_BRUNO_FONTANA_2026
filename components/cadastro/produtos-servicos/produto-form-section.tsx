@@ -1,6 +1,7 @@
 import { createProdutoAction, updateProdutoAction } from "@/app/cadastro/produtos-servicos/actions";
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
+import { DecimalInput } from "@/components/forms/decimal-input";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
@@ -166,7 +167,7 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 						<RequiredLabel htmlFor="valor" className="text-sm text-neutral-800">
 							Preco Venda:
 						</RequiredLabel>
-						<Input id="valor" name="valor" type="text" required placeholder="Ex: 39,90" defaultValue={String(produtoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+						<DecimalInput id="valor" name="valor" type="text" required placeholder="Ex: 39,90" defaultValue={String(produtoEditando?.valor ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-2">
 						<RequiredLabel htmlFor="quantidade_estoque" className="text-sm text-neutral-800">
@@ -179,7 +180,7 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 						<Label htmlFor="valor_desconto" className="text-sm text-neutral-800">
 							Desconto:
 						</Label>
-						<Input id="valor_desconto" name="valor_desconto" type="text" placeholder="Ex: 5,00" defaultValue={String(produtoEditando?.valor_desconto ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+						<DecimalInput id="valor_desconto" name="valor_desconto" type="text" placeholder="Ex: 5,00" defaultValue={String(produtoEditando?.valor_desconto ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 				</div>
 

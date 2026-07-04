@@ -22,16 +22,17 @@ function getText(formData: FormData, name: string) {
 }
 
 function parseDecimal(value: FormDataEntryValue | null) {
-	const normalized = String(value ?? "")
-		.trim()
-		.replace(/\./g, "")
-		.replace(",", ".");
+	const rawValue = String(value ?? "").trim();
 
-	if (!normalized) {
+	if (!rawValue) {
 		return 0;
 	}
 
-	return Number(normalized);
+	if (!/^\d+(?:[,.]\d{1,2})?$/.test(rawValue)) {
+		return Number.NaN;
+	}
+
+	return Number(rawValue.replace(",", "."));
 }
 
 function isLengthBetween(value: string, min: number, max: number) {
