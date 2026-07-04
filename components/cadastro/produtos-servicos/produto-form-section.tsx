@@ -159,8 +159,8 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 						<RequiredLabel htmlFor="preco_custo" className="text-sm text-neutral-800">
 							Preco Custo:
 						</RequiredLabel>
-						{produtoEditando ? <input type="hidden" name="preco_custo" value={String(produtoEditando.preco_custo ?? 0)} /> : null}
-						<Input id="preco_custo" name={produtoEditando ? undefined : "preco_custo"} type="text" required readOnly={Boolean(produtoEditando)} placeholder="Ex: 24,90" defaultValue={String(produtoEditando?.preco_custo ?? "")} className={`h-11 rounded-xl border-neutral-300 px-4 ${produtoEditando ? "bg-neutral-100 text-neutral-600" : "bg-white text-neutral-900"}`} />
+						<input type="hidden" name="preco_custo" value={String(produtoEditando?.preco_custo ?? 0)} />
+						<Input id="preco_custo" type="text" readOnly value={String(produtoEditando?.preco_custo ?? 0)} className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-3">
 						<RequiredLabel htmlFor="valor" className="text-sm text-neutral-800">
@@ -172,8 +172,8 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 						<RequiredLabel htmlFor="quantidade_estoque" className="text-sm text-neutral-800">
 							Estoque:
 						</RequiredLabel>
-						{produtoEditando ? <input type="hidden" name="quantidade_estoque" value={String(produtoEditando.quantidade_estoque ?? 0)} /> : null}
-						<Input id="quantidade_estoque" name={produtoEditando ? undefined : "quantidade_estoque"} type="number" min={0} required readOnly={Boolean(produtoEditando)} placeholder="Ex: 12" defaultValue={String(produtoEditando?.quantidade_estoque ?? 0)} className={`h-11 rounded-xl border-neutral-300 px-4 ${produtoEditando ? "bg-neutral-100 text-neutral-600" : "bg-white text-neutral-900"}`} />
+						<input type="hidden" name="quantidade_estoque" value={String(produtoEditando?.quantidade_estoque ?? 0)} />
+						<Input id="quantidade_estoque" type="number" readOnly value={String(produtoEditando?.quantidade_estoque ?? 0)} className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-3">
 						<Label htmlFor="valor_desconto" className="text-sm text-neutral-800">
