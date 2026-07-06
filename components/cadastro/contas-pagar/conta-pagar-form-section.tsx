@@ -131,7 +131,7 @@ export async function ContaPagarFormSection({
 							minLength={2}
 							maxLength={120}
 							required
-							placeholder="Ex: Aluguel, fornecedor de produtos, energia"
+							placeholder="Ex: ALUGUEL, FORNECEDOR DE PRODUTOS, ENERGIA"
 							defaultValue={contaPagar?.conta_pagar ?? ""}
 							className={inputClass}
 						/>
@@ -146,7 +146,7 @@ export async function ContaPagarFormSection({
 							name="numero_documento"
 							type="text"
 							maxLength={60}
-							placeholder="Ex: NF 1234, boleto 9988"
+							placeholder="Ex: NF 1234, BOLETO 9988"
 							defaultValue={contaPagar?.numero_documento ?? ""}
 							className={inputClass}
 						/>

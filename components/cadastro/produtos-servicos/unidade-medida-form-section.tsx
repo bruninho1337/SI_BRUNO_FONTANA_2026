@@ -76,7 +76,7 @@ export async function UnidadeMedidaFormSection({
 							minLength={2}
 							maxLength={80}
 							required
-							placeholder="Ex: Unidade"
+							placeholder="Ex: UNIDADE"
 							defaultValue={unidadeEditando?.unidade_medida ?? ""}
 							className={inputClass}
 						/>

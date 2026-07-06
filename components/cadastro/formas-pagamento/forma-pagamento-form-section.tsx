@@ -77,7 +77,7 @@ export async function FormaPagamentoFormSection({
 							minLength={2}
 							maxLength={50}
 							required
-							placeholder="Ex: PIX, Dinheiro, Cartao de Credito"
+							placeholder="Ex: PIX, DINHEIRO, CARTÃO DE CRÉDITO"
 							defaultValue={formaEditando?.forma_pagamento ?? ""}
 							className={inputClass}
 						/>
@@ -87,21 +87,6 @@ export async function FormaPagamentoFormSection({
 						name="ativo"
 						defaultValue={formaEditando?.ativo === "N" ? "N" : "S"}
 						className="w-fit md:col-span-2 md:col-start-11 md:row-start-1 md:justify-self-end"
-					/>
-				</div>
-
-				<div className="flex flex-col gap-2">
-					<Label htmlFor="descricao" className="text-sm text-neutral-800">
-						Descricao:
-					</Label>
-					<textarea
-						id="descricao"
-						name="descricao"
-						placeholder="Descreva regras, observacoes ou detalhes da forma de pagamento"
-						maxLength={255}
-						rows={4}
-						defaultValue={formaEditando?.descricao ?? ""}
-						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
 

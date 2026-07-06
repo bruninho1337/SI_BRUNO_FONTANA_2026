@@ -159,7 +159,7 @@ export function FornecedorFormFields({
 						minLength={5}
 						maxLength={80}
 						required
-						placeholder={isFisica ? "Ex: João Silva" : "Ex: Barbearia Central Ltda"}
+						placeholder={isFisica ? "Ex: JOÃO SILVA" : "Ex: BARBEARIA CENTRAL LTDA"}
 						defaultValue={String(initialData?.fornecedor ?? "")}
 						className={inputClass}
 					/>
@@ -182,7 +182,7 @@ export function FornecedorFormFields({
 							id="nome_fantasia"
 							name="nome_fantasia"
 							maxLength={80}
-							placeholder="Ex: Barbearia Central"
+							placeholder="Ex: BARBEARIA CENTRAL"
 							defaultValue={String(initialData?.nome_fantasia ?? "")}
 							className={inputClass}
 						/>
@@ -203,7 +203,7 @@ export function FornecedorFormFields({
 						minLength={5}
 						maxLength={80}
 						required
-						placeholder="Ex: Avenida Brasil"
+						placeholder="Ex: AVENIDA BRASIL"
 						defaultValue={String(initialData?.endereco ?? "")}
 						className={inputClass}
 					/>
@@ -255,7 +255,7 @@ export function FornecedorFormFields({
 						id="complemento"
 						name="complemento"
 						maxLength={60}
-						placeholder="Ex: Sala 2"
+						placeholder="Ex: SALA 2"
 						defaultValue={String(initialData?.complemento ?? "")}
 						className={inputClass}
 					/>
@@ -271,7 +271,7 @@ export function FornecedorFormFields({
 						minLength={5}
 						maxLength={60}
 						required
-						placeholder="Ex: Centro"
+						placeholder="Ex: CENTRO"
 						defaultValue={String(initialData?.bairro ?? "")}
 						className={inputClass}
 					/>
@@ -326,7 +326,7 @@ export function FornecedorFormFields({
 						id="contato"
 						name="contato"
 						maxLength={60}
-						placeholder="Ex: João"
+						placeholder="Ex: JOÃO"
 						defaultValue={String(initialData?.contato ?? "")}
 						className={inputClass}
 					/>
@@ -343,7 +343,7 @@ export function FornecedorFormFields({
 						minLength={5}
 						maxLength={80}
 						required
-						placeholder="Ex: fornecedor@email.com"
+						placeholder="Ex: FORNECEDOR@EMAIL.COM"
 						defaultValue={String(initialData?.email ?? "")}
 						className={inputClass}
 					/>

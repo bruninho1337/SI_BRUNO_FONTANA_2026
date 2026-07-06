@@ -38,6 +38,7 @@ export async function FuncionariosListSection({
 	const filtered = (funcionarios ?? []).filter((funcionario) =>
 		[
 			funcionario.codfuncionario,
+			funcionario.tipo,
 			funcionario.funcionario,
 			funcionario.apelido,
 			funcionario.funcao_funcionario,
@@ -70,11 +71,12 @@ export async function FuncionariosListSection({
 						<thead>
 							<tr className="text-left text-sm text-neutral-500">
 								<th className="pb-2 font-medium">Codigo</th>
+								<th className="pb-2 font-medium">Tipo</th>
 								<th className="pb-2 font-medium">Funcionário</th>
 								<th className="pb-2 font-medium">Função</th>
 								<th className="pb-2 font-medium">Telefone</th>
 								<th className="pb-2 font-medium">E-mail</th>
-								<th className="pb-2 font-medium">CPF</th>
+								<th className="pb-2 font-medium">CPF/CNPJ</th>
 								<th className="pb-2 font-medium">Admissão</th>
 								<th className="pb-2 font-medium">Demissão</th>
 								<th className="pb-2 font-medium">Salário</th>
@@ -88,6 +90,7 @@ export async function FuncionariosListSection({
 									<td className="rounded-l-xl px-4 py-3 text-sm font-semibold text-neutral-900">
 										{funcionario.codfuncionario}
 									</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">{funcionario.tipo ?? "FISICA"}</td>
 									<td className="px-4 py-3 text-sm text-neutral-900">
 										{funcionario.funcionario}
 										{funcionario.apelido ? (
@@ -97,7 +100,9 @@ export async function FuncionariosListSection({
 									<td className="px-4 py-3 text-sm text-neutral-700">{funcionario.funcao_funcionario}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatTelefone(funcionario.telefone)}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{funcionario.email ?? "-"}</td>
-									<td className="px-4 py-3 text-sm text-neutral-700">{formatCpfCnpj(funcionario.cpf, 11)}</td>
+									<td className="px-4 py-3 text-sm text-neutral-700">
+										{formatCpfCnpj(funcionario.cpf, String(funcionario.cpf ?? "").length === 14 ? 14 : 11)}
+									</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatDate(funcionario.data_admissao)}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatDate(funcionario.data_demissao)}</td>
 									<td className="px-4 py-3 text-sm text-neutral-700">{formatCurrency(funcionario.salario_base)}</td>

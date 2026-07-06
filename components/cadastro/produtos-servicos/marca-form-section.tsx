@@ -64,7 +64,7 @@ export async function MarcaFormSection({ searchParams }: MarcaFormSectionProps) 
 							minLength={2}
 							maxLength={80}
 							required
-							placeholder="Ex: Don Alcides"
+							placeholder="Ex: DON ALCIDES"
 							defaultValue={marcaEditando?.marca ?? ""}
 							className={inputClass}
 						/>

@@ -59,15 +59,10 @@ export async function deleteFormaPagamentoAction(formData: FormData) {
 
 async function saveFormaPagamento(formData: FormData, codformaPagamento?: number) {
 	const formaPagamento = getText(formData, "forma_pagamento");
-	const descricao = getText(formData, "descricao");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(formaPagamento, 2, 50)) {
 		redirect(buildRedirect(FORMAS_PAGAMENTO_PATH, "error", "Forma de pagamento deve ter entre 2 e 50 caracteres."));
-	}
-
-	if (descricao.length > 255) {
-		redirect(buildRedirect(FORMAS_PAGAMENTO_PATH, "error", "Descricao deve ter no maximo 255 caracteres."));
 	}
 
 	if (!["S", "N"].includes(ativo)) {
@@ -77,14 +72,14 @@ async function saveFormaPagamento(formData: FormData, codformaPagamento?: number
 	const { error } = codformaPagamento
 		? await executeQuery(
 				`update public.formas_pagamento
-				set forma_pagamento = $1, descricao = $2, ativo = $3
-				where codforma_pagamento = $4`,
-				[formaPagamento, descricao || null, ativo, codformaPagamento]
+				set forma_pagamento = $1, ativo = $2
+				where codforma_pagamento = $3`,
+				[formaPagamento, ativo, codformaPagamento]
 			)
 		: await executeQuery(
-				`insert into public.formas_pagamento (forma_pagamento, descricao, ativo)
-				values ($1, $2, $3)`,
-				[formaPagamento, descricao || null, ativo]
+				`insert into public.formas_pagamento (forma_pagamento, ativo)
+				values ($1, $2)`,
+				[formaPagamento, ativo]
 			);
 
 	if (error) {

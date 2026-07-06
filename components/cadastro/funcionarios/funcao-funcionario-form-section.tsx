@@ -77,7 +77,7 @@ export async function FuncaoFuncionarioFormSection({
 							minLength={2}
 							maxLength={60}
 							required
-							placeholder="Ex: Barbeiro, Recepcionista"
+							placeholder="Ex: BARBEIRO, RECEPCIONISTA"
 							defaultValue={funcao?.funcao_funcionario ?? ""}
 							className={inputClass}
 						/>

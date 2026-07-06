@@ -27,6 +27,66 @@ function hasOnlyDigitsAndFormatting(value: string) {
 	return /^[\d\s()./+:-]+$/.test(value);
 }
 
+function hasRepeatedDigits(value: string) {
+	return /^(\d)\1+$/.test(value);
+}
+
+function isValidCpf(value: string) {
+	if (value.length !== 11 || hasRepeatedDigits(value)) {
+		return false;
+	}
+
+	const digits = value.split("").map(Number);
+	const firstCheckSum = digits
+		.slice(0, 9)
+		.reduce((sum, digit, index) => sum + digit * (10 - index), 0);
+	const firstCheckDigit = (firstCheckSum * 10) % 11;
+
+	if ((firstCheckDigit === 10 ? 0 : firstCheckDigit) !== digits[9]) {
+		return false;
+	}
+
+	const secondCheckSum = digits
+		.slice(0, 10)
+		.reduce((sum, digit, index) => sum + digit * (11 - index), 0);
+	const secondCheckDigit = (secondCheckSum * 10) % 11;
+
+	return (secondCheckDigit === 10 ? 0 : secondCheckDigit) === digits[10];
+}
+
+function isValidCnpj(value: string) {
+	if (value.length !== 14 || hasRepeatedDigits(value)) {
+		return false;
+	}
+
+	const digits = value.split("").map(Number);
+	const getCheckDigit = (baseDigits: number[], weights: number[]) => {
+		const sum = baseDigits.reduce(
+			(total, digit, index) => total + digit * weights[index],
+			0
+		);
+		const remainder = sum % 11;
+
+		return remainder < 2 ? 0 : 11 - remainder;
+	};
+
+	const firstCheckDigit = getCheckDigit(
+		digits.slice(0, 12),
+		[5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+	);
+
+	if (firstCheckDigit !== digits[12]) {
+		return false;
+	}
+
+	const secondCheckDigit = getCheckDigit(
+		digits.slice(0, 13),
+		[6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+	);
+
+	return secondCheckDigit === digits[13];
+}
+
 function parseDecimal(value: FormDataEntryValue | null) {
 	const normalized = String(value ?? "")
 		.trim()
@@ -89,6 +149,7 @@ export async function deleteFuncionarioAction(formData: FormData) {
 }
 
 async function saveFuncionario(formData: FormData, codfuncionario?: number) {
+	const tipo = getText(formData, "tipo").toUpperCase();
 	const funcionario = getText(formData, "funcionario");
 	const apelido = getText(formData, "apelido");
 	const estadoCivil = getText(formData, "estado_civil");
@@ -106,7 +167,8 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 	const telefone = onlyDigits(telefoneRaw);
 	const contato = getText(formData, "contato");
 	const email = getText(formData, "email");
-	const cpf = onlyDigits(getText(formData, "cpf"));
+	const cpfRaw = getText(formData, "cpf");
+	const cpf = onlyDigits(cpfRaw);
 	const rg = onlyDigits(getText(formData, "rg"));
 	const sexo = getText(formData, "sexo");
 	const nacionalidade = getText(formData, "nacionalidade");
@@ -118,6 +180,10 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 	const observacoes = getText(formData, "observacoes");
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
+	if (!["FISICA", "JURIDICA"].includes(tipo)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Selecione o tipo do funcionario."));
+	}
+
 	if (!isLengthBetween(funcionario, 5, 60)) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Funcionário deve ter entre 5 e 60 caracteres."));
 	}
@@ -126,7 +192,7 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Apelido deve ter no maximo 35 caracteres."));
 	}
 
-	if (estadoCivil && !["SOLTEIRO", "CASADO", "SEPARADO", "DIVORCIADO", "VIUVO", "OUTRO"].includes(estadoCivil)) {
+	if (tipo === "FISICA" && estadoCivil && !["SOLTEIRO", "CASADO", "SEPARADO", "DIVORCIADO", "VIUVO", "OUTRO"].includes(estadoCivil)) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Estado civil invalido."));
 	}
 
@@ -170,23 +236,43 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "E-mail deve ter entre 5 e 80 caracteres."));
 	}
 
-	if (cpf.length !== 11) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CPF deve conter 11 digitos."));
+	if (cpfRaw && !hasOnlyDigitsAndFormatting(cpfRaw)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CPF/CNPJ deve conter apenas digitos."));
+	}
+
+	if (cpf && ![11, 14].includes(cpf.length)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CPF deve conter 11 digitos ou CNPJ deve conter 14 digitos."));
+	}
+
+	if (tipo === "FISICA" && cpf.length !== 11) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Funcionario pessoa fisica deve informar um CPF com 11 digitos."));
+	}
+
+	if (tipo === "JURIDICA" && cpf.length !== 14) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Funcionario pessoa juridica deve informar um CNPJ com 14 digitos."));
+	}
+
+	if (cpf.length === 11 && !isValidCpf(cpf)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CPF invalido."));
+	}
+
+	if (cpf.length === 14 && !isValidCnpj(cpf)) {
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CNPJ invalido."));
 	}
 
 	if (rg && !isLengthBetween(rg, 5, 14)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "RG deve ter entre 5 e 14 numeros."));
+		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "RG/Inscricao estadual deve ter entre 5 e 14 numeros."));
 	}
 
-	if (sexo && !["MASCULINO", "FEMININO"].includes(sexo)) {
+	if (tipo === "FISICA" && sexo && !["MASCULINO", "FEMININO"].includes(sexo)) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Sexo do funcionario invalido."));
 	}
 
-	if (nacionalidade && !isLengthBetween(nacionalidade, 5, 20)) {
+	if (tipo === "FISICA" && nacionalidade && !isLengthBetween(nacionalidade, 5, 20)) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Nacionalidade deve ter entre 5 e 20 caracteres."));
 	}
 
-	if (dataNascimento && !isValidDate(dataNascimento)) {
+	if (tipo === "FISICA" && dataNascimento && !isValidDate(dataNascimento)) {
 		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Informe uma data de nascimento valida."));
 	}
 
@@ -219,9 +305,10 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 	}
 
 	const values = [
+		tipo,
 		funcionario,
 		apelido || null,
-		estadoCivil || null,
+		tipo === "FISICA" ? estadoCivil || null : null,
 		endereco,
 		numero,
 		complemento || null,
@@ -232,11 +319,11 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 		telefone,
 		contato || null,
 		email || null,
-		sexo || null,
-		nacionalidade || null,
+		tipo === "FISICA" ? sexo || null : null,
+		tipo === "FISICA" ? nacionalidade || null : null,
 		cpf,
 		rg || null,
-		dataNascimento || null,
+		tipo === "FISICA" ? dataNascimento || null : null,
 		dataAdmissao,
 		dataDemissao || null,
 		salarioBase,
@@ -248,23 +335,23 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 	const { error } = codfuncionario
 		? await executeQuery(
 				`update public.funcionarios
-				set funcionario = $1, apelido = $2, estado_civil = $3, endereco = $4, numero = $5,
-					complemento = $6, bairro = $7, cep = $8, codcidade = $9, codfuncao_funcionario = $10,
-					telefone = $11, contato = $12, email = $13, sexo = $14, nacionalidade = $15, cpf = $16, rg = $17,
-					data_nascimento = $18, data_admissao = $19, data_demissao = $20, salario_base = $21,
-					percentual_comissao = $22, observacoes = $23, ativo = $24
-				where codfuncionario = $25`,
+				set tipo = $1, funcionario = $2, apelido = $3, estado_civil = $4, endereco = $5, numero = $6,
+					complemento = $7, bairro = $8, cep = $9, codcidade = $10, codfuncao_funcionario = $11,
+					telefone = $12, contato = $13, email = $14, sexo = $15, nacionalidade = $16, cpf = $17, rg = $18,
+					data_nascimento = $19, data_admissao = $20, data_demissao = $21, salario_base = $22,
+					percentual_comissao = $23, observacoes = $24, ativo = $25
+				where codfuncionario = $26`,
 				[...values, codfuncionario]
 			)
 		: await executeQuery(
 				`insert into public.funcionarios (
-					funcionario, apelido, estado_civil, endereco, numero, complemento, bairro, cep, codcidade,
+					tipo, funcionario, apelido, estado_civil, endereco, numero, complemento, bairro, cep, codcidade,
 					codfuncao_funcionario, telefone, contato, email, sexo, nacionalidade, cpf, rg, data_nascimento,
 					data_admissao, data_demissao, salario_base, percentual_comissao, observacoes, ativo
 				) values (
 					$1, $2, $3, $4, $5, $6, $7, $8, $9,
 					$10, $11, $12, $13, $14, $15, $16, $17,
-					$18, $19, $20, $21, $22, $23, $24
+					$18, $19, $20, $21, $22, $23, $24, $25
 				)`,
 				values
 			);

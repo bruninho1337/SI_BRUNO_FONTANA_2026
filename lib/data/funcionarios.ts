@@ -3,6 +3,7 @@ import { queryMaybeSingle, queryRows } from "@/lib/database/db";
 const FUNCIONARIO_SELECT =
 	`
 	f.codfuncionario,
+	f.tipo,
 	f.funcionario,
 	f.apelido,
 	f.estado_civil,

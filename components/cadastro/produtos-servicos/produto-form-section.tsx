@@ -103,7 +103,7 @@ export async function ProdutoFormSection({ searchParams }: ProdutoFormSectionPro
 						minLength={2}
 						maxLength={80}
 						required
-						placeholder="Ex: Pomada modeladora"
+						placeholder="Ex: POMADA MODELADORA"
 						defaultValue={produtoEditando?.produto ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
 					/>

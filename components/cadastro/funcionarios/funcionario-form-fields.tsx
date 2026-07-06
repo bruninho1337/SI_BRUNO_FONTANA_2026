@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
@@ -13,6 +13,7 @@ import { RequiredLabel } from "@/components/ui/required-label";
 import {
 	formatCep,
 	formatCpfCnpj,
+	formatInscricaoEstadual,
 	formatRg,
 	formatTelefone,
 	onlyDigits,
@@ -82,8 +83,12 @@ export function FuncionarioFormFields({
 	initialData,
 	submitLabel = "Salvar funcionario",
 }: FuncionarioFormFieldsProps) {
+	const [tipo, setTipo] = useState(String(initialData?.tipo ?? "FISICA"));
 	const [selectErrors, setSelectErrors] = useState<Record<string, string>>({});
 	const [selectedCidadeId, setSelectedCidadeId] = useState(String(initialData?.codcidade ?? ""));
+	const cpfRef = useRef<HTMLInputElement>(null);
+	const isEditing = Boolean(initialData?.codfuncionario);
+	const isFisica = tipo === "FISICA";
 
 	function clearSelectError(name: string) {
 		setSelectErrors((current) => {
@@ -120,6 +125,18 @@ export function FuncionarioFormFields({
 		}
 	}
 
+	function handleTipoChange(event: React.ChangeEvent<HTMLSelectElement>) {
+		const nextTipo = event.target.value;
+		setTipo(nextTipo);
+
+		if (cpfRef.current) {
+			cpfRef.current.value = formatCpfCnpj(
+				cpfRef.current.value,
+				nextTipo === "FISICA" ? 11 : 14
+			);
+		}
+	}
+
 	return (
 		<form action={action} onSubmit={validateSearchableSelects} className="space-y-5">
 			{initialData?.codfuncionario ? (
@@ -140,15 +157,27 @@ export function FuncionarioFormFields({
 				</div>
 
 				<div className={fieldClass.sm}>
-					<RequiredLabel htmlFor="tipo-display" className="text-sm text-neutral-800">
+					<RequiredLabel htmlFor="tipo" className="text-sm text-neutral-800">
 						Tipo:
 					</RequiredLabel>
-					<Input id="tipo-display" value="Fisica" readOnly className={readOnlyInputClass} />
+					{isEditing ? <input type="hidden" name="tipo" value={tipo} /> : null}
+					<select
+						id="tipo"
+						name={isEditing ? undefined : "tipo"}
+						value={tipo}
+						onChange={handleTipoChange}
+						disabled={isEditing}
+						required
+						className={`${inputClass} disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600`}
+					>
+						<option value="FISICA">Fisica</option>
+						<option value="JURIDICA">Juridica</option>
+					</select>
 				</div>
 
 				<div className="flex flex-col gap-2 md:col-span-5">
 					<RequiredLabel htmlFor="funcionario" className="text-sm text-neutral-800">
-						Funcionario:
+						{isFisica ? "Funcionario:" : "Razao Social:"}
 					</RequiredLabel>
 					<Input
 						id="funcionario"
@@ -156,7 +185,7 @@ export function FuncionarioFormFields({
 						minLength={5}
 						maxLength={60}
 						required
-						placeholder="Ex: João Silva"
+						placeholder={isFisica ? "Ex: JOAO SILVA" : "Ex: BARBEARIA CENTRAL LTDA"}
 						defaultValue={String(initialData?.funcionario ?? "")}
 						className={inputClass}
 					/>
@@ -172,77 +201,81 @@ export function FuncionarioFormFields({
 			<div className="grid gap-4 md:grid-cols-12">
 				<div className={fieldClass.sm}>
 					<Label htmlFor="apelido" className="text-sm text-neutral-800">
-						Apelido:
+						{isFisica ? "Apelido:" : "Nome Fantasia:"}
 					</Label>
 					<Input
 						id="apelido"
 						name="apelido"
 						maxLength={35}
-						placeholder="Ex: João"
+						placeholder={isFisica ? "Ex: JOAO" : "Ex: CENTRAL"}
 						defaultValue={String(initialData?.apelido ?? "")}
 						className={inputClass}
 					/>
 				</div>
 
-				<div className={fieldClass.sm}>
-					<Label htmlFor="estado-civil" className="text-sm text-neutral-800">
-						Estado Civil:
-					</Label>
-					<select
-						id="estado-civil"
-						name="estado_civil"
-						defaultValue={String(initialData?.estado_civil ?? "")}
-						className={inputClass}
-					>
-						<option value="">Selecione</option>
-						<option value="SOLTEIRO">Solteiro(a)</option>
-						<option value="CASADO">Casado(a)</option>
-						<option value="SEPARADO">Separado(a)</option>
-						<option value="DIVORCIADO">Divorciado(a)</option>
-						<option value="VIUVO">Viuvo(a)</option>
-						<option value="OUTRO">Outro</option>
-					</select>
-				</div>
+				{isFisica ? (
+					<>
+						<div className={fieldClass.sm}>
+							<Label htmlFor="estado-civil" className="text-sm text-neutral-800">
+								Estado Civil:
+							</Label>
+							<select
+								id="estado-civil"
+								name="estado_civil"
+								defaultValue={String(initialData?.estado_civil ?? "")}
+								className={inputClass}
+							>
+								<option value="">Selecione</option>
+								<option value="SOLTEIRO">Solteiro(a)</option>
+								<option value="CASADO">Casado(a)</option>
+								<option value="SEPARADO">Separado(a)</option>
+								<option value="DIVORCIADO">Divorciado(a)</option>
+								<option value="VIUVO">Viuvo(a)</option>
+								<option value="OUTRO">Outro</option>
+							</select>
+						</div>
 
-				<div className={fieldClass.sm}>
-					<Label htmlFor="sexo" className="text-sm text-neutral-800">
-						Sexo:
-					</Label>
-					<select
-						id="sexo"
-						name="sexo"
-						defaultValue={String(initialData?.sexo ?? "")}
-						className={inputClass}
-					>
-						<option value="">Selecione</option>
-						<option value="MASCULINO">Masculino</option>
-						<option value="FEMININO">Feminino</option>
-					</select>
-				</div>
+						<div className={fieldClass.sm}>
+							<Label htmlFor="sexo" className="text-sm text-neutral-800">
+								Sexo:
+							</Label>
+							<select
+								id="sexo"
+								name="sexo"
+								defaultValue={String(initialData?.sexo ?? "")}
+								className={inputClass}
+							>
+								<option value="">Selecione</option>
+								<option value="MASCULINO">Masculino</option>
+								<option value="FEMININO">Feminino</option>
+							</select>
+						</div>
 
-				<div className={fieldClass.sm}>
-					<Label htmlFor="nacionalidade" className="text-sm text-neutral-800">
-						Nacionalidade:
-					</Label>
-					<Input
-						id="nacionalidade"
-						name="nacionalidade"
-						minLength={5}
-						maxLength={20}
-						placeholder="Ex: Brasileira"
-						defaultValue={String(initialData?.nacionalidade ?? "")}
-						className={inputClass}
-					/>
-				</div>
+						<div className={fieldClass.sm}>
+							<Label htmlFor="nacionalidade" className="text-sm text-neutral-800">
+								Nacionalidade:
+							</Label>
+							<Input
+								id="nacionalidade"
+								name="nacionalidade"
+								minLength={5}
+								maxLength={20}
+								placeholder="Ex: BRASILEIRA"
+								defaultValue={String(initialData?.nacionalidade ?? "")}
+								className={inputClass}
+							/>
+						</div>
 
-				<DatePickerInput
-					id="data_nascimento"
-					name="data_nascimento"
-					label="Nascimento"
-					defaultValue={formatDateInput(initialData?.data_nascimento)}
-					className={fieldClass.sm}
-					inputClassName={inputClass}
-				/>
+						<DatePickerInput
+							id="data_nascimento"
+							name="data_nascimento"
+							label="Nascimento"
+							defaultValue={formatDateInput(initialData?.data_nascimento)}
+							className={fieldClass.sm}
+							inputClassName={inputClass}
+						/>
+					</>
+				) : null}
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-12">
@@ -256,7 +289,7 @@ export function FuncionarioFormFields({
 						minLength={5}
 						maxLength={80}
 						required
-						placeholder="Ex: Avenida Brasil"
+						placeholder="Ex: AVENIDA BRASIL"
 						defaultValue={String(initialData?.endereco ?? "")}
 						className={inputClass}
 					/>
@@ -308,7 +341,7 @@ export function FuncionarioFormFields({
 						id="complemento"
 						name="complemento"
 						maxLength={60}
-						placeholder="Ex: Sala 2"
+						placeholder="Ex: SALA 2"
 						defaultValue={String(initialData?.complemento ?? "")}
 						className={inputClass}
 					/>
@@ -324,7 +357,7 @@ export function FuncionarioFormFields({
 						minLength={5}
 						maxLength={60}
 						required
-						placeholder="Ex: Centro"
+						placeholder="Ex: CENTRO"
 						defaultValue={String(initialData?.bairro ?? "")}
 						className={inputClass}
 					/>
@@ -379,7 +412,7 @@ export function FuncionarioFormFields({
 						id="contato"
 						name="contato"
 						maxLength={60}
-						placeholder="Ex: João"
+						placeholder={isFisica ? "Ex: JOAO" : "Ex: CENTRAL"}
 						defaultValue={String(initialData?.contato ?? "")}
 						className={inputClass}
 					/>
@@ -395,7 +428,7 @@ export function FuncionarioFormFields({
 						type="email"
 						minLength={5}
 						maxLength={80}
-						placeholder="Ex: funcionario@email.com"
+						placeholder="Ex: FUNCIONARIO@EMAIL.COM"
 						defaultValue={String(initialData?.email ?? "")}
 						className={inputClass}
 					/>
@@ -405,37 +438,46 @@ export function FuncionarioFormFields({
 			<div className="grid gap-4 md:grid-cols-12">
 				<div className={fieldClass.sm}>
 					<Label htmlFor="rg" className="text-sm text-neutral-800">
-						RG:
+						{isFisica ? "RG:" : "Inscricao Estadual:"}
 					</Label>
 					<Input
 						id="rg"
 						name="rg"
 						inputMode="numeric"
-						pattern="\d{2}\.?\d{3}\.?\d{3}-?\d?"
+						pattern={isFisica ? "\\d{2}\\.?\\d{3}\\.?\\d{3}-?\\d?" : "[0-9]{5,14}"}
 						minLength={5}
-						maxLength={12}
-						placeholder="Ex: 00.000.000-0"
-						defaultValue={formatRg(String(initialData?.rg ?? ""))}
-						onInput={(event) => formatInput(event, formatRg)}
+						maxLength={isFisica ? 12 : 14}
+						placeholder={isFisica ? "Ex: 00.000.000-0" : "Ex: 123456789"}
+						defaultValue={
+							isFisica
+								? formatRg(String(initialData?.rg ?? ""))
+								: formatInscricaoEstadual(String(initialData?.rg ?? ""))
+						}
+						onInput={
+							isFisica
+								? (event) => formatInput(event, formatRg)
+								: (event) => formatInput(event, formatInscricaoEstadual)
+						}
 						className={inputClass}
 					/>
 				</div>
 
 				<div className={fieldClass.sm}>
 					<RequiredLabel htmlFor="cpf" className="text-sm text-neutral-800">
-						CPF:
+						{isFisica ? "CPF:" : "CNPJ:"}
 					</RequiredLabel>
 					<Input
 						id="cpf"
+						ref={cpfRef}
 						name="cpf"
 						inputMode="numeric"
-						pattern="\d{3}\.?\d{3}\.?\d{3}-?\d{2}"
+						pattern={isFisica ? "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}" : "\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2}"}
 						minLength={11}
-						maxLength={14}
+						maxLength={isFisica ? 14 : 18}
 						required
-						placeholder="Ex: 000.000.000-00"
-						defaultValue={formatCpfCnpj(String(initialData?.cpf ?? ""), 11)}
-						onInput={(event) => formatInput(event, (value) => formatCpfCnpj(value, 11))}
+						placeholder={isFisica ? "Ex: 000.000.000-00" : "Ex: 00.000.000/0001-00"}
+						defaultValue={formatCpfCnpj(String(initialData?.cpf ?? ""), isFisica ? 11 : 14)}
+						onInput={(event) => formatInput(event, (value) => formatCpfCnpj(value, isFisica ? 11 : 14))}
 						className={inputClass}
 					/>
 				</div>

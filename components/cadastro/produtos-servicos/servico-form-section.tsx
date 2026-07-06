@@ -72,7 +72,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 						minLength={2}
 						maxLength={80}
 						required
-						placeholder="Ex: Corte social"
+						placeholder="Ex: CORTE SOCIAL"
 						defaultValue={servicoEditando?.servico ?? ""}
 						className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900"
 					/>
@@ -109,7 +109,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 						<RequiredLabel htmlFor="duracao_minutos" className="text-sm text-neutral-800">
 							Duração:
 						</RequiredLabel>
-						<Input id="duracao_minutos" name="duracao_minutos" type="number" required placeholder="Ex: 45 (min)" defaultValue={String(servicoEditando?.duracao_minutos ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
+						<Input id="duracao_minutos" name="duracao_minutos" type="number" required placeholder="Ex: 45 (MIN)" defaultValue={String(servicoEditando?.duracao_minutos ?? "")} className="h-11 rounded-xl border-neutral-300 bg-white px-4 text-neutral-900" />
 					</div>
 					<div className="flex flex-col gap-2 md:col-span-3">
 						<Label htmlFor="valor_desconto" className="text-sm text-neutral-800">
