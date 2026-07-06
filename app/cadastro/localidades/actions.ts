@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { executeQuery } from "@/lib/database/db";
+import { executeQuery, queryMaybeSingle } from "@/lib/database/db";
 
 const PAISES_PATH = "/cadastro/localidades/paises";
 const ESTADOS_PATH = "/cadastro/localidades/estados";
@@ -206,12 +206,30 @@ async function saveCidade(formData: FormData, codcidade?: number) {
 	const codest = Number(codestValue);
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
-	if (!isLengthBetween(cidade, 2, 100)) {
-		redirect(buildRedirect(CIDADES_PATH, "error", "Cidade deve ter entre 2 e 100 caracteres."));
+	if (!isLengthBetween(cidade, 2, 50)) {
+		redirect(buildRedirect(CIDADES_PATH, "error", "Cidade deve ter entre 2 e 50 caracteres."));
 	}
 
 	if (!codestValue || Number.isNaN(codest)) {
 		redirect(buildRedirect(CIDADES_PATH, "error", "Selecione o estado da cidade."));
+	}
+
+	const { data: cidadeDuplicada, error: duplicateError } = await queryMaybeSingle<{ codcidade: number }>(
+		`select codcidade
+			from public.cidades
+			where codest = $1
+				and lower(btrim(cidade)) = lower(btrim($2))
+				and ($3::integer is null or codcidade <> $3)
+			limit 1`,
+		[codest, cidade, codcidade ?? null]
+	);
+
+	if (duplicateError) {
+		redirect(buildRedirect(CIDADES_PATH, "error", duplicateError.message));
+	}
+
+	if (cidadeDuplicada) {
+		redirect(buildRedirect(CIDADES_PATH, "error", "Ja existe uma cidade com esse nome neste estado."));
 	}
 
 	const { error } = codcidade
@@ -225,6 +243,10 @@ async function saveCidade(formData: FormData, codcidade?: number) {
 			);
 
 	if (error) {
+		if (error.message.includes("cidades_codest_cidade_unique_idx")) {
+			redirect(buildRedirect(CIDADES_PATH, "error", "Ja existe uma cidade com esse nome neste estado."));
+		}
+
 		redirect(buildRedirect(CIDADES_PATH, "error", error.message));
 	}
 

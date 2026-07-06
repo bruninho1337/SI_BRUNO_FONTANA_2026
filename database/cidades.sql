@@ -18,6 +18,9 @@ alter table public.cidades
 	add constraint cidades_cidade_check
 	check (char_length(cidade) between 2 and 50);
 
+create unique index if not exists cidades_codest_cidade_unique_idx
+	on public.cidades (codest, lower(btrim(cidade)));
+
 create or replace function public.set_data_ult_alteracao()
 returns trigger
 language plpgsql

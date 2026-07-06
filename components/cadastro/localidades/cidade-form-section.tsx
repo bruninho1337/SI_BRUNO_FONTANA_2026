@@ -71,7 +71,7 @@ export async function CidadeFormSection({ searchParams }: CidadeFormSectionProps
 						name="cidade"
 						type="text"
 						minLength={2}
-						maxLength={100}
+						maxLength={50}
 						required
 						placeholder="Ex: CAMPINAS"
 						defaultValue={cidadeEditando?.cidade ?? ""}
