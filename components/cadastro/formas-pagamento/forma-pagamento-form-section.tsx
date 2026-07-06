@@ -4,6 +4,7 @@ import {
 } from "@/app/cadastro/formas-pagamento/actions";
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,7 @@ export async function FormaPagamentoFormSection({
 				action={formaEditando ? updateFormaPagamentoAction : createFormaPagamentoAction}
 				className="space-y-4"
 			>
+				<FormStatePersistence formKey="formas-pagamento" />
 				<div className="grid gap-4 md:grid-cols-12">
 					{formaEditando ? (
 						<input

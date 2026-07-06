@@ -2,6 +2,7 @@ import { createMarcaAction, updateMarcaAction } from "@/app/cadastro/produtos-se
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +37,7 @@ export async function MarcaFormSection({ searchParams }: MarcaFormSectionProps) 
 			<FormFeedback params={params} />
 
 			<form action={marcaEditando ? updateMarcaAction : createMarcaAction} className="space-y-4">
+				<FormStatePersistence formKey="marcas" />
 				<div className="grid gap-4 md:grid-cols-12">
 					{marcaEditando ? (
 						<input type="hidden" name="codmarca" value={marcaEditando.codmarca} />

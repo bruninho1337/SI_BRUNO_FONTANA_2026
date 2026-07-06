@@ -13,12 +13,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function isLengthBetween(value: string, min: number, max: number) {
 	return value.length >= min && value.length <= max;
@@ -32,7 +40,7 @@ export async function updateFuncaoFuncionarioAction(formData: FormData) {
 	const codfuncaoFuncionario = Number(getText(formData, "codfuncao_funcionario"));
 
 	if (Number.isNaN(codfuncaoFuncionario)) {
-		redirect(buildRedirect(FUNCOES_FUNCIONARIOS_PATH, "error", "Funcao invalida para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCOES_FUNCIONARIOS_PATH), "error", "Funcao invalida para edicao."));
 	}
 
 	return saveFuncaoFuncionario(formData, codfuncaoFuncionario);
@@ -42,7 +50,7 @@ export async function deleteFuncaoFuncionarioAction(formData: FormData) {
 	const codfuncaoFuncionario = Number(getText(formData, "codfuncao_funcionario"));
 
 	if (Number.isNaN(codfuncaoFuncionario)) {
-		redirect(buildRedirect(FUNCOES_FUNCIONARIOS_PATH, "error", "Funcao invalida para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCOES_FUNCIONARIOS_PATH), "error", "Funcao invalida para exclusao."));
 	}
 
 	const { error } = await executeQuery(
@@ -51,7 +59,7 @@ export async function deleteFuncaoFuncionarioAction(formData: FormData) {
 	);
 
 	if (error) {
-		redirect(buildRedirect(FUNCOES_FUNCIONARIOS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, FUNCOES_FUNCIONARIOS_PATH), "error", error.message));
 	}
 
 	revalidatePath(FUNCOES_FUNCIONARIOS_PATH);
@@ -65,15 +73,15 @@ async function saveFuncaoFuncionario(formData: FormData, codfuncaoFuncionario?: 
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(funcaoFuncionario, 2, 60)) {
-		redirect(buildRedirect(FUNCOES_FUNCIONARIOS_PATH, "error", "Funcao deve ter entre 2 e 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCOES_FUNCIONARIOS_PATH), "error", "Funcao deve ter entre 2 e 60 caracteres."));
 	}
 
 	if (descricao.length > 255) {
-		redirect(buildRedirect(FUNCOES_FUNCIONARIOS_PATH, "error", "Descricao deve ter no maximo 255 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCOES_FUNCIONARIOS_PATH), "error", "Descricao deve ter no maximo 255 caracteres."));
 	}
 
 	if (!["S", "N"].includes(ativo)) {
-		redirect(buildRedirect(FUNCOES_FUNCIONARIOS_PATH, "error", "Informe um status valido para a funcao."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCOES_FUNCIONARIOS_PATH), "error", "Informe um status valido para a funcao."));
 	}
 
 	const { error } = codfuncaoFuncionario
@@ -90,7 +98,7 @@ async function saveFuncaoFuncionario(formData: FormData, codfuncaoFuncionario?: 
 			);
 
 	if (error) {
-		redirect(buildRedirect(FUNCOES_FUNCIONARIOS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, FUNCOES_FUNCIONARIOS_PATH), "error", error.message));
 	}
 
 	revalidatePath(FUNCOES_FUNCIONARIOS_PATH);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { RequiredLabel } from "@/components/ui/required-label";
 import { cn } from "@/lib/shared/utils";
@@ -24,12 +24,29 @@ export function CategoryTypeToggle({
 	defaultValue = "AMBOS",
 	className,
 }: CategoryTypeToggleProps) {
+	const inputRef = useRef<HTMLInputElement>(null);
 	const [value, setValue] = useState<CategoriaTipo>(defaultValue);
+
+	useEffect(() => {
+		function handleDraftRestored() {
+			const nextValue = inputRef.current?.value;
+
+			if (nextValue === "PRODUTO" || nextValue === "SERVICO" || nextValue === "AMBOS") {
+				setValue(nextValue);
+			}
+		}
+
+		window.addEventListener("form-draft-restored", handleDraftRestored);
+
+		return () => {
+			window.removeEventListener("form-draft-restored", handleDraftRestored);
+		};
+	}, []);
 
 	return (
 		<div className={cn("flex flex-col gap-2", className)}>
 			<RequiredLabel className="text-sm text-neutral-800">Tipo:</RequiredLabel>
-			<input type="hidden" name={name} value={value} readOnly />
+			<input ref={inputRef} type="hidden" name={name} value={value} readOnly />
 			<div className="flex flex-wrap gap-3">
 				{options.map((option) => (
 					<button

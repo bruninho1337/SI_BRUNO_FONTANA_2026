@@ -14,12 +14,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function parseDecimal(value: FormDataEntryValue | null) {
 	const normalized = String(value ?? "")
@@ -56,7 +64,7 @@ export async function updateContaPagarAction(formData: FormData) {
 	const codcontaPagar = Number(getText(formData, "codconta_pagar"));
 
 	if (Number.isNaN(codcontaPagar)) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Conta a pagar invalida para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Conta a pagar invalida para edicao."));
 	}
 
 	return saveContaPagar(formData, codcontaPagar);
@@ -66,7 +74,7 @@ export async function deleteContaPagarAction(formData: FormData) {
 	const codcontaPagar = Number(getText(formData, "codconta_pagar"));
 
 	if (Number.isNaN(codcontaPagar)) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Conta a pagar invalida para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Conta a pagar invalida para exclusao."));
 	}
 
 	const { error } = await executeQuery(
@@ -75,7 +83,7 @@ export async function deleteContaPagarAction(formData: FormData) {
 	);
 
 	if (error) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", error.message));
 	}
 
 	revalidatePath(CONTAS_PAGAR_PATH);
@@ -99,55 +107,55 @@ async function saveContaPagar(formData: FormData, codcontaPagar?: number) {
 	const codformaPagamento = Number(codformaPagamentoValue);
 
 	if (!isLengthBetween(contaPagar, 2, 120)) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Conta a pagar deve ter entre 2 e 120 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Conta a pagar deve ter entre 2 e 120 caracteres."));
 	}
 
 	if (!codfornecedorValue || Number.isNaN(codfornecedor)) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Selecione o fornecedor da conta."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Selecione o fornecedor da conta."));
 	}
 
 	if (codformaPagamentoValue && Number.isNaN(codformaPagamento)) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Forma de pagamento invalida."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Forma de pagamento invalida."));
 	}
 
 	if (numeroDocumento.length > 60) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Documento deve ter no maximo 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Documento deve ter no maximo 60 caracteres."));
 	}
 
 	if (!isValidDate(dataEmissao)) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Informe uma data de emissao valida."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Informe uma data de emissao valida."));
 	}
 
 	if (!isValidDate(dataVencimento)) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Informe uma data de vencimento valida."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Informe uma data de vencimento valida."));
 	}
 
 	if (dataPagamento && !isValidDate(dataPagamento)) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Informe uma data de pagamento valida."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Informe uma data de pagamento valida."));
 	}
 
 	if (Number.isNaN(valor) || valor <= 0) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Valor deve ser maior que zero."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Valor deve ser maior que zero."));
 	}
 
 	if (Number.isNaN(valorPago) || valorPago < 0 || valorPago > valor) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Valor pago deve estar entre 0 e o valor da conta."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Valor pago deve estar entre 0 e o valor da conta."));
 	}
 
 	if (!statusOptions.includes(status)) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Selecione um status valido."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Selecione um status valido."));
 	}
 
 	if (!["S", "N"].includes(ativo)) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Informe um status ativo valido para a conta."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Informe um status ativo valido para a conta."));
 	}
 
 	if (status === "PAGO" && valorPago <= 0) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Informe o valor pago para contas pagas."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Informe o valor pago para contas pagas."));
 	}
 
 	if (observacoes.length > 110) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", "Observacoes devem ter no maximo 110 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", "Observacoes devem ter no maximo 110 caracteres."));
 	}
 
 	const values = [
@@ -185,7 +193,7 @@ async function saveContaPagar(formData: FormData, codcontaPagar?: number) {
 			);
 
 	if (error) {
-		redirect(buildRedirect(CONTAS_PAGAR_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, CONTAS_PAGAR_PATH), "error", error.message));
 	}
 
 	revalidatePath(CONTAS_PAGAR_PATH);

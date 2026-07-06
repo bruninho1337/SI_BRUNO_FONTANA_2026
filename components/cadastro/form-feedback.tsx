@@ -21,12 +21,14 @@ export function FormFeedback({ params }: FormFeedbackProps) {
 			return;
 		}
 
+		const feedbackKey = `${pathname}:${searchParams.toString()}`;
+
 		if (params.success) {
-			toast.success(params.success);
+			toast.success(params.success, { id: feedbackKey });
 		}
 
 		if (params.error) {
-			toast.error(params.error);
+			toast.error(params.error, { id: feedbackKey });
 		}
 
 		const nextParams = new URLSearchParams(searchParams.toString());

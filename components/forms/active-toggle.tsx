@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/shared/utils";
@@ -18,12 +18,29 @@ export function ActiveToggle({
 	defaultValue = "S",
 	className,
 }: ActiveToggleProps) {
+	const inputRef = useRef<HTMLInputElement>(null);
 	const [value, setValue] = useState<"S" | "N">(defaultValue);
+
+	useEffect(() => {
+		function handleDraftRestored() {
+			const nextValue = inputRef.current?.value;
+
+			if (nextValue === "S" || nextValue === "N") {
+				setValue(nextValue);
+			}
+		}
+
+		window.addEventListener("form-draft-restored", handleDraftRestored);
+
+		return () => {
+			window.removeEventListener("form-draft-restored", handleDraftRestored);
+		};
+	}, []);
 
 	return (
 		<div className={cn("flex flex-col gap-2", className)}>
 			<Label className="text-sm text-neutral-800">{label}:</Label>
-			<input type="hidden" name={name} value={value} readOnly />
+			<input ref={inputRef} type="hidden" name={name} value={value} readOnly />
 			<div className="flex gap-3">
 				<button
 					type="button"

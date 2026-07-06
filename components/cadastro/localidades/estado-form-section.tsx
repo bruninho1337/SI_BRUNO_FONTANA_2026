@@ -2,6 +2,7 @@ import { createEstadoAction, updateEstadoAction } from "@/app/cadastro/localidad
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,7 @@ export async function EstadoFormSection({ searchParams }: EstadoFormSectionProps
 			) : null}
 
 			<form action={estadoEditando ? updateEstadoAction : createEstadoAction} className="space-y-4">
+				<FormStatePersistence formKey="estados" />
 				<div className="grid gap-4 md:grid-cols-12">
 				{estadoEditando ? (
 					<input type="hidden" name="codestado" value={estadoEditando.codestado} />

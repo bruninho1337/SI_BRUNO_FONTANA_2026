@@ -3,6 +3,7 @@ import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { DecimalInput } from "@/components/forms/decimal-input";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 			) : null}
 
 			<form action={servicoEditando ? updateServicoAction : createServicoAction} className="space-y-4">
+				<FormStatePersistence formKey="servicos" />
 				<div className="grid gap-4 md:grid-cols-12">
 				{servicoEditando ? (
 					<input type="hidden" name="codservico" value={servicoEditando.codservico} />

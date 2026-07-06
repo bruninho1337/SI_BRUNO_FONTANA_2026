@@ -51,6 +51,7 @@ export function SearchableSelect({
 	onValueChange,
 }: SearchableSelectProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
 	const searchInputRef = useRef<HTMLInputElement>(null);
 	const fieldId = id ?? name;
 	const [isOpen, setIsOpen] = useState(false);
@@ -80,6 +81,23 @@ export function SearchableSelect({
 			setSelectedId(value);
 		}
 	}, [value]);
+
+	useEffect(() => {
+		function handleDraftRestored() {
+			const nextValue = inputRef.current?.value;
+
+			if (nextValue !== undefined) {
+				setSelectedId(nextValue);
+				onValueChange?.(nextValue);
+			}
+		}
+
+		window.addEventListener("form-draft-restored", handleDraftRestored);
+
+		return () => {
+			window.removeEventListener("form-draft-restored", handleDraftRestored);
+		};
+	}, [onValueChange]);
 
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
@@ -130,7 +148,7 @@ export function SearchableSelect({
 					{label}:
 				</Label>
 			)}
-			<input name={name} value={currentValue} required={required} type="hidden" readOnly />
+			<input ref={inputRef} name={name} value={currentValue} required={required} type="hidden" readOnly />
 			<button
 				id={`${fieldId}-trigger`}
 				type="button"

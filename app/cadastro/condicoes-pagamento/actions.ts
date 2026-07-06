@@ -13,12 +13,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function parseDecimal(value: FormDataEntryValue | null) {
 	const text = String(value ?? "").trim();
@@ -64,7 +72,7 @@ export async function updateCondicaoPagamentoAction(formData: FormData) {
 	const codcondicaoPagamento = Number(getText(formData, "codcondicao_pagamento"));
 
 	if (Number.isNaN(codcondicaoPagamento)) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Condicao de pagamento invalida para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, CONDICOES_PAGAMENTO_PATH), "error", "Condicao de pagamento invalida para edicao."));
 	}
 
 	return saveCondicaoPagamento(formData, codcondicaoPagamento);
@@ -74,7 +82,7 @@ export async function deleteCondicaoPagamentoAction(formData: FormData) {
 	const codcondicaoPagamento = Number(getText(formData, "codcondicao_pagamento"));
 
 	if (Number.isNaN(codcondicaoPagamento)) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Condicao de pagamento invalida para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, CONDICOES_PAGAMENTO_PATH), "error", "Condicao de pagamento invalida para exclusao."));
 	}
 
 	const { data: clientesVinculados, error: clientesError } = await queryRows(
@@ -83,7 +91,7 @@ export async function deleteCondicaoPagamentoAction(formData: FormData) {
 	);
 
 	if (clientesError) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", clientesError.message));
+		redirect(buildRedirect(getErrorPath(formData, CONDICOES_PAGAMENTO_PATH), "error", clientesError.message));
 	}
 
 	const totalClientesVinculados = Number(clientesVinculados?.[0]?.total ?? 0);
@@ -127,15 +135,15 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (condicaoPagamento.length < 2 || condicaoPagamento.length > 50) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Condicao de pagamento deve ter entre 2 e 50 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CONDICOES_PAGAMENTO_PATH), "error", "Condicao de pagamento deve ter entre 2 e 50 caracteres."));
 	}
 
 	if (!parcelasCondicao) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Adicione ao menos uma parcela valida."));
+		redirect(buildRedirect(getErrorPath(formData, CONDICOES_PAGAMENTO_PATH), "error", "Adicione ao menos uma parcela valida."));
 	}
 
 	if ([juro, multa, desconto].some((value) => Number.isNaN(value) || value < 0)) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Juro, multa e desconto devem ser valores maiores ou iguais a zero."));
+		redirect(buildRedirect(getErrorPath(formData, CONDICOES_PAGAMENTO_PATH), "error", "Juro, multa e desconto devem ser valores maiores ou iguais a zero."));
 	}
 
 	const parcelasInvalidas = parcelasCondicao.some(
@@ -151,7 +159,7 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 	);
 
 	if (parcelasInvalidas) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "Revise numero, vencimento, forma e percentual das parcelas."));
+		redirect(buildRedirect(getErrorPath(formData, CONDICOES_PAGAMENTO_PATH), "error", "Revise numero, vencimento, forma e percentual das parcelas."));
 	}
 
 	const totalPercentual = parcelasCondicao.reduce(
@@ -160,7 +168,7 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 	);
 
 	if (Math.abs(totalPercentual - 100) > 0.01) {
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", "A soma dos percentuais das parcelas deve ser 100%."));
+		redirect(buildRedirect(getErrorPath(formData, CONDICOES_PAGAMENTO_PATH), "error", "A soma dos percentuais das parcelas deve ser 100%."));
 	}
 
 	const prazoDias = Math.max(...parcelasCondicao.map((parcela) => parcela.diasVencimento));
@@ -234,7 +242,7 @@ async function saveCondicaoPagamento(formData: FormData, codcondicaoPagamento?: 
 	} catch (error) {
 		await client.query("rollback");
 		const message = error instanceof Error ? error.message : "Erro ao salvar condicao de pagamento.";
-		redirect(buildRedirect(CONDICOES_PAGAMENTO_PATH, "error", message));
+		redirect(buildRedirect(getErrorPath(formData, CONDICOES_PAGAMENTO_PATH), "error", message));
 	} finally {
 		client.release();
 	}

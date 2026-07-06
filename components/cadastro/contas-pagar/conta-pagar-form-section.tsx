@@ -5,6 +5,7 @@ import {
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { DatePickerInput } from "@/components/forms/date-picker-input";
 import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,8 @@ export async function ContaPagarFormSection({
 				action={contaPagar ? updateContaPagarAction : createContaPagarAction}
 				className="space-y-4"
 			>
+				<FormStatePersistence formKey="contas-pagar" />
+
 				<div className="grid gap-4 md:grid-cols-12">
 					{contaPagar ? (
 						<input

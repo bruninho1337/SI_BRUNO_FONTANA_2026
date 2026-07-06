@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 import { SearchableSelect } from "@/components/forms/searchable-select";
@@ -20,6 +20,9 @@ type Parcela = {
 	codforma_pagamento: string;
 	percentual: string;
 };
+
+type DraftValue = string | string[];
+type FormDraft = Record<string, DraftValue>;
 
 type ParcelasCondicaoFieldsProps = {
 	formaPagamentoOptions: Option[];
@@ -58,6 +61,14 @@ function createInitialParcelas(
 	];
 }
 
+function draftValues(value: DraftValue | undefined) {
+	if (!value) {
+		return [];
+	}
+
+	return Array.isArray(value) ? value : [value];
+}
+
 export function ParcelasCondicaoFields({
 	formaPagamentoOptions,
 	initialParcelas,
@@ -65,6 +76,46 @@ export function ParcelasCondicaoFields({
 	const [parcelas, setParcelas] = useState(() =>
 		createInitialParcelas(initialParcelas, formaPagamentoOptions)
 	);
+
+	useEffect(() => {
+		function handleDraftRestored(event: Event) {
+			const draft = (event as CustomEvent<FormDraft>).detail;
+
+			if (!draft) {
+				return;
+			}
+
+			const numeros = draftValues(draft.parcela_numero);
+			const dias = draftValues(draft.parcela_dias_vencimento);
+			const formas = draftValues(draft.parcela_codforma_pagamento);
+			const percentuais = draftValues(draft.parcela_percentual);
+			const totalParcelas = Math.max(
+				numeros.length,
+				dias.length,
+				formas.length,
+				percentuais.length
+			);
+
+			if (totalParcelas === 0) {
+				return;
+			}
+
+			setParcelas(
+				Array.from({ length: totalParcelas }, (_, index) => ({
+					num_parcela: Number(numeros[index] ?? index + 1) || index + 1,
+					dias_vencimento: Number(dias[index] ?? 0) || 0,
+					codforma_pagamento: formas[index] ?? formaPagamentoOptions[0]?.id ?? "",
+					percentual: percentuais[index] ?? "0",
+				}))
+			);
+		}
+
+		window.addEventListener("form-draft-restored", handleDraftRestored);
+
+		return () => {
+			window.removeEventListener("form-draft-restored", handleDraftRestored);
+		};
+	}, [formaPagamentoOptions]);
 
 	function updateParcela(index: number, field: keyof Omit<Parcela, "num_parcela">, value: string) {
 		setParcelas((current) =>

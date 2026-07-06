@@ -12,12 +12,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function isLengthBetween(value: string, min: number, max: number) {
 	return value.length >= min && value.length <= max;
@@ -39,7 +47,7 @@ export async function updateFornecedorAction(formData: FormData) {
 	const codfornecedor = Number(getText(formData, "codfornecedor"));
 
 	if (Number.isNaN(codfornecedor)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Fornecedor invalido para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Fornecedor invalido para edicao."));
 	}
 
 	return saveFornecedor(formData, codfornecedor);
@@ -49,13 +57,13 @@ export async function deleteFornecedorAction(formData: FormData) {
 	const codfornecedor = Number(getText(formData, "codfornecedor"));
 
 	if (Number.isNaN(codfornecedor)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Fornecedor invalido para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Fornecedor invalido para exclusao."));
 	}
 
 	const { error } = await executeQuery("delete from public.fornecedores where codfornecedor = $1", [codfornecedor]);
 
 	if (error) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", error.message));
 	}
 
 	revalidatePath(FORNECEDORES_PATH);
@@ -88,71 +96,71 @@ async function saveFornecedor(formData: FormData, codfornecedor?: number) {
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!["FISICA", "JURIDICA"].includes(tipo)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Selecione o tipo do fornecedor."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Selecione o tipo do fornecedor."));
 	}
 
 	if (!isLengthBetween(fornecedor, 5, 80)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Fornecedor deve ter entre 5 e 80 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Fornecedor deve ter entre 5 e 80 caracteres."));
 	}
 
 	if (nomeFantasia.length > 80) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Nome fantasia deve ter no maximo 80 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Nome fantasia deve ter no maximo 80 caracteres."));
 	}
 
 	if (contato.length > 60) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Contato deve ter no maximo 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Contato deve ter no maximo 60 caracteres."));
 	}
 
 	if (!isLengthBetween(endereco, 5, 80)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Endereco deve ter entre 5 e 80 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Endereco deve ter entre 5 e 80 caracteres."));
 	}
 
 	if (!isLengthBetween(numero, 1, 10)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Numero deve conter entre 1 e 10 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Numero deve conter entre 1 e 10 digitos."));
 	}
 
 	if (complemento.length > 60) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Complemento deve ter no maximo 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Complemento deve ter no maximo 60 caracteres."));
 	}
 
 	if (!isLengthBetween(bairro, 5, 60)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Bairro deve ter entre 5 e 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Bairro deve ter entre 5 e 60 caracteres."));
 	}
 
 	if (cep.length !== 8 || !hasOnlyDigitsAndFormatting(cepRaw)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "CEP deve conter exatamente 8 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "CEP deve conter exatamente 8 digitos."));
 	}
 
 	if (!codcidadeValue || Number.isNaN(codcidade)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Selecione a cidade do fornecedor."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Selecione a cidade do fornecedor."));
 	}
 
 	if (!isLengthBetween(telefone, 10, 11) || !hasOnlyDigitsAndFormatting(telefoneRaw)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Telefone deve ter 10 ou 11 numeros."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Telefone deve ter 10 ou 11 numeros."));
 	}
 
 	if (!isLengthBetween(email, 5, 80)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "E-mail deve ter entre 5 e 80 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "E-mail deve ter entre 5 e 80 caracteres."));
 	}
 
 	if (rgInscricaoEstadualRaw && (!isLengthBetween(rgInscricaoEstadual, 5, 14) || !hasOnlyDigitsAndFormatting(rgInscricaoEstadualRaw))) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "RG/Inscricao estadual deve conter apenas digitos e ter entre 5 e 14 numeros."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "RG/Inscricao estadual deve conter apenas digitos e ter entre 5 e 14 numeros."));
 	}
 
 	if (cpfCnpjRaw && !hasOnlyDigitsAndFormatting(cpfCnpjRaw)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "CPF/CNPJ deve conter apenas digitos."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "CPF/CNPJ deve conter apenas digitos."));
 	}
 
 	if (cpfCnpj && ![11, 14].includes(cpfCnpj.length)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "CPF deve conter 11 digitos ou CNPJ deve conter 14 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "CPF deve conter 11 digitos ou CNPJ deve conter 14 digitos."));
 	}
 
 	if (codcondicaoPagamentoValue && Number.isNaN(codcondicaoPagamento)) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Condicao de pagamento invalida."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Condicao de pagamento invalida."));
 	}
 
 	if (observacoes.length > 110) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", "Observacoes devem ter no maximo 110 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", "Observacoes devem ter no maximo 110 caracteres."));
 	}
 
 	const values = [
@@ -198,7 +206,7 @@ async function saveFornecedor(formData: FormData, codfornecedor?: number) {
 			);
 
 	if (error) {
-		redirect(buildRedirect(FORNECEDORES_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, FORNECEDORES_PATH), "error", error.message));
 	}
 
 	revalidatePath(FORNECEDORES_PATH);

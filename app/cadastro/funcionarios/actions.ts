@@ -12,12 +12,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function onlyDigits(value: string) {
 	return value.replace(/\D/g, "");
@@ -122,7 +130,7 @@ export async function updateFuncionarioAction(formData: FormData) {
 	const codfuncionario = Number(getText(formData, "codfuncionario"));
 
 	if (Number.isNaN(codfuncionario)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Funcionário invalido para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Funcionário invalido para edicao."));
 	}
 
 	return saveFuncionario(formData, codfuncionario);
@@ -132,7 +140,7 @@ export async function deleteFuncionarioAction(formData: FormData) {
 	const codfuncionario = Number(getText(formData, "codfuncionario"));
 
 	if (Number.isNaN(codfuncionario)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Funcionário invalido para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Funcionário invalido para exclusao."));
 	}
 
 	const { error } = await executeQuery(
@@ -141,7 +149,7 @@ export async function deleteFuncionarioAction(formData: FormData) {
 	);
 
 	if (error) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", error.message));
 	}
 
 	revalidatePath(FUNCIONARIOS_PATH);
@@ -181,127 +189,127 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!["FISICA", "JURIDICA"].includes(tipo)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Selecione o tipo do funcionario."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Selecione o tipo do funcionario."));
 	}
 
 	if (!isLengthBetween(funcionario, 5, 60)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Funcionário deve ter entre 5 e 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Funcionário deve ter entre 5 e 60 caracteres."));
 	}
 
 	if (apelido.length > 35) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Apelido deve ter no maximo 35 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Apelido deve ter no maximo 35 caracteres."));
 	}
 
 	if (tipo === "FISICA" && estadoCivil && !["SOLTEIRO", "CASADO", "SEPARADO", "DIVORCIADO", "VIUVO", "OUTRO"].includes(estadoCivil)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Estado civil invalido."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Estado civil invalido."));
 	}
 
 	if (!isLengthBetween(endereco, 5, 80)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Endereco deve ter entre 5 e 80 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Endereco deve ter entre 5 e 80 caracteres."));
 	}
 
 	if (!isLengthBetween(numero, 1, 10)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Numero deve conter entre 1 e 10 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Numero deve conter entre 1 e 10 digitos."));
 	}
 
 	if (complemento.length > 60) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Complemento deve ter no maximo 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Complemento deve ter no maximo 60 caracteres."));
 	}
 
 	if (!isLengthBetween(bairro, 5, 60)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Bairro deve ter entre 5 e 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Bairro deve ter entre 5 e 60 caracteres."));
 	}
 
 	if (cep.length !== 8 || !hasOnlyDigitsAndFormatting(cepRaw)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CEP deve conter exatamente 8 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "CEP deve conter exatamente 8 digitos."));
 	}
 
 	if (!codcidadeValue || Number.isNaN(codcidade)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Selecione a cidade do funcionario."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Selecione a cidade do funcionario."));
 	}
 
 	if (!codfuncaoFuncionarioValue || Number.isNaN(codfuncaoFuncionario)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Selecione a funcao do funcionario."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Selecione a funcao do funcionario."));
 	}
 
 	if (!isLengthBetween(telefone, 10, 11) || !hasOnlyDigitsAndFormatting(telefoneRaw)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Telefone deve ter 10 ou 11 numeros."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Telefone deve ter 10 ou 11 numeros."));
 	}
 
 	if (contato.length > 60) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Contato deve ter no maximo 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Contato deve ter no maximo 60 caracteres."));
 	}
 
 	if (email && !isLengthBetween(email, 5, 80)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "E-mail deve ter entre 5 e 80 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "E-mail deve ter entre 5 e 80 caracteres."));
 	}
 
 	if (cpfRaw && !hasOnlyDigitsAndFormatting(cpfRaw)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CPF/CNPJ deve conter apenas digitos."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "CPF/CNPJ deve conter apenas digitos."));
 	}
 
 	if (cpf && ![11, 14].includes(cpf.length)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CPF deve conter 11 digitos ou CNPJ deve conter 14 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "CPF deve conter 11 digitos ou CNPJ deve conter 14 digitos."));
 	}
 
 	if (tipo === "FISICA" && cpf.length !== 11) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Funcionario pessoa fisica deve informar um CPF com 11 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Funcionario pessoa fisica deve informar um CPF com 11 digitos."));
 	}
 
 	if (tipo === "JURIDICA" && cpf.length !== 14) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Funcionario pessoa juridica deve informar um CNPJ com 14 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Funcionario pessoa juridica deve informar um CNPJ com 14 digitos."));
 	}
 
 	if (cpf.length === 11 && !isValidCpf(cpf)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CPF invalido."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "CPF invalido."));
 	}
 
 	if (cpf.length === 14 && !isValidCnpj(cpf)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "CNPJ invalido."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "CNPJ invalido."));
 	}
 
 	if (rg && !isLengthBetween(rg, 5, 14)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "RG/Inscricao estadual deve ter entre 5 e 14 numeros."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "RG/Inscricao estadual deve ter entre 5 e 14 numeros."));
 	}
 
 	if (tipo === "FISICA" && sexo && !["MASCULINO", "FEMININO"].includes(sexo)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Sexo do funcionario invalido."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Sexo do funcionario invalido."));
 	}
 
 	if (tipo === "FISICA" && nacionalidade && !isLengthBetween(nacionalidade, 5, 20)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Nacionalidade deve ter entre 5 e 20 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Nacionalidade deve ter entre 5 e 20 caracteres."));
 	}
 
 	if (tipo === "FISICA" && dataNascimento && !isValidDate(dataNascimento)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Informe uma data de nascimento valida."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Informe uma data de nascimento valida."));
 	}
 
 	if (!isValidDate(dataAdmissao)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Informe uma data de admissao valida."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Informe uma data de admissao valida."));
 	}
 
 	if (dataDemissao && !isValidDate(dataDemissao)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Informe uma data de demissao valida."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Informe uma data de demissao valida."));
 	}
 
 	if (dataDemissao && new Date(`${dataDemissao}T00:00:00`) < new Date(`${dataAdmissao}T00:00:00`)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Data de demissao nao pode ser anterior a admissao."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Data de demissao nao pode ser anterior a admissao."));
 	}
 
 	if (Number.isNaN(salarioBase) || salarioBase < 0) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Salario base deve ser maior ou igual a zero."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Salario base deve ser maior ou igual a zero."));
 	}
 
 	if (Number.isNaN(percentualComissao) || percentualComissao < 0 || percentualComissao > 100) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Comissao deve estar entre 0 e 100."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Comissao deve estar entre 0 e 100."));
 	}
 
 	if (!["S", "N"].includes(ativo)) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Informe um status valido para o funcionario."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Informe um status valido para o funcionario."));
 	}
 
 	if (observacoes.length > 110) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", "Observacoes devem ter no maximo 110 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", "Observacoes devem ter no maximo 110 caracteres."));
 	}
 
 	const values = [
@@ -357,7 +365,7 @@ async function saveFuncionario(formData: FormData, codfuncionario?: number) {
 			);
 
 	if (error) {
-		redirect(buildRedirect(FUNCIONARIOS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, FUNCIONARIOS_PATH), "error", error.message));
 	}
 
 	revalidatePath(FUNCIONARIOS_PATH);

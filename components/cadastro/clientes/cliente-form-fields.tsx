@@ -5,6 +5,7 @@ import { Calendar } from "lucide-react";
 
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -127,6 +128,7 @@ export function ClienteFormFields({
 
 	return (
 		<form action={action} onSubmit={validateSearchableSelects} className="space-y-5">
+			<FormStatePersistence formKey="clientes" />
 			{initialData?.codcliente ? (
 				<input type="hidden" name="codcliente" value={String(initialData.codcliente)} />
 			) : null}

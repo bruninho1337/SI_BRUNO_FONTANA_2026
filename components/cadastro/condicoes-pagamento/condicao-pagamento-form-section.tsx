@@ -5,6 +5,7 @@ import {
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { ParcelasCondicaoFields } from "@/components/cadastro/condicoes-pagamento/parcelas-condicao-fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,8 @@ export async function CondicaoPagamentoFormSection({
 				action={condicaoEditando ? updateCondicaoPagamentoAction : createCondicaoPagamentoAction}
 				className="space-y-4"
 			>
+				<FormStatePersistence formKey="condicoes-pagamento" />
+
 				<div className="grid gap-4 md:grid-cols-12">
 					{condicaoEditando ? (
 						<input

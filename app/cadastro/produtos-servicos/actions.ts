@@ -14,12 +14,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function parseDecimal(value: FormDataEntryValue | null) {
 	const rawValue = String(value ?? "").trim();
@@ -47,7 +55,7 @@ export async function updateProdutoAction(formData: FormData) {
 	const codproduto = Number(getText(formData, "codproduto"));
 
 	if (Number.isNaN(codproduto)) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", "Produto invalido para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, PRODUTOS_PATH), "error", "Produto invalido para edicao."));
 	}
 
 	return saveProduto(formData, codproduto);
@@ -57,13 +65,13 @@ export async function deleteProdutoAction(formData: FormData) {
 	const codproduto = Number(getText(formData, "codproduto"));
 
 	if (Number.isNaN(codproduto)) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", "Produto invalido para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, PRODUTOS_PATH), "error", "Produto invalido para exclusao."));
 	}
 
 	const { error } = await executeQuery("delete from public.produtos where codproduto = $1", [codproduto]);
 
 	if (error) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, PRODUTOS_PATH), "error", error.message));
 	}
 
 	revalidatePath(PRODUTOS_PATH);
@@ -82,23 +90,23 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(produto, 2, 80)) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", "Produto deve ter entre 2 e 80 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, PRODUTOS_PATH), "error", "Produto deve ter entre 2 e 80 caracteres."));
 	}
 
 	if (Number.isNaN(valor) || valor < 0) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", "Informe um valor valido para o produto."));
+		redirect(buildRedirect(getErrorPath(formData, PRODUTOS_PATH), "error", "Informe um valor valido para o produto."));
 	}
 
 	if (Number.isNaN(precoCusto) || precoCusto < 0) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", "Informe um preco de custo valido para o produto."));
+		redirect(buildRedirect(getErrorPath(formData, PRODUTOS_PATH), "error", "Informe um preco de custo valido para o produto."));
 	}
 
 	if (Number.isNaN(quantidadeEstoque) || quantidadeEstoque < 0) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", "Informe uma quantidade em estoque valida."));
+		redirect(buildRedirect(getErrorPath(formData, PRODUTOS_PATH), "error", "Informe uma quantidade em estoque valida."));
 	}
 
 	if (Number.isNaN(valorDesconto) || valorDesconto < 0 || valorDesconto > valor) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", "O desconto do produto precisa estar entre 0 e o valor informado."));
+		redirect(buildRedirect(getErrorPath(formData, PRODUTOS_PATH), "error", "O desconto do produto precisa estar entre 0 e o valor informado."));
 	}
 
 	const { error } = codproduto
@@ -137,7 +145,7 @@ async function saveProduto(formData: FormData, codproduto?: number) {
 			);
 
 	if (error) {
-		redirect(buildRedirect(PRODUTOS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, PRODUTOS_PATH), "error", error.message));
 	}
 
 	revalidatePath(PRODUTOS_PATH);
@@ -152,7 +160,7 @@ export async function updateServicoAction(formData: FormData) {
 	const codservico = Number(getText(formData, "codservico"));
 
 	if (Number.isNaN(codservico)) {
-		redirect(buildRedirect(SERVICOS_PATH, "error", "Servico invalido para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, SERVICOS_PATH), "error", "Servico invalido para edicao."));
 	}
 
 	return saveServico(formData, codservico);
@@ -162,13 +170,13 @@ export async function deleteServicoAction(formData: FormData) {
 	const codservico = Number(getText(formData, "codservico"));
 
 	if (Number.isNaN(codservico)) {
-		redirect(buildRedirect(SERVICOS_PATH, "error", "Servico invalido para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, SERVICOS_PATH), "error", "Servico invalido para exclusao."));
 	}
 
 	const { error } = await executeQuery("delete from public.servicos where codservico = $1", [codservico]);
 
 	if (error) {
-		redirect(buildRedirect(SERVICOS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, SERVICOS_PATH), "error", error.message));
 	}
 
 	revalidatePath(SERVICOS_PATH);
@@ -184,19 +192,19 @@ async function saveServico(formData: FormData, codservico?: number) {
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(servico, 2, 80)) {
-		redirect(buildRedirect(SERVICOS_PATH, "error", "Servico deve ter entre 2 e 80 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, SERVICOS_PATH), "error", "Servico deve ter entre 2 e 80 caracteres."));
 	}
 
 	if (Number.isNaN(duracaoMinutos) || duracaoMinutos <= 0) {
-		redirect(buildRedirect(SERVICOS_PATH, "error", "Informe uma duracao valida em minutos."));
+		redirect(buildRedirect(getErrorPath(formData, SERVICOS_PATH), "error", "Informe uma duracao valida em minutos."));
 	}
 
 	if (Number.isNaN(valor) || valor < 0) {
-		redirect(buildRedirect(SERVICOS_PATH, "error", "Informe um valor valido para o servico."));
+		redirect(buildRedirect(getErrorPath(formData, SERVICOS_PATH), "error", "Informe um valor valido para o servico."));
 	}
 
 	if (Number.isNaN(valorDesconto) || valorDesconto < 0 || valorDesconto > valor) {
-		redirect(buildRedirect(SERVICOS_PATH, "error", "O desconto do servico precisa estar entre 0 e o valor informado."));
+		redirect(buildRedirect(getErrorPath(formData, SERVICOS_PATH), "error", "O desconto do servico precisa estar entre 0 e o valor informado."));
 	}
 
 	const { error } = codservico
@@ -230,7 +238,7 @@ async function saveServico(formData: FormData, codservico?: number) {
 				);
 
 	if (error) {
-		redirect(buildRedirect(SERVICOS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, SERVICOS_PATH), "error", error.message));
 	}
 
 	revalidatePath(SERVICOS_PATH);
@@ -245,7 +253,7 @@ export async function updateCategoriaAction(formData: FormData) {
 	const codcategoria = Number(getText(formData, "codcategoria"));
 
 	if (Number.isNaN(codcategoria)) {
-		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Categoria invalida para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, CATEGORIAS_PATH), "error", "Categoria invalida para edicao."));
 	}
 
 	return saveCategoria(formData, codcategoria);
@@ -255,13 +263,13 @@ export async function deleteCategoriaAction(formData: FormData) {
 	const codcategoria = Number(getText(formData, "codcategoria"));
 
 	if (Number.isNaN(codcategoria)) {
-		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Categoria invalida para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, CATEGORIAS_PATH), "error", "Categoria invalida para exclusao."));
 	}
 
 	const { error } = await executeQuery("delete from public.categorias where codcategoria = $1", [codcategoria]);
 
 	if (error) {
-		redirect(buildRedirect(CATEGORIAS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, CATEGORIAS_PATH), "error", error.message));
 	}
 
 	revalidatePath(CATEGORIAS_PATH);
@@ -277,15 +285,15 @@ async function saveCategoria(formData: FormData, codcategoria?: number) {
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(categoria, 2, 50)) {
-		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Categoria deve ter entre 2 e 50 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CATEGORIAS_PATH), "error", "Categoria deve ter entre 2 e 50 caracteres."));
 	}
 
 	if (!["PRODUTO", "SERVICO", "AMBOS"].includes(tipo)) {
-		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Selecione um tipo valido para a categoria."));
+		redirect(buildRedirect(getErrorPath(formData, CATEGORIAS_PATH), "error", "Selecione um tipo valido para a categoria."));
 	}
 
 	if (descricao.length > 255) {
-		redirect(buildRedirect(CATEGORIAS_PATH, "error", "Descricao deve ter no maximo 255 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CATEGORIAS_PATH), "error", "Descricao deve ter no maximo 255 caracteres."));
 	}
 
 	const { error } = codcategoria
@@ -299,7 +307,7 @@ async function saveCategoria(formData: FormData, codcategoria?: number) {
 			);
 
 	if (error) {
-		redirect(buildRedirect(CATEGORIAS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, CATEGORIAS_PATH), "error", error.message));
 	}
 
 	revalidatePath(CATEGORIAS_PATH);

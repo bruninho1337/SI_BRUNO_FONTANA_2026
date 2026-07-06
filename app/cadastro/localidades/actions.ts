@@ -14,12 +14,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function isLengthBetween(value: string, min: number, max: number) {
 	return value.length >= min && value.length <= max;
@@ -33,7 +41,7 @@ export async function updatePaisAction(formData: FormData) {
 	const codpais = Number(getText(formData, "codpais"));
 
 	if (Number.isNaN(codpais)) {
-		redirect(buildRedirect(PAISES_PATH, "error", "Pais invalido para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, PAISES_PATH), "error", "Pais invalido para edicao."));
 	}
 
 	return savePais(formData, codpais);
@@ -43,13 +51,13 @@ export async function deletePaisAction(formData: FormData) {
 	const codpais = Number(getText(formData, "codpais"));
 
 	if (Number.isNaN(codpais)) {
-		redirect(buildRedirect(PAISES_PATH, "error", "Pais invalido para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, PAISES_PATH), "error", "Pais invalido para exclusao."));
 	}
 
 	const { error } = await executeQuery("delete from public.paises where codpais = $1", [codpais]);
 
 	if (error) {
-		redirect(buildRedirect(PAISES_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, PAISES_PATH), "error", error.message));
 	}
 
 	revalidatePath(PAISES_PATH);
@@ -65,19 +73,19 @@ async function savePais(formData: FormData, codpais?: number) {
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(pais, 2, 60)) {
-		redirect(buildRedirect(PAISES_PATH, "error", "Pais deve ter entre 2 e 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, PAISES_PATH), "error", "Pais deve ter entre 2 e 60 caracteres."));
 	}
 
 	if (!isLengthBetween(sigla, 1, 5)) {
-		redirect(buildRedirect(PAISES_PATH, "error", "Sigla deve ter entre 1 e 5 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, PAISES_PATH), "error", "Sigla deve ter entre 1 e 5 caracteres."));
 	}
 
 	if (!isLengthBetween(ddi, 1, 5)) {
-		redirect(buildRedirect(PAISES_PATH, "error", "DDI deve ter entre 1 e 5 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, PAISES_PATH), "error", "DDI deve ter entre 1 e 5 caracteres."));
 	}
 
 	if (!isLengthBetween(moeda, 1, 10)) {
-		redirect(buildRedirect(PAISES_PATH, "error", "Moeda deve ter entre 1 e 10 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, PAISES_PATH), "error", "Moeda deve ter entre 1 e 10 caracteres."));
 	}
 
 	const { error } = codpais
@@ -91,7 +99,7 @@ async function savePais(formData: FormData, codpais?: number) {
 			);
 
 	if (error) {
-		redirect(buildRedirect(PAISES_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, PAISES_PATH), "error", error.message));
 	}
 
 	revalidatePath(PAISES_PATH);
@@ -107,7 +115,7 @@ export async function updateEstadoAction(formData: FormData) {
 	const codestado = Number(getText(formData, "codestado"));
 
 	if (Number.isNaN(codestado)) {
-		redirect(buildRedirect(ESTADOS_PATH, "error", "Estado invalido para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, ESTADOS_PATH), "error", "Estado invalido para edicao."));
 	}
 
 	return saveEstado(formData, codestado);
@@ -117,13 +125,13 @@ export async function deleteEstadoAction(formData: FormData) {
 	const codestado = Number(getText(formData, "codestado"));
 
 	if (Number.isNaN(codestado)) {
-		redirect(buildRedirect(ESTADOS_PATH, "error", "Estado invalido para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, ESTADOS_PATH), "error", "Estado invalido para exclusao."));
 	}
 
 	const { error } = await executeQuery("delete from public.estados where codestado = $1", [codestado]);
 
 	if (error) {
-		redirect(buildRedirect(ESTADOS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, ESTADOS_PATH), "error", error.message));
 	}
 
 	revalidatePath(ESTADOS_PATH);
@@ -139,15 +147,15 @@ async function saveEstado(formData: FormData, codestado?: number) {
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(uf, 2, 2)) {
-		redirect(buildRedirect(ESTADOS_PATH, "error", "UF deve ter exatamente 2 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, ESTADOS_PATH), "error", "UF deve ter exatamente 2 caracteres."));
 	}
 
 	if (!isLengthBetween(estado, 2, 60)) {
-		redirect(buildRedirect(ESTADOS_PATH, "error", "Estado deve ter entre 2 e 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, ESTADOS_PATH), "error", "Estado deve ter entre 2 e 60 caracteres."));
 	}
 
 	if (!codpaisValue || Number.isNaN(codpais)) {
-		redirect(buildRedirect(ESTADOS_PATH, "error", "Selecione o pais do estado."));
+		redirect(buildRedirect(getErrorPath(formData, ESTADOS_PATH), "error", "Selecione o pais do estado."));
 	}
 
 	const { error } = codestado
@@ -161,7 +169,7 @@ async function saveEstado(formData: FormData, codestado?: number) {
 			);
 
 	if (error) {
-		redirect(buildRedirect(ESTADOS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, ESTADOS_PATH), "error", error.message));
 	}
 
 	revalidatePath(ESTADOS_PATH);
@@ -177,7 +185,7 @@ export async function updateCidadeAction(formData: FormData) {
 	const codcidade = Number(getText(formData, "codcidade"));
 
 	if (Number.isNaN(codcidade)) {
-		redirect(buildRedirect(CIDADES_PATH, "error", "Cidade invalida para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, CIDADES_PATH), "error", "Cidade invalida para edicao."));
 	}
 
 	return saveCidade(formData, codcidade);
@@ -187,13 +195,13 @@ export async function deleteCidadeAction(formData: FormData) {
 	const codcidade = Number(getText(formData, "codcidade"));
 
 	if (Number.isNaN(codcidade)) {
-		redirect(buildRedirect(CIDADES_PATH, "error", "Cidade invalida para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, CIDADES_PATH), "error", "Cidade invalida para exclusao."));
 	}
 
 	const { error } = await executeQuery("delete from public.cidades where codcidade = $1", [codcidade]);
 
 	if (error) {
-		redirect(buildRedirect(CIDADES_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, CIDADES_PATH), "error", error.message));
 	}
 
 	revalidatePath(CIDADES_PATH);
@@ -207,11 +215,11 @@ async function saveCidade(formData: FormData, codcidade?: number) {
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(cidade, 2, 50)) {
-		redirect(buildRedirect(CIDADES_PATH, "error", "Cidade deve ter entre 2 e 50 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CIDADES_PATH), "error", "Cidade deve ter entre 2 e 50 caracteres."));
 	}
 
 	if (!codestValue || Number.isNaN(codest)) {
-		redirect(buildRedirect(CIDADES_PATH, "error", "Selecione o estado da cidade."));
+		redirect(buildRedirect(getErrorPath(formData, CIDADES_PATH), "error", "Selecione o estado da cidade."));
 	}
 
 	const { data: cidadeDuplicada, error: duplicateError } = await queryMaybeSingle<{ codcidade: number }>(
@@ -225,11 +233,11 @@ async function saveCidade(formData: FormData, codcidade?: number) {
 	);
 
 	if (duplicateError) {
-		redirect(buildRedirect(CIDADES_PATH, "error", duplicateError.message));
+		redirect(buildRedirect(getErrorPath(formData, CIDADES_PATH), "error", duplicateError.message));
 	}
 
 	if (cidadeDuplicada) {
-		redirect(buildRedirect(CIDADES_PATH, "error", "Ja existe uma cidade com esse nome neste estado."));
+		redirect(buildRedirect(getErrorPath(formData, CIDADES_PATH), "error", "Ja existe uma cidade com esse nome neste estado."));
 	}
 
 	const { error } = codcidade
@@ -244,10 +252,10 @@ async function saveCidade(formData: FormData, codcidade?: number) {
 
 	if (error) {
 		if (error.message.includes("cidades_codest_cidade_unique_idx")) {
-			redirect(buildRedirect(CIDADES_PATH, "error", "Ja existe uma cidade com esse nome neste estado."));
+			redirect(buildRedirect(getErrorPath(formData, CIDADES_PATH), "error", "Ja existe uma cidade com esse nome neste estado."));
 		}
 
-		redirect(buildRedirect(CIDADES_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, CIDADES_PATH), "error", error.message));
 	}
 
 	revalidatePath(CIDADES_PATH);

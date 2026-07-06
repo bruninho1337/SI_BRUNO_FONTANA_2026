@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,6 +114,7 @@ export function FornecedorFormFields({
 
 	return (
 		<form action={action} onSubmit={validateSearchableSelects} className="space-y-5">
+			<FormStatePersistence formKey="fornecedores" />
 			{initialData?.codfornecedor ? (
 				<input type="hidden" name="codfornecedor" value={String(initialData.codfornecedor)} />
 			) : null}

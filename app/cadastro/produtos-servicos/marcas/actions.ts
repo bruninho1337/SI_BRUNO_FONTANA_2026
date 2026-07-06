@@ -13,12 +13,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function isLengthBetween(value: string, min: number, max: number) {
 	return value.length >= min && value.length <= max;
@@ -32,7 +40,7 @@ export async function updateMarcaAction(formData: FormData) {
 	const codmarca = Number(getText(formData, "codmarca"));
 
 	if (Number.isNaN(codmarca)) {
-		redirect(buildRedirect(MARCAS_PATH, "error", "Marca invalida para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, MARCAS_PATH), "error", "Marca invalida para edicao."));
 	}
 
 	return saveMarca(formData, codmarca);
@@ -42,13 +50,13 @@ export async function deleteMarcaAction(formData: FormData) {
 	const codmarca = Number(getText(formData, "codmarca"));
 
 	if (Number.isNaN(codmarca)) {
-		redirect(buildRedirect(MARCAS_PATH, "error", "Marca invalida para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, MARCAS_PATH), "error", "Marca invalida para exclusao."));
 	}
 
 	const { error } = await executeQuery("delete from public.marcas where codmarca = $1", [codmarca]);
 
 	if (error) {
-		redirect(buildRedirect(MARCAS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, MARCAS_PATH), "error", error.message));
 	}
 
 	revalidatePath(MARCAS_PATH);
@@ -61,11 +69,11 @@ async function saveMarca(formData: FormData, codmarca?: number) {
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(marca, 2, 80)) {
-		redirect(buildRedirect(MARCAS_PATH, "error", "Marca deve ter entre 2 e 80 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, MARCAS_PATH), "error", "Marca deve ter entre 2 e 80 caracteres."));
 	}
 
 	if (!["S", "N"].includes(ativo)) {
-		redirect(buildRedirect(MARCAS_PATH, "error", "Informe um status valido para a marca."));
+		redirect(buildRedirect(getErrorPath(formData, MARCAS_PATH), "error", "Informe um status valido para a marca."));
 	}
 
 	const { error } = codmarca
@@ -79,7 +87,7 @@ async function saveMarca(formData: FormData, codmarca?: number) {
 			);
 
 	if (error) {
-		redirect(buildRedirect(MARCAS_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, MARCAS_PATH), "error", error.message));
 	}
 
 	revalidatePath(MARCAS_PATH);

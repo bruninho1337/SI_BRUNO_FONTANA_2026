@@ -5,6 +5,7 @@ import {
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +45,7 @@ export async function UnidadeMedidaFormSection({
 				action={unidadeEditando ? updateUnidadeMedidaAction : createUnidadeMedidaAction}
 				className="space-y-4"
 			>
+				<FormStatePersistence formKey="unidades-medida" />
 				<div className="grid gap-4 md:grid-cols-12">
 					{unidadeEditando ? (
 						<input

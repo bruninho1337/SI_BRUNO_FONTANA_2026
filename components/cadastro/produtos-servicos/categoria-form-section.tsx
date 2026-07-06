@@ -2,6 +2,7 @@ import { createCategoriaAction, updateCategoriaAction } from "@/app/cadastro/pro
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { CategoryTypeToggle } from "@/components/cadastro/produtos-servicos/category-type-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 			<FormFeedback params={params} />
 
 			<form action={categoriaEditando ? updateCategoriaAction : createCategoriaAction} className="space-y-4">
+				<FormStatePersistence formKey="categorias" />
 				<div className="grid gap-4 md:grid-cols-12">
 				{categoriaEditando ? (
 					<input type="hidden" name="codcategoria" value={categoriaEditando.codcategoria} />

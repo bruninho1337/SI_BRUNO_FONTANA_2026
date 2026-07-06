@@ -13,12 +13,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function isLengthBetween(value: string, min: number, max: number) {
 	return value.length >= min && value.length <= max;
@@ -32,7 +40,7 @@ export async function updateUnidadeMedidaAction(formData: FormData) {
 	const codunidadeMedida = Number(getText(formData, "codunidade_medida"));
 
 	if (Number.isNaN(codunidadeMedida)) {
-		redirect(buildRedirect(UNIDADES_MEDIDA_PATH, "error", "Unidade de medida invalida para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, UNIDADES_MEDIDA_PATH), "error", "Unidade de medida invalida para edicao."));
 	}
 
 	return saveUnidadeMedida(formData, codunidadeMedida);
@@ -42,7 +50,7 @@ export async function deleteUnidadeMedidaAction(formData: FormData) {
 	const codunidadeMedida = Number(getText(formData, "codunidade_medida"));
 
 	if (Number.isNaN(codunidadeMedida)) {
-		redirect(buildRedirect(UNIDADES_MEDIDA_PATH, "error", "Unidade de medida invalida para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, UNIDADES_MEDIDA_PATH), "error", "Unidade de medida invalida para exclusao."));
 	}
 
 	const { error } = await executeQuery(
@@ -51,7 +59,7 @@ export async function deleteUnidadeMedidaAction(formData: FormData) {
 	);
 
 	if (error) {
-		redirect(buildRedirect(UNIDADES_MEDIDA_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, UNIDADES_MEDIDA_PATH), "error", error.message));
 	}
 
 	revalidatePath(UNIDADES_MEDIDA_PATH);
@@ -65,15 +73,15 @@ async function saveUnidadeMedida(formData: FormData, codunidadeMedida?: number) 
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(unidadeMedida, 2, 80)) {
-		redirect(buildRedirect(UNIDADES_MEDIDA_PATH, "error", "Unidade de medida deve ter entre 2 e 80 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, UNIDADES_MEDIDA_PATH), "error", "Unidade de medida deve ter entre 2 e 80 caracteres."));
 	}
 
 	if (!isLengthBetween(sigla, 1, 10)) {
-		redirect(buildRedirect(UNIDADES_MEDIDA_PATH, "error", "Sigla deve ter entre 1 e 10 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, UNIDADES_MEDIDA_PATH), "error", "Sigla deve ter entre 1 e 10 caracteres."));
 	}
 
 	if (!["S", "N"].includes(ativo)) {
-		redirect(buildRedirect(UNIDADES_MEDIDA_PATH, "error", "Informe um status valido para a unidade de medida."));
+		redirect(buildRedirect(getErrorPath(formData, UNIDADES_MEDIDA_PATH), "error", "Informe um status valido para a unidade de medida."));
 	}
 
 	const { error } = codunidadeMedida
@@ -89,7 +97,7 @@ async function saveUnidadeMedida(formData: FormData, codunidadeMedida?: number) 
 			);
 
 	if (error) {
-		redirect(buildRedirect(UNIDADES_MEDIDA_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, UNIDADES_MEDIDA_PATH), "error", error.message));
 	}
 
 	revalidatePath(UNIDADES_MEDIDA_PATH);

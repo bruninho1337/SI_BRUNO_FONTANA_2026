@@ -12,12 +12,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function isLengthBetween(value: string, min: number, max: number) {
 	return value.length >= min && value.length <= max;
@@ -128,7 +136,7 @@ export async function updateClienteAction(formData: FormData) {
 	const codcliente = Number(getText(formData, "codcliente"));
 
 	if (Number.isNaN(codcliente)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Cliente invalido para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Cliente invalido para edicao."));
 	}
 
 	return saveCliente(formData, codcliente);
@@ -138,13 +146,13 @@ export async function deleteClienteAction(formData: FormData) {
 	const codcliente = Number(getText(formData, "codcliente"));
 
 	if (Number.isNaN(codcliente)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Cliente invalido para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Cliente invalido para exclusao."));
 	}
 
 	const { error } = await executeQuery("delete from public.clientes where codcliente = $1", [codcliente]);
 
 	if (error) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", error.message));
 	}
 
 	revalidatePath(CLIENTES_PATH);
@@ -182,99 +190,99 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!["FISICA", "JURIDICA"].includes(tipo)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Selecione o tipo do cliente."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Selecione o tipo do cliente."));
 	}
 
 	if (!isLengthBetween(cliente, 5, 60)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Cliente deve ter entre 5 e 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Cliente deve ter entre 5 e 60 caracteres."));
 	}
 
 	if (apelido.length > 60) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Apelido deve ter no maximo 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Apelido deve ter no maximo 60 caracteres."));
 	}
 
 	if (!isLengthBetween(endereco, 5, 60)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Endereco deve ter entre 5 e 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Endereco deve ter entre 5 e 60 caracteres."));
 	}
 
 	if (!isLengthBetween(numero, 1, 10) || !hasOnlyDigits(numeroRaw)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Numero deve conter apenas digitos e ter entre 1 e 10 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Numero deve conter apenas digitos e ter entre 1 e 10 caracteres."));
 	}
 
 	if (complemento.length > 60) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Complemento deve ter no maximo 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Complemento deve ter no maximo 60 caracteres."));
 	}
 
 	if (!isLengthBetween(bairro, 5, 60)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Bairro deve ter entre 5 e 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Bairro deve ter entre 5 e 60 caracteres."));
 	}
 
 	if (cep.length !== 8 || !hasOnlyDigitsAndFormatting(cepRaw)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "CEP deve conter exatamente 8 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "CEP deve conter exatamente 8 digitos."));
 	}
 
 	if (!codcidadeValue || Number.isNaN(codcidade)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Selecione a cidade do cliente."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Selecione a cidade do cliente."));
 	}
 
 	if (codcondicaoPagamentoValue && Number.isNaN(codcondicaoPagamento)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Condicao de pagamento invalida."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Condicao de pagamento invalida."));
 	}
 
 	if (!isLengthBetween(telefone, 10, 11) || !hasOnlyDigitsAndFormatting(telefoneRaw)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Telefone deve conter apenas digitos e ter 10 ou 11 numeros."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Telefone deve conter apenas digitos e ter 10 ou 11 numeros."));
 	}
 
 	if (contato.length > 60) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Contato deve ter no maximo 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Contato deve ter no maximo 60 caracteres."));
 	}
 
 	if (!isLengthBetween(email, 5, 60)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "E-mail deve ter entre 5 e 60 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "E-mail deve ter entre 5 e 60 caracteres."));
 	}
 
 	if (sexo && !["MASCULINO", "FEMININO"].includes(sexo)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Sexo do cliente invalido."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Sexo do cliente invalido."));
 	}
 
 	if (!isOptionalLengthBetween(nacionalidade, 5, 20)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Nacionalidade deve ter entre 5 e 20 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Nacionalidade deve ter entre 5 e 20 caracteres."));
 	}
 
 	if (tipo === "FISICA" && !isOlderThan15(dataNascimento)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Data de nascimento exige idade maior que 15 anos."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Data de nascimento exige idade maior que 15 anos."));
 	}
 
 	if (!isOptionalLengthBetween(rgInscricaoEstadual, 5, 14) || (rgInscricaoEstadualRaw && !hasOnlyDigitsAndFormatting(rgInscricaoEstadualRaw))) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "RG/Inscricao estadual deve conter apenas digitos e ter entre 5 e 14 numeros."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "RG/Inscricao estadual deve conter apenas digitos e ter entre 5 e 14 numeros."));
 	}
 
 	if (cpfCnpjRaw && !hasOnlyDigitsAndFormatting(cpfCnpjRaw)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "CPF/CNPJ deve conter apenas digitos."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "CPF/CNPJ deve conter apenas digitos."));
 	}
 
 	if (cpfCnpj && ![11, 14].includes(cpfCnpj.length)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "CPF deve conter 11 digitos ou CNPJ deve conter 14 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "CPF deve conter 11 digitos ou CNPJ deve conter 14 digitos."));
 	}
 
 	if (cpfCnpj && tipo === "FISICA" && cpfCnpj.length !== 11) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Cliente pessoa fisica deve informar um CPF com 11 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Cliente pessoa fisica deve informar um CPF com 11 digitos."));
 	}
 
 	if (cpfCnpj && tipo === "JURIDICA" && cpfCnpj.length !== 14) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Cliente pessoa juridica deve informar um CNPJ com 14 digitos."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Cliente pessoa juridica deve informar um CNPJ com 14 digitos."));
 	}
 
 	if (cpfCnpj.length === 11 && !isValidCpf(cpfCnpj)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "CPF invalido."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "CPF invalido."));
 	}
 
 	if (cpfCnpj.length === 14 && !isValidCnpj(cpfCnpj)) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "CNPJ invalido."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "CNPJ invalido."));
 	}
 
 	if (observacoes.length > 110) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", "Observacoes devem ter no maximo 110 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", "Observacoes devem ter no maximo 110 caracteres."));
 	}
 
 	const { error } = codcliente
@@ -345,7 +353,7 @@ async function saveCliente(formData: FormData, codcliente?: number) {
 			);
 
 	if (error) {
-		redirect(buildRedirect(CLIENTES_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, CLIENTES_PATH), "error", error.message));
 	}
 
 	revalidatePath(CLIENTES_PATH);

@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
 import { DatePickerInput } from "@/components/forms/date-picker-input";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -139,6 +140,7 @@ export function FuncionarioFormFields({
 
 	return (
 		<form action={action} onSubmit={validateSearchableSelects} className="space-y-5">
+			<FormStatePersistence formKey="funcionarios" />
 			{initialData?.codfuncionario ? (
 				<input type="hidden" name="codfuncionario" value={String(initialData.codfuncionario)} />
 			) : null}

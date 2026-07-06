@@ -1,6 +1,7 @@
 import { createPaisAction, updatePaisAction } from "@/app/cadastro/localidades/actions";
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
+import { FormStatePersistence } from "@/components/forms/form-state-persistence";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,7 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 			<FormFeedback params={params} />
 
 			<form action={paisEditando ? updatePaisAction : createPaisAction} className="space-y-4">
+				<FormStatePersistence formKey="paises" />
 				<div className="grid gap-4 md:grid-cols-12">
 				{paisEditando ? (
 					<input type="hidden" name="codpais" value={paisEditando.codpais} />

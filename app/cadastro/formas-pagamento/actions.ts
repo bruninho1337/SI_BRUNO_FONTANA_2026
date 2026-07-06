@@ -12,12 +12,20 @@ function buildRedirect(path: string, type: "success" | "error", message: string)
 		[type]: message,
 	});
 
-	return `${path}?${params.toString()}`;
+	const separator = path.includes("?") ? "&" : "?";
+
+	return `${path}${separator}${params.toString()}`;
 }
 
 function getText(formData: FormData, name: string) {
 	return String(formData.get(name) ?? "").trim();
 }
+function getErrorPath(formData: FormData, fallbackPath: string) {
+	const path = getText(formData, "_form_error_url");
+
+	return path === fallbackPath || path.startsWith(`${fallbackPath}?`) ? path : fallbackPath;
+}
+
 
 function isLengthBetween(value: string, min: number, max: number) {
 	return value.length >= min && value.length <= max;
@@ -31,7 +39,7 @@ export async function updateFormaPagamentoAction(formData: FormData) {
 	const codformaPagamento = Number(getText(formData, "codforma_pagamento"));
 
 	if (Number.isNaN(codformaPagamento)) {
-		redirect(buildRedirect(FORMAS_PAGAMENTO_PATH, "error", "Forma de pagamento invalida para edicao."));
+		redirect(buildRedirect(getErrorPath(formData, FORMAS_PAGAMENTO_PATH), "error", "Forma de pagamento invalida para edicao."));
 	}
 
 	return saveFormaPagamento(formData, codformaPagamento);
@@ -41,7 +49,7 @@ export async function deleteFormaPagamentoAction(formData: FormData) {
 	const codformaPagamento = Number(getText(formData, "codforma_pagamento"));
 
 	if (Number.isNaN(codformaPagamento)) {
-		redirect(buildRedirect(FORMAS_PAGAMENTO_PATH, "error", "Forma de pagamento invalida para exclusao."));
+		redirect(buildRedirect(getErrorPath(formData, FORMAS_PAGAMENTO_PATH), "error", "Forma de pagamento invalida para exclusao."));
 	}
 
 	const { error } = await executeQuery(
@@ -50,7 +58,7 @@ export async function deleteFormaPagamentoAction(formData: FormData) {
 	);
 
 	if (error) {
-		redirect(buildRedirect(FORMAS_PAGAMENTO_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, FORMAS_PAGAMENTO_PATH), "error", error.message));
 	}
 
 	revalidatePath(FORMAS_PAGAMENTO_PATH);
@@ -62,11 +70,11 @@ async function saveFormaPagamento(formData: FormData, codformaPagamento?: number
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(formaPagamento, 2, 50)) {
-		redirect(buildRedirect(FORMAS_PAGAMENTO_PATH, "error", "Forma de pagamento deve ter entre 2 e 50 caracteres."));
+		redirect(buildRedirect(getErrorPath(formData, FORMAS_PAGAMENTO_PATH), "error", "Forma de pagamento deve ter entre 2 e 50 caracteres."));
 	}
 
 	if (!["S", "N"].includes(ativo)) {
-		redirect(buildRedirect(FORMAS_PAGAMENTO_PATH, "error", "Informe um status valido para a forma de pagamento."));
+		redirect(buildRedirect(getErrorPath(formData, FORMAS_PAGAMENTO_PATH), "error", "Informe um status valido para a forma de pagamento."));
 	}
 
 	const { error } = codformaPagamento
@@ -83,7 +91,7 @@ async function saveFormaPagamento(formData: FormData, codformaPagamento?: number
 			);
 
 	if (error) {
-		redirect(buildRedirect(FORMAS_PAGAMENTO_PATH, "error", error.message));
+		redirect(buildRedirect(getErrorPath(formData, FORMAS_PAGAMENTO_PATH), "error", error.message));
 	}
 
 	revalidatePath(FORMAS_PAGAMENTO_PATH);
