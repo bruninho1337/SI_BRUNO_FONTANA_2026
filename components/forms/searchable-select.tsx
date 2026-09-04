@@ -24,6 +24,7 @@ type SearchableSelectProps = {
 	selectPlaceholder: string;
 	options: Option[];
 	required?: boolean;
+	disabled?: boolean;
 	defaultValue?: string;
 	value?: string;
 	className?: string;
@@ -42,6 +43,7 @@ export function SearchableSelect({
 	selectPlaceholder,
 	options,
 	required = false,
+	disabled = false,
 	defaultValue = "",
 	value,
 	className,
@@ -148,17 +150,18 @@ export function SearchableSelect({
 					{label}:
 				</Label>
 			)}
-			<input ref={inputRef} name={name} value={currentValue} required={required} type="hidden" readOnly />
+			<input ref={inputRef} name={name} value={currentValue} required={required} disabled={disabled} type="hidden" readOnly />
 			<button
 				id={`${fieldId}-trigger`}
 				type="button"
+				disabled={disabled}
 				data-invalid={error ? "true" : undefined}
 				aria-describedby={error ? `${fieldId}-error` : undefined}
 				aria-haspopup="dialog"
 				aria-expanded={isOpen}
 				onClick={() => setIsOpen(true)}
 				className={cn(
-					"flex h-11 w-full items-center justify-between rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring",
+					"flex h-11 w-full items-center justify-between rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600 disabled:opacity-100",
 					error ? "border-red-500 focus-visible:ring-red-500" : "border-neutral-300"
 				)}
 			>

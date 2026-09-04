@@ -12,6 +12,11 @@ const navigationItems = [
 		label: "Dashboard",
 		description: "Visão geral do dia",
 	},
+	{
+		href: "/cadastro/compras",
+		label: "Compras",
+		description: "Notas de entrada e estoque",
+	},
 ];
 
 const financeiroItems = [
