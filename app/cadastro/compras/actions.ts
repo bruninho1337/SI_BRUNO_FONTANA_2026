@@ -64,7 +64,7 @@ function todayIso() {
 function databaseMessage(error: unknown) {
 	const dbError = error as { code?: string; constraint?: string; message?: string };
 
-	if (dbError.code === "23505" && dbError.constraint === "compras_nota_fornecedor_unique_idx") {
+	if (dbError.code === "23505" && ["compras_pkey", "compras_nota_fornecedor_unique_idx"].includes(dbError.constraint ?? "")) {
 		return "Ja existe uma compra com este fornecedor, modelo, serie e numero de nota.";
 	}
 
@@ -215,13 +215,12 @@ export async function createCompraAction(formData: FormData) {
 			throw new Error("Um ou mais produtos selecionados nao estao ativos.");
 		}
 
-		const compraResult = await client.query<{ codcompra: string }>(
+		await client.query(
 			`insert into public.compras (
 				codfornecedor, codcondicao_pagamento, modelo, serie, numero_nota,
 				data_emissao, data_chegada, valor_produtos, valor_frete, valor_seguro,
 				outras_despesas, valor_desconto, valor_total, status, ativo, observacoes
-			) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'CONFIRMADA', 'S', $14)
-			returning codcompra`,
+			) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'CONFIRMADA', 'S', $14)`,
 			[
 				codfornecedor,
 				codcondicaoPagamento,
@@ -239,16 +238,26 @@ export async function createCompraAction(formData: FormData) {
 				observacoes || null,
 			]
 		);
-		const codcompra = compraResult.rows[0].codcompra;
-
 		for (const [index, item] of items.entries()) {
 			const itemTotal = roundMoney(item.quantidade * item.valorUnitario - item.valorDesconto);
 
 			await client.query(
 				`insert into public.compras_itens (
-					codcompra, num_item, codproduto, quantidade, valor_unitario, valor_desconto, valor_total
-				) values ($1, $2, $3, $4, $5, $6, $7)`,
-				[codcompra, index + 1, item.codproduto, item.quantidade, item.valorUnitario, item.valorDesconto, itemTotal]
+					modelo, serie, numero_nota, codfornecedor, num_item,
+					codproduto, quantidade, valor_unitario, valor_desconto, valor_total
+				) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+				[
+					modelo,
+					serie,
+					numeroNota,
+					codfornecedor,
+					index + 1,
+					item.codproduto,
+					item.quantidade,
+					item.valorUnitario,
+					item.valorDesconto,
+					itemTotal,
+				]
 			);
 
 			await client.query(
@@ -273,11 +282,20 @@ export async function createCompraAction(formData: FormData) {
 }
 
 export async function cancelCompraAction(formData: FormData) {
-	const codcompra = Number(getText(formData, "codcompra"));
+	const modelo = getText(formData, "modelo");
+	const serie = getText(formData, "serie");
+	const numeroNota = getText(formData, "numero_nota");
+	const codfornecedor = Number(getText(formData, "codfornecedor"));
 
-	if (!Number.isInteger(codcompra) || codcompra <= 0) {
+	if (
+		modelo.length < 1 || modelo.length > 10 ||
+		serie.length < 1 || serie.length > 10 ||
+		numeroNota.length < 1 || numeroNota.length > 30 ||
+		!Number.isInteger(codfornecedor) || codfornecedor <= 0
+	) {
 		fail(formData, "Compra invalida para cancelamento.");
 	}
+	const compraKey = [modelo, serie, numeroNota, codfornecedor];
 
 	const client = await db.connect();
 
@@ -285,8 +303,11 @@ export async function cancelCompraAction(formData: FormData) {
 		await client.query("begin");
 
 		const compraResult = await client.query<{ status: string }>(
-			"select status from public.compras where codcompra = $1 for update",
-			[codcompra]
+			`select status
+			from public.compras
+			where modelo = $1 and serie = $2 and numero_nota = $3 and codfornecedor = $4
+			for update`,
+			compraKey
 		);
 		const compra = compraResult.rows[0];
 
@@ -307,10 +328,13 @@ export async function cancelCompraAction(formData: FormData) {
 			`select ci.codproduto, ci.quantidade, p.quantidade_estoque, p.produto
 			from public.compras_itens ci
 			join public.produtos p on p.codproduto = ci.codproduto
-			where ci.codcompra = $1
+			where ci.modelo = $1
+				and ci.serie = $2
+				and ci.numero_nota = $3
+				and ci.codfornecedor = $4
 			order by ci.num_item
 			for update of p`,
-			[codcompra]
+			compraKey
 		);
 		const itemSemEstoque = itensResult.rows.find(
 			(item) => Number(item.quantidade_estoque) < Number(item.quantidade)
@@ -332,8 +356,10 @@ export async function cancelCompraAction(formData: FormData) {
 		}
 
 		await client.query(
-			"update public.compras set status = 'CANCELADA', ativo = 'N' where codcompra = $1",
-			[codcompra]
+			`update public.compras
+			set status = 'CANCELADA', ativo = 'N'
+			where modelo = $1 and serie = $2 and numero_nota = $3 and codfornecedor = $4`,
+			compraKey
 		);
 		await client.query("commit");
 	} catch (error) {

@@ -1,20 +1,23 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Ban } from "lucide-react";
 
 import { cancelCompraAction } from "@/app/cadastro/compras/actions";
 import { Button } from "@/components/ui/button";
 
 type CancelCompraFormProps = {
-	codcompra: number | string;
+	modelo: string;
+	serie: string;
+	numeroNota: string;
+	codfornecedor: number | string;
 	disabled?: boolean;
 };
 
-export function CancelCompraForm({ codcompra, disabled = false }: CancelCompraFormProps) {
+export function CancelCompraForm({ modelo, serie, numeroNota, codfornecedor, disabled = false }: CancelCompraFormProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
-	const titleId = `cancel-compra-${codcompra}`;
+	const titleId = useId();
 
 	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		if (isOpen) return;
@@ -25,7 +28,10 @@ export function CancelCompraForm({ codcompra, disabled = false }: CancelCompraFo
 	return (
 		<>
 			<form ref={formRef} action={cancelCompraAction} onSubmit={handleSubmit}>
-				<input type="hidden" name="codcompra" value={codcompra} />
+				<input type="hidden" name="modelo" value={modelo} />
+				<input type="hidden" name="serie" value={serie} />
+				<input type="hidden" name="numero_nota" value={numeroNota} />
+				<input type="hidden" name="codfornecedor" value={codfornecedor} />
 				<input type="hidden" name="_form_error_url" value="/cadastro/compras" />
 				<Button
 					type="submit"

@@ -13,6 +13,9 @@ type DatePickerInputProps = {
 	label: string;
 	defaultValue?: string;
 	required?: boolean;
+	disabled?: boolean;
+	min?: string;
+	max?: string;
 	className?: string;
 	inputClassName?: string;
 };
@@ -23,6 +26,9 @@ export function DatePickerInput({
 	label,
 	defaultValue,
 	required = false,
+	disabled = false,
+	min,
+	max,
 	className = "flex flex-col gap-2",
 	inputClassName = "h-11 rounded-xl border border-neutral-300 bg-white px-4 text-neutral-900",
 }: DatePickerInputProps) {
@@ -52,15 +58,19 @@ export function DatePickerInput({
 					name={name}
 					type="date"
 					required={required}
+					disabled={disabled}
+					min={min}
+					max={max}
 					defaultValue={defaultValue}
-					className={inputClassName}
+					className={`${inputClassName} min-w-0 flex-1`}
 				/>
 				<button
 					type="button"
+					disabled={disabled}
 					aria-label={`Selecionar ${label.toLowerCase()}`}
 					title="Selecionar data"
 					onClick={openDatePicker}
-					className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white text-neutral-700 shadow-sm transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+					className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white text-neutral-700 shadow-sm transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400 disabled:opacity-100"
 				>
 					<Calendar className="h-4 w-4" aria-hidden="true" />
 				</button>

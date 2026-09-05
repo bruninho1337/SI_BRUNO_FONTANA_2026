@@ -1,8 +1,18 @@
 import { CompraForm, type PurchaseInitial } from "@/components/cadastro/compras/compra-form";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
-import { buscarCompraPorId, carregarOpcoesCompra } from "@/lib/data/compras";
+import { buscarCompraPorChave, carregarOpcoesCompra } from "@/lib/data/compras";
 
-type CompraFormSectionProps = { searchParams?: Promise<{ success?: string; error?: string; edit?: string }> };
+type CompraFormSectionProps = {
+	searchParams?: Promise<{
+		success?: string;
+		error?: string;
+		edit?: string;
+		modelo?: string;
+		serie?: string;
+		numero_nota?: string;
+		codfornecedor?: string;
+	}>;
+};
 
 function dateValue(value: unknown) {
 	if (!value) return "";
@@ -15,14 +25,30 @@ function moneyValue(value: unknown) {
 	return Number(value ?? 0).toFixed(2).replace(".", ",");
 }
 
+function dateTimeValue(value: unknown) {
+	if (!value) return "";
+	const date = new Date(value as string | number | Date);
+	return Number.isNaN(date.getTime()) ? "" : date.toISOString();
+}
+
 export async function CompraFormSection({ searchParams }: CompraFormSectionProps) {
 	const params = await searchParams;
 	const editRequested = Boolean(params?.edit);
-	const editId = Number(params?.edit ?? "");
+	const editKey = {
+		modelo: String(params?.modelo ?? "").trim(),
+		serie: String(params?.serie ?? "").trim(),
+		numeroNota: String(params?.numero_nota ?? "").trim(),
+		codfornecedor: Number(params?.codfornecedor ?? ""),
+	};
+	const validEditKey =
+		editKey.modelo.length >= 1 && editKey.modelo.length <= 10 &&
+		editKey.serie.length >= 1 && editKey.serie.length <= 10 &&
+		editKey.numeroNota.length >= 1 && editKey.numeroNota.length <= 30 &&
+		Number.isInteger(editKey.codfornecedor) && editKey.codfornecedor > 0;
 	const [options, purchaseResult] = await Promise.all([
 		carregarOpcoesCompra(),
-		editRequested && Number.isInteger(editId) && editId > 0
-			? buscarCompraPorId(editId)
+		editRequested && validEditKey
+			? buscarCompraPorChave(editKey)
 			: Promise.resolve({ compra: null, itens: null, error: null }),
 	]);
 	const { fornecedores, condicoesPagamento, produtos, error: optionsError } = options;
@@ -76,7 +102,6 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 
 	const initialPurchase: PurchaseInitial | undefined = compra
 		? {
-				codcompra: String(compra.codcompra),
 				codfornecedor: String(compra.codfornecedor),
 				codcondicaoPagamento: String(compra.codcondicao_pagamento),
 				modelo: String(compra.modelo),
@@ -90,6 +115,8 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 				valorDesconto: moneyValue(compra.valor_desconto),
 				observacoes: String(compra.observacoes ?? ""),
 				status: String(compra.status),
+				dataCriacao: dateTimeValue(compra.data_criacao),
+				dataAtualizacao: dateTimeValue(compra.data_atualizacao),
 				itens: (itens ?? []).map((item) => ({
 					id: `item-${item.num_item}`,
 					codproduto: String(item.codproduto),
@@ -103,7 +130,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 	return (
 		<div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
 			<div className="mb-6">
-				<h2 className="text-xl font-semibold text-neutral-900">{compra ? `Compra #${compra.codcompra}` : "Nova Compra"}</h2>
+				<h2 className="text-xl font-semibold text-neutral-900">{compra ? `Compra · Nota ${compra.numero_nota}` : "Nova Compra"}</h2>
 				<p className="mt-1 text-sm text-neutral-500">{compra ? "Consulte os dados registrados abaixo. Os campos ficam bloqueados após a confirmação." : "Preencha os dados da compra abaixo."}</p>
 			</div>
 

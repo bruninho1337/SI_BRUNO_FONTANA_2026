@@ -13,6 +13,10 @@ type ComprasPageProps = {
 		mode?: string;
 		edit?: string;
 		q?: string;
+		modelo?: string;
+		serie?: string;
+		numero_nota?: string;
+		codfornecedor?: string;
 	}>;
 };
 
