@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { PackagePlus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 import { createCompraAction } from "@/app/cadastro/compras/actions";
 import { FormStatePersistence } from "@/components/forms/form-state-persistence";
@@ -155,22 +155,11 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	];
 
 	return (
-		<form action={readOnly ? undefined : createCompraAction} className="space-y-6">
+		<form action={readOnly ? undefined : createCompraAction} className="space-y-5">
 			{readOnly ? null : <FormStatePersistence formKey="compras" />}
 			{readOnly ? null : <input type="hidden" name="itens_json" value={JSON.stringify(items)} readOnly />}
 
-			<section className="rounded-2xl border border-neutral-200 bg-neutral-50/70 p-4 md:p-5">
-				<div className="mb-4 flex items-center gap-3">
-					<span className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-900 text-white">
-						<ShoppingCart className="h-5 w-5" aria-hidden="true" />
-					</span>
-					<div>
-						<h3 className="font-semibold text-neutral-900">Dados da nota</h3>
-						<p className="text-sm text-neutral-500">Fornecedor, condição e identificação fiscal.</p>
-					</div>
-				</div>
-
-				<div className="grid gap-4 md:grid-cols-12">
+			<div className="grid gap-4 md:grid-cols-12">
 					<SearchableSelect name="codfornecedor" label="Fornecedor" searchLabel="Pesquisar fornecedor" searchPlaceholder="Digite o nome do fornecedor" selectPlaceholder="Selecione um fornecedor" options={fornecedores} required={!readOnly} disabled={readOnly} value={fornecedorId} onValueChange={selectSupplier} className="md:col-span-6" createHref={readOnly ? undefined : "/cadastro/fornecedores?mode=create"} createLabel="Novo fornecedor" />
 					<SearchableSelect name="codcondicao_pagamento" label="Condição de pagamento" searchLabel="Pesquisar condição" searchPlaceholder="Digite a condição de pagamento" selectPlaceholder="Selecione a condição" options={condicoesPagamento} required={!readOnly} disabled={readOnly} value={condicaoId} onValueChange={setCondicaoId} className="md:col-span-6" createHref={readOnly ? undefined : "/cadastro/condicoes-pagamento?mode=create"} createLabel="Nova condição" />
 
@@ -194,15 +183,11 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 						<RequiredLabel htmlFor="data_chegada" className="text-sm text-neutral-800">Chegada:</RequiredLabel>
 						<Input id="data_chegada" name="data_chegada" type="date" defaultValue={initialPurchase?.dataChegada ?? localToday()} required={!readOnly} disabled={readOnly} className={inputClass} />
 					</div>
-				</div>
-			</section>
+			</div>
 
-			<section className="rounded-2xl border border-neutral-200 p-4 md:p-5">
+			<div className="pt-3">
 				<div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-					<div className="flex items-center gap-3">
-						<span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-800"><PackagePlus className="h-5 w-5" aria-hidden="true" /></span>
-						<div><h3 className="font-semibold text-neutral-900">Itens da compra</h3><p className="text-sm text-neutral-500">Ao menos um produto é obrigatório.</p></div>
-					</div>
+					<div><h3 className="font-semibold text-neutral-900">Itens da compra</h3><p className="mt-1 text-sm text-neutral-500">Ao menos um produto é obrigatório.</p></div>
 					{readOnly ? null : (
 						<Button type="button" variant="outline" onClick={() => setItems((current) => [...current, newItem(current.length)])} className="h-10 rounded-xl border-neutral-300">
 							<Plus className="h-4 w-4" aria-hidden="true" />Adicionar item
@@ -212,93 +197,95 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 				<div className="space-y-3">
 					{items.map((item, index) => {
-						const selected = produtos.find((product) => product.id === item.codproduto);
 						const subtotal = Math.max(0, (Number(item.quantidade) || 0) * parseDecimal(item.valor_unitario) - parseDecimal(item.valor_desconto));
 
 						return (
-							<div key={item.id} className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-								<div className="mb-3 flex items-center justify-between">
-									<p className="text-sm font-semibold text-neutral-700">Item {index + 1}</p>
-									{readOnly ? null : (
-										<Button type="button" variant="ghost" size="icon" disabled={items.length === 1} onClick={() => setItems((current) => current.filter((currentItem) => currentItem.id !== item.id))} className="rounded-xl text-red-600 hover:bg-red-50 hover:text-red-700" title="Remover item">
-											<Trash2 className="h-4 w-4" aria-hidden="true" />
-										</Button>
-									)}
+							<div key={item.id} className="grid gap-4 rounded-xl border border-neutral-200 bg-neutral-50 p-4 md:grid-cols-12">
+								<div className={`${fieldClass} md:col-span-1`}>
+									<Label htmlFor={`item-numero-${item.id}`} className="text-sm font-medium text-neutral-800">Item:</Label>
+									<Input id={`item-numero-${item.id}`} value={index + 1} readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
 								</div>
-
-								<div className="grid gap-4 md:grid-cols-12">
-									<div className={`${fieldClass} md:col-span-4`}>
-										<RequiredLabel htmlFor={`produto-${item.id}`} className="text-sm text-neutral-800">Produto:</RequiredLabel>
-										<select id={`produto-${item.id}`} value={item.codproduto} onChange={(event) => updateItem(item.id, "codproduto", event.target.value)} required={!readOnly} disabled={readOnly} className={inputClass}>
-											<option value="">Selecione um produto</option>
-											{produtos.map((product) => (
-												<option key={product.id} value={product.id} disabled={items.some((other) => other.id !== item.id && other.codproduto === product.id)}>
-													{product.label} · estoque {product.estoque} {product.unidade}
-												</option>
-											))}
-										</select>
-									</div>
-									<div className={`${fieldClass} md:col-span-2`}>
-										<RequiredLabel htmlFor={`quantidade-${item.id}`} className="text-sm text-neutral-800">Quantidade:</RequiredLabel>
+								<SearchableSelect
+									id={`produto-${item.id}`}
+									name={`produto_item_${index}`}
+									label="Produto"
+									searchLabel="Pesquisar produto"
+									searchPlaceholder="Digite o nome do produto"
+									selectPlaceholder="Selecione um produto"
+									options={produtos
+										.filter((product) => product.id === item.codproduto || !items.some((other) => other.id !== item.id && other.codproduto === product.id))
+										.map((product) => ({
+											id: product.id,
+											label: `${product.label} · estoque ${product.estoque} ${product.unidade}`,
+										}))}
+									required={!readOnly}
+									disabled={readOnly}
+									value={item.codproduto}
+									onValueChange={(value) => updateItem(item.id, "codproduto", value)}
+									className="md:col-span-3"
+									createHref={readOnly ? undefined : "/cadastro/produtos-servicos/produtos?mode=create"}
+									createLabel="Novo produto"
+								/>
+								<div className={`${fieldClass} md:col-span-1`}>
+										<RequiredLabel htmlFor={`quantidade-${item.id}`} className="text-sm text-neutral-800">Qtd.:</RequiredLabel>
 										<Input id={`quantidade-${item.id}`} type="number" min={1} step={1} required={!readOnly} disabled={readOnly} value={item.quantidade} onChange={(event) => updateItem(item.id, "quantidade", event.target.value)} className={inputClass} />
-									</div>
-									<div className={`${fieldClass} md:col-span-2`}>
+								</div>
+								<div className={`${fieldClass} md:col-span-2`}>
 										<RequiredLabel htmlFor={`unitario-${item.id}`} className="text-sm text-neutral-800">Custo unitário:</RequiredLabel>
 										<Input id={`unitario-${item.id}`} inputMode="decimal" required={!readOnly} disabled={readOnly} value={item.valor_unitario} onChange={(event) => updateItem(item.id, "valor_unitario", normalizeMoneyInput(event.target.value))} className={inputClass} />
-									</div>
-									<div className={`${fieldClass} md:col-span-2`}>
-										<Label htmlFor={`desconto-${item.id}`} className="text-sm text-neutral-800">Desconto:</Label>
+								</div>
+								<div className={`${fieldClass} md:col-span-2`}>
+										<Label htmlFor={`desconto-${item.id}`} className="text-sm text-neutral-800">Desc.:</Label>
 										<Input id={`desconto-${item.id}`} inputMode="decimal" disabled={readOnly} value={item.valor_desconto} onChange={(event) => updateItem(item.id, "valor_desconto", normalizeMoneyInput(event.target.value))} className={inputClass} />
-									</div>
-									<div className={`${fieldClass} md:col-span-2`}>
+								</div>
+								<div className={`${fieldClass} md:col-span-2`}>
 										<Label className="text-sm text-neutral-800">Subtotal:</Label>
 										<div className="flex h-11 items-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-semibold text-neutral-900">{currency(subtotal)}</div>
-									</div>
 								</div>
-								{selected ? <p className="mt-3 text-xs text-neutral-500">Estoque atual: {selected.estoque} {selected.unidade}</p> : null}
+								<div className={`${fieldClass} md:col-span-1`}>
+									<Label className="text-sm font-medium text-neutral-800">Ações:</Label>
+									<Button type="button" variant="outline" size="icon" disabled={readOnly || items.length === 1} onClick={() => setItems((current) => current.filter((currentItem) => currentItem.id !== item.id))} className="h-11 w-11 rounded-xl text-red-600" title="Remover item" aria-label={`Remover item ${index + 1}`}>
+										<Trash2 className="h-4 w-4" aria-hidden="true" />
+									</Button>
+								</div>
 							</div>
 						);
 					})}
 				</div>
-			</section>
-
-			<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-				<section className="rounded-2xl border border-neutral-200 p-4 md:p-5">
-					<h3 className="font-semibold text-neutral-900">Ajustes e observações</h3>
-					<div className="mt-4 grid gap-4 sm:grid-cols-2">
-						{moneyFields.map((field) => (
-							<div key={field.name} className={fieldClass}>
-								<Label htmlFor={field.name} className="text-sm text-neutral-800">{field.label}:</Label>
-								<Input id={field.name} name={field.name} inputMode="decimal" disabled={readOnly} value={field.value} onChange={(event) => field.setter(normalizeMoneyInput(event.target.value))} className={inputClass} />
-							</div>
-						))}
-					</div>
-					<div className="mt-4 flex flex-col gap-2">
-						<Label htmlFor="observacoes" className="text-sm text-neutral-800">Observações:</Label>
-						<textarea id="observacoes" name="observacoes" maxLength={255} rows={4} disabled={readOnly} defaultValue={initialPurchase?.observacoes} placeholder="Informações adicionais da nota ou do recebimento" className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600" />
-					</div>
-				</section>
-
-				<aside className="rounded-2xl bg-neutral-900 p-5 text-white shadow-sm">
-					<p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">Resumo</p>
-					<div className="mt-5 space-y-3 text-sm">
-						<div className="flex items-center justify-between gap-4 text-neutral-300"><span>Itens</span><span>{items.length}</span></div>
-						<div className="flex items-center justify-between gap-4 text-neutral-300"><span>Produtos</span><span>{currency(totals.produtos)}</span></div>
-						<div className="flex items-center justify-between gap-4 text-neutral-300"><span>Acréscimos</span><span>{currency(parseDecimal(valorFrete) + parseDecimal(valorSeguro) + parseDecimal(outrasDespesas))}</span></div>
-						<div className="flex items-center justify-between gap-4 text-neutral-300"><span>Desconto</span><span>- {currency(parseDecimal(valorDesconto))}</span></div>
-					</div>
-					<div className="mt-5 border-t border-neutral-700 pt-5"><p className="text-sm text-neutral-400">Total da compra</p><p className="mt-1 text-3xl font-bold tracking-tight">{currency(totals.total)}</p></div>
-				</aside>
 			</div>
 
-			<div className="flex flex-col-reverse gap-3 border-t border-neutral-100 pt-5 sm:flex-row sm:justify-end">
-				<Button asChild variant="outline" className="h-11 rounded-xl border-neutral-300 px-6"><Link href="/cadastro/compras">{readOnly ? "Voltar" : "Cancelar"}</Link></Button>
-				{readOnly ? null : (
-					<Button type="submit" disabled={disabled || fornecedores.length === 0 || condicoesPagamento.length === 0 || produtos.length === 0} className="h-11 rounded-xl bg-neutral-900 px-6 text-white hover:bg-neutral-800">
-						<ShoppingCart className="h-4 w-4" aria-hidden="true" />Salvar compra
-					</Button>
-				)}
+			<div className="grid gap-4 pt-3 md:grid-cols-12">
+				{moneyFields.map((field) => (
+					<div key={field.name} className={`${fieldClass} md:col-span-3`}>
+						<Label htmlFor={field.name} className="text-sm text-neutral-800">{field.label}:</Label>
+						<Input id={field.name} name={field.name} inputMode="decimal" disabled={readOnly} value={field.value} onChange={(event) => field.setter(normalizeMoneyInput(event.target.value))} className={inputClass} />
+					</div>
+				))}
 			</div>
+
+			<div className="flex flex-col gap-2">
+				<Label htmlFor="observacoes" className="text-sm text-neutral-800">Observações:</Label>
+				<textarea id="observacoes" name="observacoes" maxLength={255} rows={4} disabled={readOnly} defaultValue={initialPurchase?.observacoes} placeholder="Informações adicionais da nota ou do recebimento" className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600" />
+			</div>
+
+			<div className="flex flex-col gap-4 border-t border-neutral-200 pt-5 sm:flex-row sm:items-end sm:justify-between">
+				<div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-neutral-600">
+					<span>{items.length} item(ns)</span>
+					<span>Produtos: {currency(totals.produtos)}</span>
+					<span>Acréscimos: {currency(parseDecimal(valorFrete) + parseDecimal(valorSeguro) + parseDecimal(outrasDespesas))}</span>
+					<span>Desconto: {currency(parseDecimal(valorDesconto))}</span>
+				</div>
+				<div className="shrink-0 text-left sm:text-right">
+					<p className="text-sm text-neutral-500">Total da compra</p>
+					<p className="mt-1 text-2xl font-bold text-neutral-900">{currency(totals.total)}</p>
+				</div>
+			</div>
+
+			{readOnly ? (
+				<Button asChild variant="outline" className="h-11 w-full rounded-xl border-neutral-300"><Link href="/cadastro/compras">Voltar</Link></Button>
+			) : (
+				<Button type="submit" disabled={disabled || fornecedores.length === 0 || condicoesPagamento.length === 0 || produtos.length === 0} className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">Salvar compra</Button>
+			)}
 		</form>
 	);
 }

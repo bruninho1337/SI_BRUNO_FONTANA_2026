@@ -102,15 +102,9 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 
 	return (
 		<div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
-			<div className="mb-6 flex flex-col gap-3 border-b border-neutral-100 pb-5 md:flex-row md:items-start md:justify-between">
-				<div>
-					<p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Entrada de estoque</p>
-					<h2 className="mt-2 text-xl font-semibold text-neutral-900">{compra ? `Compra #${compra.codcompra}` : "Nova Compra"}</h2>
-					<p className="mt-1 text-sm text-neutral-500">{compra ? "Consulte os dados registrados. Compras confirmadas não podem ser alteradas." : "Informe a nota fiscal e adicione todos os produtos recebidos."}</p>
-				</div>
-				<span className={compra ? "w-fit rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-semibold text-neutral-700" : "w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700"}>
-					{compra ? "Somente leitura" : "Estoque atualizado ao salvar"}
-				</span>
+			<div className="mb-6">
+				<h2 className="text-xl font-semibold text-neutral-900">{compra ? `Compra #${compra.codcompra}` : "Nova Compra"}</h2>
+				<p className="mt-1 text-sm text-neutral-500">{compra ? "Consulte os dados registrados abaixo. Os campos ficam bloqueados após a confirmação." : "Preencha os dados da compra abaixo."}</p>
 			</div>
 
 			<FormFeedback params={params} />
