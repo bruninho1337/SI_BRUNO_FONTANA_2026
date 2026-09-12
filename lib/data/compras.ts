@@ -43,7 +43,7 @@ export async function listarCompras() {
 }
 
 export async function carregarOpcoesCompra() {
-	const [fornecedoresResult, condicoesResult, produtosResult] = await Promise.all([
+	const [fornecedoresResult, condicoesResult, produtosResult, parcelasResult] = await Promise.all([
 		queryRows(
 			`select codfornecedor, fornecedor, codcondicao_pagamento
 			from public.fornecedores
@@ -64,28 +64,31 @@ export async function carregarOpcoesCompra() {
 			where p.ativo = 'S'
 			order by p.produto asc`
 		),
+		queryRows(`select p.*, fp.forma_pagamento from public.condicoes_pagamento_parcelas p
+			join public.formas_pagamento fp using (codforma_pagamento) order by p.num_parcela`),
 	]);
 
 	return {
 		fornecedores: fornecedoresResult.data,
 		condicoesPagamento: condicoesResult.data,
+		parcelas: parcelasResult.data,
 		produtos: produtosResult.data,
 		error:
 			fornecedoresResult.error ??
 			condicoesResult.error ??
-			produtosResult.error,
+			produtosResult.error ?? parcelasResult.error,
 	};
 }
 
 export async function buscarCompraPorChave(chave: CompraKey) {
 	const values = [chave.modelo, chave.serie, chave.numeroNota, chave.codfornecedor];
 
-	const [compraResult, itensResult] = await Promise.all([
+	const [compraResult, itensResult, parcelasResult] = await Promise.all([
 		queryMaybeSingle(
 			`select c.codfornecedor, c.codcondicao_pagamento, c.modelo, c.serie,
 				c.numero_nota, c.data_emissao, c.data_chegada, c.valor_produtos,
 				c.valor_frete, c.valor_seguro, c.outras_despesas, c.valor_desconto,
-				c.valor_total, c.status, c.observacoes, c.ativo,
+				c.valor_total, c.status, c.observacoes, c.ativo, c.motivo_cancelamento,
 				c.data_cadastro as data_criacao, c.data_ult_alteracao as data_atualizacao,
 				f.fornecedor, cp.condicao_pagamento
 			from public.compras c
@@ -99,7 +102,7 @@ export async function buscarCompraPorChave(chave: CompraKey) {
 		),
 		queryRows(
 			`select ci.num_item, ci.codproduto, ci.quantidade, ci.valor_unitario,
-				ci.valor_desconto, ci.valor_total, p.produto,
+				ci.valor_desconto, ci.valor_total, ci.valor_rateio, p.produto,
 				p.quantidade_estoque, u.sigla as unidade_medida
 			from public.compras_itens ci
 			join public.produtos p on p.codproduto = ci.codproduto
@@ -111,11 +114,18 @@ export async function buscarCompraPorChave(chave: CompraKey) {
 			order by ci.num_item asc`,
 			values
 		),
+		queryRows(`select p.num_parcela, p.percentual, cp.data_vencimento, cp.valor, cp.status,
+			cp.codforma_pagamento, fp.forma_pagamento
+			from public.compras_parcelas p join public.contas_pagar cp using (codconta_pagar)
+			left join public.formas_pagamento fp using (codforma_pagamento)
+			where p.modelo = $1 and p.serie = $2 and p.numero_nota = $3 and p.codfornecedor = $4
+			order by p.num_parcela`, values),
 	]);
 
 	return {
 		compra: compraResult.data,
 		itens: itensResult.data,
-		error: compraResult.error ?? itensResult.error,
+		parcelas: parcelasResult.data,
+		error: compraResult.error ?? itensResult.error ?? parcelasResult.error,
 	};
 }

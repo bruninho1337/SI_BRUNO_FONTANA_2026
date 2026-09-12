@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
+import { ParcelasLayout, ParcelaRow } from "@/components/cadastro/condicoes-pagamento/parcelas-layout";
 import { SearchableSelect } from "@/components/forms/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -155,27 +156,16 @@ export function ParcelasCondicaoFields({
 	}
 
 	return (
-		<div className="space-y-3">
-			<div className="flex items-center justify-between gap-4">
-				<div>
-					<h3 className="text-base font-semibold text-neutral-900">Parcelas</h3>
-					<p className="text-sm text-neutral-500">
-						Adicione as parcelas para esta condição de pagamento. O percentual total deve ser igual a 100%.
-					</p>
-				</div>
-
+		<ParcelasLayout
+			description="Adicione as parcelas para esta condição de pagamento. O percentual total deve ser igual a 100%."
+			action={
 				<Button type="button" variant="outline" onClick={addParcela} className="rounded-xl">
-					<Plus className="mr-2 h-4 w-4" />
-					Adicionar parcela
+					<Plus className="mr-2 h-4 w-4" />Adicionar parcela
 				</Button>
-			</div>
-
-			<div className="space-y-3">
+			}
+		>
 				{parcelas.map((parcela, index) => (
-					<div
-						key={parcela.num_parcela}
-						className="grid gap-4 rounded-xl border border-neutral-200 bg-neutral-50 p-4 md:grid-cols-12"
-					>
+					<ParcelaRow key={parcela.num_parcela}>
 						<input type="hidden" name="parcela_numero" value={parcela.num_parcela} />
 
 						<div className="flex flex-col gap-2 md:col-span-2">
@@ -267,9 +257,8 @@ export function ParcelasCondicaoFields({
 								<Trash2 className="h-4 w-4" />
 							</Button>
 						</div>
-					</div>
+					</ParcelaRow>
 				))}
-			</div>
-		</div>
+		</ParcelasLayout>
 	);
 }

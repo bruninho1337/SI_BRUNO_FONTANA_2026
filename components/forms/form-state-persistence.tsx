@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 type FormStatePersistenceProps = {
 	formKey: string;
+	onRestore?: (draft: Record<string, string | string[]>) => void;
 };
 
 type DraftValue = string | string[];
@@ -77,7 +78,9 @@ function setNativeChecked(element: HTMLInputElement, checked: boolean) {
 	}
 }
 
-export function FormStatePersistence({ formKey }: FormStatePersistenceProps) {
+export function FormStatePersistence({ formKey, onRestore }: FormStatePersistenceProps) {
+	const onRestoreRef = useRef(onRestore);
+	useEffect(() => { onRestoreRef.current = onRestore; }, [onRestore]);
 	const markerRef = useRef<HTMLInputElement>(null);
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -172,6 +175,7 @@ export function FormStatePersistence({ formKey }: FormStatePersistenceProps) {
 		}
 
 		window.dispatchEvent(new CustomEvent("form-draft-restored", { detail: draft }));
+		onRestoreRef.current?.(draft);
 	}, [hasError, storageKey]);
 
 	return <input ref={markerRef} type="hidden" name="_form_error_url" value={cleanUrl} readOnly />;

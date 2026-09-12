@@ -1,3 +1,4 @@
+import { CancelCompraForm } from "@/components/cadastro/compras/cancel-compra-form";
 import { CompraForm, type PurchaseInitial } from "@/components/cadastro/compras/compra-form";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { buscarCompraPorChave, carregarOpcoesCompra } from "@/lib/data/compras";
@@ -49,7 +50,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 		carregarOpcoesCompra(),
 		editRequested && validEditKey
 			? buscarCompraPorChave(editKey)
-			: Promise.resolve({ compra: null, itens: null, error: null }),
+			: Promise.resolve({ compra: null, itens: null, parcelas: null, error: null }),
 	]);
 	const { fornecedores, condicoesPagamento, produtos, error: optionsError } = options;
 	const { compra, itens, error: purchaseError } = purchaseResult;
@@ -70,6 +71,10 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 	}));
 	const condicaoOptions = (condicoesPagamento ?? []).map((item) => ({
 		id: String(item.codcondicao_pagamento),
+		parcelas: (options.parcelas ?? []).filter((p) => String(p.codcondicao_pagamento) === String(item.codcondicao_pagamento)).map((p) => ({
+			num_parcela: Number(p.num_parcela), dias_vencimento: Number(p.dias_vencimento), percentual: Number(p.percentual),
+			codforma_pagamento: Number(p.codforma_pagamento), forma_pagamento: String(p.forma_pagamento),
+		})),
 		label: `${item.condicao_pagamento} · ${item.parcelas}x`,
 	}));
 	const produtoOptions = (produtos ?? []).map((item) => ({
@@ -85,7 +90,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 	}
 
 	if (compra && !condicaoOptions.some((item) => item.id === String(compra.codcondicao_pagamento))) {
-		condicaoOptions.unshift({ id: String(compra.codcondicao_pagamento), label: String(compra.condicao_pagamento) });
+		condicaoOptions.unshift({ id: String(compra.codcondicao_pagamento), label: String(compra.condicao_pagamento), parcelas: [] });
 	}
 
 	for (const item of itens ?? []) {
@@ -115,6 +120,10 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 				valorDesconto: moneyValue(compra.valor_desconto),
 				observacoes: String(compra.observacoes ?? ""),
 				status: String(compra.status),
+				motivoCancelamento: String(compra.motivo_cancelamento ?? ""),
+				parcelas: (purchaseResult.parcelas ?? []).map((p) => ({ num_parcela: Number(p.num_parcela), percentual: Number(p.percentual),
+					dataVencimento: dateValue(p.data_vencimento), valor: Number(p.valor), status: String(p.status), forma_pagamento: String(p.forma_pagamento ?? ""),
+				})),
 				dataCriacao: dateTimeValue(compra.data_criacao),
 				dataAtualizacao: dateTimeValue(compra.data_atualizacao),
 				itens: (itens ?? []).map((item) => ({
@@ -123,6 +132,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 					quantidade: String(item.quantidade),
 					valor_unitario: moneyValue(item.valor_unitario),
 					valor_desconto: moneyValue(item.valor_desconto),
+					valorRateio: item.valor_rateio == null ? undefined : Number(item.valor_rateio),
 				})),
 			}
 		: undefined;
@@ -130,7 +140,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 	return (
 		<div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
 			<div className="mb-6">
-				<h2 className="text-xl font-semibold text-neutral-900">{compra ? `Compra · Nota ${compra.numero_nota}` : "Nova Compra"}</h2>
+				<h2 className="text-xl font-semibold text-neutral-900">{compra ? `Editar Compra` : "Nova Compra"}</h2>
 				<p className="mt-1 text-sm text-neutral-500">{compra ? "Consulte os dados registrados abaixo. Os campos ficam bloqueados após a confirmação." : "Preencha os dados da compra abaixo."}</p>
 			</div>
 
@@ -148,6 +158,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 				disabled={Boolean(optionsError)}
 				initialPurchase={initialPurchase}
 			/>
+			{compra?.status === "CONFIRMADA" ? <div className="mt-5 border-t pt-5"><CancelCompraForm modelo={String(compra.modelo)} serie={String(compra.serie)} numeroNota={String(compra.numero_nota)} codfornecedor={String(compra.codfornecedor)} /></div> : null}
 		</div>
 	);
 }

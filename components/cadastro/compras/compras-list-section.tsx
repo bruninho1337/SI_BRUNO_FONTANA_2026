@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Edit } from "lucide-react";
 
 import { CadastroListToolbar } from "@/components/cadastro/cadastro-list-actions";
-import { CancelCompraForm } from "@/components/cadastro/compras/cancel-compra-form";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { Button } from "@/components/ui/button";
 import { listarCompras } from "@/lib/data/compras";
@@ -66,13 +65,6 @@ export async function ComprasListSection({ searchParams }: ComprasListSectionPro
 												<Edit className="h-4 w-4" aria-hidden="true" />
 											</Link>
 										</Button>
-										<CancelCompraForm
-											modelo={String(compra.modelo)}
-											serie={String(compra.serie)}
-											numeroNota={String(compra.numero_nota)}
-											codfornecedor={String(compra.codfornecedor)}
-											disabled={compra.status === "CANCELADA"}
-										/>
 									</div>
 								</td>
 							</tr>

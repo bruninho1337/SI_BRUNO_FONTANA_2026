@@ -12,6 +12,8 @@ type DatePickerInputProps = {
 	name: string;
 	label: string;
 	defaultValue?: string;
+	value?: string;
+	onChange?: (value: string) => void;
 	required?: boolean;
 	disabled?: boolean;
 	min?: string;
@@ -25,6 +27,8 @@ export function DatePickerInput({
 	name,
 	label,
 	defaultValue,
+	value,
+	onChange,
 	required = false,
 	disabled = false,
 	min,
@@ -47,7 +51,7 @@ export function DatePickerInput({
 	}
 
 	return (
-		<div className={className}>
+		<div data-date-field={id} className={className}>
 			<LabelComponent htmlFor={id} className="text-sm text-neutral-800">
 				{label}:
 			</LabelComponent>
@@ -62,6 +66,8 @@ export function DatePickerInput({
 					min={min}
 					max={max}
 					defaultValue={defaultValue}
+					value={value}
+					onChange={(event) => onChange?.(event.target.value)}
 					className={`${inputClassName} min-w-0 flex-1`}
 				/>
 				<button
