@@ -49,7 +49,7 @@ export function CancelCompraForm({ modelo, serie, numeroNota, codfornecedor, dis
 					type="submit"
 					variant="outline"
 					disabled={disabled}
-					className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+					className="rounded-xl border-red-500 bg-red-500 text-black hover:bg-red-600 hover:text-black"
 					title={disabled ? "Compra já cancelada" : "Cancelar compra"}
 					aria-label={disabled ? "Compra já cancelada" : "Cancelar compra"}
 				>
