@@ -292,15 +292,15 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 					<div className={`${fieldClass} md:col-span-2 md:col-start-1`}>
 						<RequiredLabel htmlFor="modelo" className="text-sm text-neutral-800">Modelo:</RequiredLabel>
-						<Input id="modelo" name="modelo_display" maxLength={10} required={!readOnly} disabled={keyDisabled} value={modelo} onChange={(event) => { setModelo(event.target.value); invalidateKey(); }} placeholder="55" className={inputClass} />
+						<Input id="modelo" name="modelo_display" maxLength={2} required={!readOnly} disabled={keyDisabled} value={modelo} onChange={(event) => { setModelo(event.target.value); invalidateKey(); }} placeholder="55" className={inputClass} />
 					</div>
 					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="serie" className="text-sm text-neutral-800">Série:</RequiredLabel>
-						<Input id="serie" name="serie_display" maxLength={10} required={!readOnly} disabled={keyDisabled} value={serie} onChange={(event) => { setSerie(event.target.value); invalidateKey(); }} placeholder="1" className={inputClass} />
+						<Input id="serie" name="serie_display" maxLength={3} required={!readOnly} disabled={keyDisabled} value={serie} onChange={(event) => { setSerie(event.target.value); invalidateKey(); }} placeholder="1" className={inputClass} />
 					</div>
 					<div className={`${fieldClass} md:col-span-4`}>
 						<RequiredLabel htmlFor="numero_nota" className="text-sm text-neutral-800">Número da nota:</RequiredLabel>
-						<Input id="numero_nota" name="numero_nota_display" maxLength={30} required={!readOnly} disabled={keyDisabled} value={numeroNota} onBlur={(event) => {
+						<Input id="numero_nota" name="numero_nota_display" maxLength={9} required={!readOnly} disabled={keyDisabled} value={numeroNota} onBlur={(event) => {
 							if (event.relatedTarget instanceof Element && event.relatedTarget.closest('[data-purchase-step="key"]')) return;
 							void validateKey();
 						}} onChange={(event) => { setNumeroNota(event.target.value); invalidateKey(); }} placeholder="Ex: 000012345" className={inputClass} />

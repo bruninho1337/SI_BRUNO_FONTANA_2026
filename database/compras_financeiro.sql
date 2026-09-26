@@ -7,9 +7,9 @@ alter table public.compras add column if not exists data_cancelamento timestamp;
 alter table public.compras_itens add column if not exists valor_rateio numeric(14,2);
 
 create table if not exists public.compras_parcelas (
-	modelo varchar(10) not null,
-	serie varchar(10) not null,
-	numero_nota varchar(30) not null,
+	modelo varchar(2) not null,
+	serie varchar(3) not null,
+	numero_nota varchar(9) not null,
 	codfornecedor bigint not null,
 	num_parcela integer not null check (num_parcela > 0),
 	percentual numeric(7,4) not null check (percentual > 0 and percentual <= 100),

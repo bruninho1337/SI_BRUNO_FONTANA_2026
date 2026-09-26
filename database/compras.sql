@@ -1,9 +1,9 @@
 create table if not exists public.compras (
 	codfornecedor bigint not null references public.fornecedores(codfornecedor),
 	codcondicao_pagamento integer not null references public.condicoes_pagamento(codcondicao_pagamento),
-	modelo varchar(10) not null check (char_length(btrim(modelo)) between 1 and 10),
-	serie varchar(10) not null check (char_length(btrim(serie)) between 1 and 10),
-	numero_nota varchar(30) not null check (char_length(btrim(numero_nota)) between 1 and 30),
+	modelo varchar(2) not null check (char_length(btrim(modelo)) between 1 and 2),
+	serie varchar(3) not null check (char_length(btrim(serie)) between 1 and 3),
+	numero_nota varchar(9) not null check (char_length(btrim(numero_nota)) between 1 and 9),
 	data_emissao date not null,
 	data_chegada date not null,
 	valor_produtos numeric(14,2) not null check (valor_produtos >= 0),
@@ -38,9 +38,9 @@ create index if not exists compras_condicao_pagamento_idx
 	on public.compras (codcondicao_pagamento);
 
 create table if not exists public.compras_itens (
-	modelo varchar(10) not null,
-	serie varchar(10) not null,
-	numero_nota varchar(30) not null,
+	modelo varchar(2) not null,
+	serie varchar(3) not null,
+	numero_nota varchar(9) not null,
 	codfornecedor bigint not null,
 	num_item integer not null check (num_item >= 1),
 	codproduto integer not null,

@@ -64,7 +64,7 @@ function databaseMessage(error: unknown) {
 
 export async function validateCompraKeyAction(key: { codfornecedor: string; modelo: string; serie: string; numeroNota: string }) {
 	const supplier = Number(key.codfornecedor);
-	if (!Number.isSafeInteger(supplier) || supplier <= 0 || !key.modelo.trim() || key.modelo.trim().length > 10 || !key.serie.trim() || key.serie.trim().length > 10 || !key.numeroNota.trim() || key.numeroNota.trim().length > 30) {
+	if (!Number.isSafeInteger(supplier) || supplier <= 0 || !key.modelo.trim() || key.modelo.trim().length > 2 || !key.serie.trim() || key.serie.trim().length > 3 || !key.numeroNota.trim() || key.numeroNota.trim().length > 9) {
 		return { valid: false, message: "Preencha fornecedor, modelo, série e número da nota." };
 	}
 	try {
@@ -101,16 +101,16 @@ export async function createCompraAction(formData: FormData) {
 		fail(formData, "Selecione a condicao de pagamento.");
 	}
 
-	if (modelo.length < 1 || modelo.length > 10) {
-		fail(formData, "Modelo da nota deve ter entre 1 e 10 caracteres.");
+	if (modelo.length < 1 || modelo.length > 2) {
+		fail(formData, "Modelo da nota deve ter entre 1 e 2 caracteres.");
 	}
 
-	if (serie.length < 1 || serie.length > 10) {
-		fail(formData, "Serie da nota deve ter entre 1 e 10 caracteres.");
+	if (serie.length < 1 || serie.length > 3) {
+		fail(formData, "Serie da nota deve ter entre 1 e 3 caracteres.");
 	}
 
-	if (numeroNota.length < 1 || numeroNota.length > 30) {
-		fail(formData, "Numero da nota deve ter entre 1 e 30 caracteres.");
+	if (numeroNota.length < 1 || numeroNota.length > 9) {
+		fail(formData, "Numero da nota deve ter entre 1 e 9 caracteres.");
 	}
 
 	if (!isIsoDate(dataEmissao) || dataEmissao > purchaseToday()) {
@@ -325,9 +325,9 @@ export async function cancelCompraAction(formData: FormData) {
 	const codfornecedor = Number(getText(formData, "codfornecedor"));
 
 	if (
-		modelo.length < 1 || modelo.length > 10 ||
-		serie.length < 1 || serie.length > 10 ||
-		numeroNota.length < 1 || numeroNota.length > 30 ||
+		modelo.length < 1 || modelo.length > 2 ||
+		serie.length < 1 || serie.length > 3 ||
+		numeroNota.length < 1 || numeroNota.length > 9 ||
 		!Number.isInteger(codfornecedor) || codfornecedor <= 0
 	) {
 		fail(formData, "Compra invalida para cancelamento.");

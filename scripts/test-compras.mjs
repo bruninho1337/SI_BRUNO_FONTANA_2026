@@ -59,8 +59,8 @@ async function main() {
 			order by cp.parcelas desc limit 1`)).rows[0];
 		assert.ok(supplier && product && condition, 'Cadastre fornecedor, produto e condição com parcelas antes do teste.');
 		const terms = (await client.query('select * from public.condicoes_pagamento_parcelas where codcondicao_pagamento = $1 order by num_parcela', [condition.codcondicao_pagamento])).rows;
-		const note = `TEST-${Date.now()}`;
-		const key = ['55', 'TEST', note, supplier.codfornecedor];
+		const note = String(100000000 + Date.now() % 900000000);
+		const key = ['55', 'TST', note, supplier.codfornecedor];
 		const data = {
 			modelo: key[0], serie: key[1], numero_nota: note, codfornecedor: String(supplier.codfornecedor),
 			codcondicao_pagamento: String(condition.codcondicao_pagamento), data_emissao: '2026-01-01', data_chegada: '2026-01-02',
@@ -78,12 +78,28 @@ async function main() {
 		assert.ok((await invoke(actions.createCompraAction, { data_chegada: '2025-12-31' })).has('error'));
 		assert.ok((await invoke(actions.createCompraAction, { data_emissao: '2026-02-30' })).has('error'));
 		assert.ok((await invoke(actions.createCompraAction, { vencimentos_json: '["2025-01-01"]' })).has('error'));
+		for (const overrides of [{ modelo: '555' }, { serie: '1234' }]) {
+			assert.ok((await invoke(actions.createCompraAction, overrides)).has('error'));
+			const validation = await actions.validateCompraKeyAction({ modelo: key[0], serie: key[1], numeroNota: note, codfornecedor: data.codfornecedor, ...overrides });
+			assert.equal(validation.valid, false);
+		}
+		assert.ok((await invoke(actions.createCompraAction, { numero_nota: '1234567890' })).has('error'));
+		assert.equal((await actions.validateCompraKeyAction({ modelo: key[0], serie: key[1], numeroNota: '1234567890', codfornecedor: data.codfornecedor })).valid, false);
 		const result = await invoke(actions.createCompraAction);
 		assert.ok(result.has('success'), result.get('error'));
-		const duplicate = await actions.validateCompraKeyAction({ modelo: ' 55 ', serie: 'test', numeroNota: note.toLowerCase(), codfornecedor: data.codfornecedor });
+		const duplicate = await actions.validateCompraKeyAction({ modelo: ' 55 ', serie: 'tst', numeroNota: note.toLowerCase(), codfornecedor: data.codfornecedor });
 		assert.equal(duplicate.valid, false);
 		assert.ok((await invoke(actions.createCompraAction)).has('error'));
 		const purchaseWhere = 'modelo=$1 and serie=$2 and numero_nota=$3 and codfornecedor=$4';
+		for (const table of ['compras', 'compras_itens', 'compras_parcelas']) {
+			for (const [column, value] of [['modelo', '555'], ['serie', '1234'], ['numero_nota', '1234567890']]) {
+				await client.query('savepoint limite_test');
+				await assert.rejects(client.query(`update public.${table} set ${column}=$5 where ${purchaseWhere}`, [...key, value]), { code: '22001' });
+				await client.query('rollback to savepoint limite_test');
+				await client.query('release savepoint limite_test');
+			}
+		}
+		console.log('OK: limites de modelo, serie e numero da nota no servidor e nas tres tabelas.');
 		const purchase = (await client.query(`select * from public.compras where ${purchaseWhere}`, key)).rows[0];
 		assert.equal(Number(purchase.valor_total), 200);
 		const item = (await client.query(`select * from public.compras_itens where ${purchaseWhere}`, key)).rows[0];
