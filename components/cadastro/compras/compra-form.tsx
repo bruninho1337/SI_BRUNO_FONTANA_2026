@@ -206,8 +206,8 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			setStepError("A emissão deve ser uma data válida, igual ou anterior a hoje.");
 			return;
 		}
-		if (!isIsoDate(dataChegada) || dataChegada < dataEmissao) {
-			setStepError("A chegada deve ser uma data válida, igual ou posterior à emissão.");
+		if (!isIsoDate(dataChegada) || dataChegada < dataEmissao || dataChegada > purchaseToday()) {
+			setStepError("A chegada deve ser uma data válida, igual ou posterior à emissão e igual ou anterior a hoje.");
 			return;
 		}
 		setStepError("");
@@ -330,6 +330,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 						name="data_chegada_display"
 						label="Chegada"
 						min={dataEmissao}
+						max={purchaseToday()}
 						value={dataChegada} onChange={setDataChegada}
 						required={!readOnly}
 						disabled={datesDisabled}

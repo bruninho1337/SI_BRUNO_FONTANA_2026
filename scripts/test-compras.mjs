@@ -76,6 +76,7 @@ async function main() {
 		}
 		assert.ok((await invoke(actions.createCompraAction, { data_emissao: '2999-01-01' })).has('error'));
 		assert.ok((await invoke(actions.createCompraAction, { data_chegada: '2025-12-31' })).has('error'));
+		assert.equal((await invoke(actions.createCompraAction, { data_chegada: calc.addDays(calc.purchaseToday(), 1) })).get('error'), 'A data de chegada deve ser valida, igual ou posterior a emissao e igual ou anterior a hoje.');
 		assert.ok((await invoke(actions.createCompraAction, { data_emissao: '2026-02-30' })).has('error'));
 		assert.ok((await invoke(actions.createCompraAction, { vencimentos_json: '["2025-01-01"]' })).has('error'));
 		for (const overrides of [{ modelo: '555' }, { serie: '1234' }]) {

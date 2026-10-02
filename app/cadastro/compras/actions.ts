@@ -117,8 +117,8 @@ export async function createCompraAction(formData: FormData) {
 		fail(formData, "A data de emissao deve ser valida e nao pode estar no futuro.");
 	}
 
-	if (!isIsoDate(dataChegada) || dataChegada < dataEmissao) {
-		fail(formData, "A data de chegada deve ser igual ou posterior a emissao.");
+	if (!isIsoDate(dataChegada) || dataChegada < dataEmissao || dataChegada > purchaseToday()) {
+		fail(formData, "A data de chegada deve ser valida, igual ou posterior a emissao e igual ou anterior a hoje.");
 	}
 
 	if ([valorFrete, valorSeguro, outrasDespesas, valorDesconto].some((value) => !Number.isFinite(value) || value < 0)) {
