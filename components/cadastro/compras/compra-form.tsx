@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
 
-import { addDays, allocateMoney, isIsoDate, purchaseToday, roundMoney, type PaymentTerm } from "@/lib/compras-calculos";
+import { addDays, allocateInstallments, allocatePurchaseCosts, isIsoDate, purchaseToday, roundMoney, type PaymentTerm } from "@/lib/compras-calculos";
 
 type SupplierOption = { id: string; label: string; codcondicaoPagamento: string };
 type Option = { id: string; label: string };
@@ -39,7 +39,7 @@ export type PurchaseInitial = {
 	valorFrete: string;
 	valorSeguro: string;
 	outrasDespesas: string;
-	valorDesconto: string;
+	valorTotal: number;
 	observacoes: string;
 	status: string;
 	motivoCancelamento: string;
@@ -141,7 +141,6 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	const [valorFrete, setValorFrete] = useState(initialPurchase?.valorFrete ?? "0,00");
 	const [valorSeguro, setValorSeguro] = useState(initialPurchase?.valorSeguro ?? "0,00");
 	const [outrasDespesas, setOutrasDespesas] = useState(initialPurchase?.outrasDespesas ?? "0,00");
-	const [valorDesconto, setValorDesconto] = useState(initialPurchase?.valorDesconto ?? "0,00");
 
 	function restoreDraft(draft: Record<string, string | string[]>) {
 			const detail = Object.fromEntries(Object.entries(draft).map(([name, value]) => [name, Array.isArray(value) ? value[0] : value]));
@@ -162,7 +161,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			setSerie(detail?.serie ?? "");
 			setNumeroNota(detail?.numero_nota ?? "");
 			setFornecedorId(detail?.codfornecedor ?? "");
-			setCondicaoId(detail?.codcondicao_pagamento ?? "");
+			setCondicaoId(detail?.codcondicao_pagamento || fornecedores.find((option) => option.id === detail?.codfornecedor)?.codcondicaoPagamento || "");
 			setDataEmissao(detail?.data_emissao ?? purchaseToday());
 			setDataChegada(detail?.data_chegada ?? purchaseToday());
 			invalidateKey();
@@ -170,7 +169,6 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			setValorFrete(detail?.valor_frete ?? "0,00");
 			setValorSeguro(detail?.valor_seguro ?? "0,00");
 			setOutrasDespesas(detail?.outras_despesas ?? "0,00");
-			setValorDesconto(detail?.valor_desconto ?? "0,00");
 	}
 
 	const totals = useMemo(() => {
@@ -178,9 +176,9 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			const quantidade = Number(item.quantidade) || 0;
 			return roundMoney(total + Math.max(0, quantidade * roundMoney(parseDecimal(item.valor_unitario)) - roundMoney(parseDecimal(item.valor_desconto))));
 		}, 0);
-		const total = produtosTotal + roundMoney(parseDecimal(valorFrete)) + roundMoney(parseDecimal(valorSeguro)) + roundMoney(parseDecimal(outrasDespesas)) - roundMoney(parseDecimal(valorDesconto));
+		const total = initialPurchase?.valorTotal ?? produtosTotal + roundMoney(parseDecimal(valorFrete)) + roundMoney(parseDecimal(valorSeguro)) + roundMoney(parseDecimal(outrasDespesas));
 		return { produtos: produtosTotal, total: Math.max(0, roundMoney(total)) };
-	}, [items, outrasDespesas, valorDesconto, valorFrete, valorSeguro]);
+	}, [items, outrasDespesas, valorFrete, valorSeguro, initialPurchase?.valorTotal]);
 
 	function updateItem(id: string, field: keyof Omit<PurchaseItem, "id">, value: string) {
 		setItems((current) => current.map((item) => {
@@ -197,6 +195,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 		setFornecedorId(value);
 		const defaultCondition = fornecedores.find((option) => option.id === value)?.codcondicaoPagamento;
 		setCondicaoId(defaultCondition ?? "");
+		if (value !== fornecedorId) setDueDates({});
 		invalidateKey();
 	}
 
@@ -228,8 +227,8 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			error = "Informe custos e descontos válidos, com até duas casas decimais.";
 		} else if (items.some((item) => parseDecimal(item.valor_desconto) > Number(item.quantidade) * parseDecimal(item.valor_unitario))) {
 			error = "O desconto de um item não pode superar seu valor bruto.";
-		} else if ([valorFrete, valorSeguro, outrasDespesas, valorDesconto].some((value) => !validMoney(value))) {
-			error = "Informe frete, seguro, despesas e desconto geral válidos, com até duas casas decimais.";
+		} else if ([valorFrete, valorSeguro, outrasDespesas].some((value) => !validMoney(value))) {
+			error = "Informe frete, seguro e despesas válidos, com até duas casas decimais.";
 		} else if (totals.produtos <= 0 || totals.total <= 0 || !Number.isFinite(totals.total)) {
 			error = "O total dos produtos e o total da nota devem ser maiores que zero. Confira os descontos.";
 		}
@@ -238,35 +237,41 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	}
 
 	const terms = condicoesPagamento.find((option) => option.id === condicaoId)?.parcelas ?? [];
-	const installmentValues = allocateMoney(totals.total, terms.map((term) => term.percentual));
+	const installmentValues = allocateInstallments(totals.total, terms.map((term) => term.percentual));
+	const installmentError = !readOnly && terms.length > 0
+		? installmentValues === null
+			? "Não é possível fechar o total em centavos mantendo valores iguais para percentuais iguais. Revise o total ou os percentuais da condição de pagamento."
+			: installmentValues.some((value) => value <= 0) ? "O total da nota é insuficiente para gerar todas as parcelas." : ""
+		: "";
 	const installments = readOnly ? initialPurchase!.parcelas : terms.map((term, index) => ({
 		...term, dataVencimento: dueDates[`${condicaoId}:${dataEmissao}:${term.num_parcela}`] ?? addDays(dataEmissao, term.dias_vencimento),
-		valor: installmentValues[index], status: "PREVISTA",
+		valor: installmentValues?.[index] ?? 0, status: "PREVISTA",
 	}));
-	const allocations = allocateMoney(roundMoney(totals.total - totals.produtos), items.map((item) => Math.max(0, roundMoney(Number(item.quantidade) * roundMoney(parseDecimal(item.valor_unitario)) - roundMoney(parseDecimal(item.valor_desconto))))));
+	const unitCosts = items.map((item) => roundMoney(parseDecimal(item.valor_unitario)));
+	const totalUnitCosts = unitCosts.reduce((sum, value) => sum + value, 0);
+	const allocations = allocatePurchaseCosts(roundMoney(totals.total - totals.produtos), unitCosts);
 
 	const moneyFields = [
 		{ name: "valor_frete", label: "Frete", value: valorFrete, setter: setValorFrete },
 		{ name: "valor_seguro", label: "Seguro", value: valorSeguro, setter: setValorSeguro },
 		{ name: "outras_despesas", label: "Outras despesas", value: outrasDespesas, setter: setOutrasDespesas },
-		{ name: "valor_desconto", label: "Desconto geral", value: valorDesconto, setter: setValorDesconto },
 	];
 
 	return (
-		<form ref={formRef} action={readOnly ? undefined : createCompraAction} className="space-y-5" onSubmit={(event) => { if (!readOnly && paymentDisabled) event.preventDefault(); }} onKeyDown={(event) => {
+		<form ref={formRef} action={readOnly ? undefined : createCompraAction} className="space-y-5" onSubmit={(event) => { if (!readOnly && (paymentDisabled || installmentError)) event.preventDefault(); }} onKeyDown={(event) => {
 			if (event.key !== "Enter" || !(event.target instanceof HTMLInputElement) || step === "payment") return;
 			event.preventDefault();
 			if (event.target.id === "numero_nota") void validateKey();
 			if (event.target.id === "data_chegada") validateDates();
-			if (event.target.id === "valor_desconto") validateProducts();
+			if (event.target.id === "outras_despesas") validateProducts();
 		}}>
 			{readOnly ? null : <FormStatePersistence formKey="compras" onRestore={restoreDraft} />}
 			{readOnly ? null : <><input type="hidden" name="vencimentos_json" value={JSON.stringify(installments.map((p) => p.dataVencimento))} /><input type="hidden" name="vencimentos_rascunho" value={JSON.stringify(dueDates)} /></>}
 			{readOnly ? null : <input type="hidden" name="itens_json" value={JSON.stringify(items)} readOnly />}
 
-			{!readOnly && Object.entries({ codfornecedor: fornecedorId, modelo, serie, numero_nota: numeroNota,
+			{!readOnly && Object.entries({ codfornecedor: fornecedorId, codcondicao_pagamento: condicaoId, modelo, serie, numero_nota: numeroNota,
 				data_emissao: dataEmissao, data_chegada: dataChegada, valor_frete: valorFrete, valor_seguro: valorSeguro,
-				outras_despesas: outrasDespesas, valor_desconto: valorDesconto,
+				outras_despesas: outrasDespesas,
 			}).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />)}
 			{!readOnly && <p role="status" className="rounded-xl bg-neutral-100 px-4 py-3 text-sm font-medium text-neutral-800">{
 				{ key: "Etapa 1 de 4: chave da nota", dates: "Etapa 2 de 4: datas", products: "Etapa 3 de 4: produtos e despesas", payment: "Etapa 4 de 4: pagamento e observações" }[step]
@@ -347,7 +352,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			</div>}
 			<fieldset data-purchase-step="products" disabled={productsDisabled} className="min-w-0 space-y-5" onBlur={(event) => {
 				if (event.currentTarget.contains(event.relatedTarget)) return;
-				if (event.target.id === "valor_desconto") validateProducts();
+				if (event.target.id === "outras_despesas") validateProducts();
 			}}>
 
 			<div className="pt-3">
@@ -364,6 +369,8 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 					{items.map((item, index) => {
 						const subtotal = Math.max(0, roundMoney((Number(item.quantidade) || 0) * roundMoney(parseDecimal(item.valor_unitario)) - roundMoney(parseDecimal(item.valor_desconto))));
 						const allocation = readOnly ? item.valorRateio : allocations[index];
+						const quantity = Number(item.quantidade) || 1;
+						const unitAllocation = (allocation ?? 0) / quantity;
 
 						return (
 							<div key={item.id} className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
@@ -406,10 +413,10 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 										<Input id={`desconto-${item.id}`} inputMode="decimal" disabled={productsDisabled} value={item.valor_desconto} onChange={(event) => updateItem(item.id, "valor_desconto", normalizeMoneyInput(event.target.value))} className={inputClass} />
 									</div>
 								</div>
-								{allocation !== undefined && <p className="mt-3 text-sm text-neutral-600">Participação: {totals.produtos > 0 ? (subtotal / totals.produtos * 100).toFixed(2).replace(".", ",") : "0,00"}% · Rateio: {currency(allocation)} · Custo com rateio: {currency(subtotal + allocation)}</p>}
+								{allocation !== undefined && <p className="mt-3 text-sm text-neutral-600">{!readOnly && <>Participação pelo custo unitário: {totalUnitCosts > 0 ? (unitCosts[index] / totalUnitCosts * 100).toFixed(2).replace(".", ",") : "0,00"}% · </>}Rateio por unidade: {currency(unitAllocation)} · Custo unitário com rateio: {currency(roundMoney(subtotal / quantity + unitAllocation))}</p>}
 								<div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-end">
 									<div className={`${fieldClass} w-full sm:w-48`}>
-										<Label className="text-sm text-neutral-800">Subtotal:</Label>
+										<Label className="text-sm text-neutral-800">Total do Item:</Label>
 										<div className="flex h-11 items-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-semibold text-neutral-900">{currency(subtotal)}</div>
 									</div>
 									<div className={fieldClass}>
@@ -428,7 +435,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			<p className="text-right text-lg font-semibold text-black">Total dos produtos: {currency(totals.produtos)}</p>
 			<div className="grid gap-4 pt-3 md:grid-cols-12">
 				{moneyFields.map((field) => (
-					<div key={field.name} className={`${fieldClass} md:col-span-3`}>
+					<div key={field.name} className={`${fieldClass} md:col-span-4`}>
 						<Label htmlFor={field.name} className="text-sm text-neutral-800">{field.label}:</Label>
 						<Input id={field.name} name={`${field.name}_display`} inputMode="decimal" disabled={productsDisabled} value={field.value} onChange={(event) => field.setter(normalizeMoneyInput(event.target.value))} className={inputClass} />
 					</div>
@@ -437,19 +444,20 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 			</fieldset>
 			{!readOnly && step === "products" && <div className="space-y-2">
-				<p className="text-sm text-neutral-600">Confira os produtos e as despesas. Ao sair do desconto geral ou pressionar Enter, o pagamento será liberado se os dados estiverem válidos.</p>
+				<p className="text-sm text-neutral-600">Confira os produtos e as despesas. Ao sair de outras despesas ou pressionar Enter, o pagamento será liberado se os dados estiverem válidos.</p>
 				{stepError && <p role="alert" className="text-sm text-red-700">{stepError}</p>}
 			</div>}
 			<fieldset disabled={paymentDisabled} className="min-w-0 space-y-5">
 
 			<div className="grid gap-4 md:grid-cols-12">
-				<SearchableSelect name="codcondicao_pagamento" label="Condição de pagamento" searchLabel="Pesquisar condição" searchPlaceholder="Digite a condição de pagamento" selectPlaceholder="Selecione a condição" options={condicoesPagamento} required={!readOnly} disabled={paymentDisabled} value={condicaoId} onValueChange={setCondicaoId} className="md:col-span-5" createHref={paymentDisabled ? undefined : "/cadastro/condicoes-pagamento?mode=create"} createLabel="Nova condição" />
+				<SearchableSelect id="codcondicao_pagamento" name="codcondicao_pagamento_display" label="Condição de pagamento" searchLabel="Pesquisar condição" searchPlaceholder="Digite a condição de pagamento" selectPlaceholder="Selecione a condição" options={condicoesPagamento} required={!readOnly} disabled={paymentDisabled} value={condicaoId} onValueChange={setCondicaoId} className="md:col-span-5" createHref={paymentDisabled ? undefined : "/cadastro/condicoes-pagamento?mode=create"} createLabel="Nova condição" />
 				<div className="md:col-span-7 md:text-right">
 					<p className="text-sm text-neutral-500">Valor total da nota</p>
 					<p className="mt-1 text-2xl font-bold text-neutral-900">{currency(totals.total)}</p>
 				</div>
 			</div>
 
+			{installmentError && <p role="alert" className="text-sm text-red-700">{installmentError}</p>}
 			<ParcelasLayout
 				title="Parcelas da condição de pagamento"
 				description="Vencimentos calculados a partir da emissão da nota."
@@ -464,7 +472,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 						{ id: "dias", label: "Dias para vencimento", value: days !== null && Number.isFinite(days) ? days : "", span: "md:col-span-3" },
 						{ id: "forma", label: "Forma de Pagamento", value: parcela.forma_pagamento, span: "md:col-span-5" },
 						{ id: "percentual", label: "Percentual", value: `${parcela.percentual.toLocaleString("pt-BR")}%`, span: "md:col-span-2" },
-						{ id: "valor", label: "Valor", value: currency(parcela.valor), span: "md:col-span-3" },
+						{ id: "valor", label: "Valor", value: installmentValues === null && !readOnly ? "—" : currency(parcela.valor), span: "md:col-span-3" },
 					];
 
 					return <ParcelaRow key={parcela.num_parcela}>
@@ -502,7 +510,6 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 					<span>{items.length} item(ns)</span>
 					<span>Produtos: {currency(totals.produtos)}</span>
 					<span>Acréscimos: {currency(parseDecimal(valorFrete) + parseDecimal(valorSeguro) + parseDecimal(outrasDespesas))}</span>
-					<span>Desconto: {currency(parseDecimal(valorDesconto))}</span>
 				</div>
 			</div>
 
@@ -519,7 +526,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			{readOnly ? (
 				<Button asChild variant="outline" className="h-11 w-full rounded-xl border-neutral-300"><Link href="/cadastro/compras">Voltar</Link></Button>
 			) : (
-				<Button type="submit" disabled={paymentDisabled || installments.length === 0 || fornecedores.length === 0 || condicoesPagamento.length === 0 || produtos.length === 0} className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">Salvar compra</Button>
+				<Button type="submit" disabled={paymentDisabled || Boolean(installmentError) || installments.length === 0 || fornecedores.length === 0 || condicoesPagamento.length === 0 || produtos.length === 0} className="h-11 w-full rounded-xl bg-neutral-900 text-white hover:bg-neutral-800">Salvar compra</Button>
 			)}
 		</form>
 	);

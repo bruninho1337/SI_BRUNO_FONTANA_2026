@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { allocateMoney, addDays, isIsoDate, purchaseToday, roundMoney, type PaymentTerm } from "@/lib/compras-calculos";
+import { allocateInstallments, allocatePurchaseCosts, addDays, isIsoDate, purchaseToday, roundMoney, type PaymentTerm } from "@/lib/compras-calculos";
 import { db } from "@/lib/database/db";
 
 const COMPRAS_PATH = "/cadastro/compras";
@@ -89,7 +89,6 @@ export async function createCompraAction(formData: FormData) {
 	const valorFrete = roundMoney(parseDecimal(formData.get("valor_frete")));
 	const valorSeguro = roundMoney(parseDecimal(formData.get("valor_seguro")));
 	const outrasDespesas = roundMoney(parseDecimal(formData.get("outras_despesas")));
-	const valorDesconto = roundMoney(parseDecimal(formData.get("valor_desconto")));
 	const codfornecedor = Number(codfornecedorValue);
 	const codcondicaoPagamento = Number(codcondicaoValue);
 
@@ -121,8 +120,8 @@ export async function createCompraAction(formData: FormData) {
 		fail(formData, "A data de chegada deve ser valida, igual ou posterior a emissao e igual ou anterior a hoje.");
 	}
 
-	if ([valorFrete, valorSeguro, outrasDespesas, valorDesconto].some((value) => !Number.isFinite(value) || value < 0)) {
-		fail(formData, "Frete, seguro, despesas e desconto devem ser valores positivos.");
+	if ([valorFrete, valorSeguro, outrasDespesas].some((value) => !Number.isFinite(value) || value < 0)) {
+		fail(formData, "Frete, seguro e despesas devem ser valores positivos.");
 	}
 
 	if (observacoes.length > 255) {
@@ -176,14 +175,10 @@ export async function createCompraAction(formData: FormData) {
 			0
 		)
 	);
-	const valorTotal = roundMoney(valorProdutos + valorFrete + valorSeguro + outrasDespesas - valorDesconto);
+	const valorTotal = roundMoney(valorProdutos + valorFrete + valorSeguro + outrasDespesas);
 
 	if (!Number.isFinite(valorTotal) || valorTotal <= 0 || valorProdutos <= 0) {
 		fail(formData, "O total da compra deve ser maior que zero.");
-	}
-
-	if (valorDesconto > valorProdutos + valorFrete + valorSeguro + outrasDespesas) {
-		fail(formData, "O desconto geral nao pode superar o valor da compra.");
 	}
 
 	const client = await db.connect();
@@ -224,10 +219,10 @@ export async function createCompraAction(formData: FormData) {
 			if (!isIsoDate(date) || date < dataEmissao) throw new Error("O vencimento deve ser igual ou posterior à emissão.");
 			return date;
 		});
-		const installmentValues = allocateMoney(valorTotal, terms.map((term) => Number(term.percentual)));
+		const installmentValues = allocateInstallments(valorTotal, terms.map((term) => Number(term.percentual)));
+		if (installmentValues === null) throw new Error("Não é possível fechar o total em centavos mantendo valores iguais para percentuais iguais. Revise o total ou os percentuais da condição de pagamento.");
 		if (installmentValues.some((value) => value <= 0)) throw new Error("O total da nota é insuficiente para gerar todas as parcelas.");
-		const itemValues = items.map((item) => roundMoney(item.quantidade * item.valorUnitario - item.valorDesconto));
-		const allocations = allocateMoney(roundMoney(valorTotal - valorProdutos), itemValues);
+		const allocations = allocatePurchaseCosts(roundMoney(valorTotal - valorProdutos), items.map((item) => item.valorUnitario));
 
 		const produtos = await client.query<{ codproduto: number }>(
 			"select codproduto from public.produtos where codproduto = any($1::int[]) and ativo = 'S' order by codproduto for update",
@@ -242,8 +237,8 @@ export async function createCompraAction(formData: FormData) {
 			`insert into public.compras (
 				codfornecedor, codcondicao_pagamento, modelo, serie, numero_nota,
 				data_emissao, data_chegada, valor_produtos, valor_frete, valor_seguro,
-				outras_despesas, valor_desconto, valor_total, status, ativo, observacoes
-			) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'CONFIRMADA', 'S', $14)`,
+				outras_despesas, valor_total, status, ativo, observacoes
+			) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'CONFIRMADA', 'S', $13)`,
 			[
 				codfornecedor,
 				codcondicaoPagamento,
@@ -256,7 +251,6 @@ export async function createCompraAction(formData: FormData) {
 				valorFrete,
 				valorSeguro,
 				outrasDespesas,
-				valorDesconto,
 				valorTotal,
 				observacoes || null,
 			]

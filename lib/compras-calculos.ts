@@ -24,6 +24,47 @@ export function allocateMoney(total: number, weights: number[]) {
 	return values.map((value) => value * Math.sign(total) / 100);
 }
 
+// Ajusta os centavos por grupo: percentuais iguais sempre recebem valores iguais.
+export function allocateInstallments(total: number, percentages: number[]): number[] | null {
+	if (!percentages.length) return [];
+	const sum = percentages.reduce((a, b) => a + b, 0);
+	if (!Number.isFinite(total) || total < 0 || !Number.isFinite(sum) || sum <= 0 || percentages.some((value) => value <= 0)) return null;
+	const cents = Math.round(total * 100);
+	const groups = [...new Set(percentages)].map((percentage) => {
+		const count = percentages.filter((value) => value === percentage).length;
+		const exact = cents * percentage / sum;
+		return { percentage, count, exact, base: Math.round(exact) };
+	});
+	const remainder = cents - groups.reduce((value, group) => value + group.base * group.count, 0);
+	const limit = percentages.length;
+	let states = new Map<number, { cost: number; values: number[] }>([[0, { cost: 0, values: [] }]]);
+	for (const group of groups) {
+		const next = new Map<number, { cost: number; values: number[] }>();
+		const maxAdjustment = Math.ceil(limit / group.count);
+		for (const [adjusted, state] of states) {
+			for (let adjustment = -maxAdjustment; adjustment <= maxAdjustment; adjustment++) {
+				const value = group.base + adjustment;
+				const target = adjusted + adjustment * group.count;
+				if (value < 0 || Math.abs(target) > limit) continue;
+				const cost = state.cost + group.count * (value - group.exact) ** 2;
+				if (!next.has(target) || cost < next.get(target)!.cost) {
+					next.set(target, { cost, values: [...state.values, value] });
+				}
+			}
+		}
+		states = next;
+	}
+	const result = states.get(remainder);
+	if (!result) return null;
+	const byPercentage = new Map(groups.map((group, index) => [group.percentage, result.values[index] / 100]));
+	return percentages.map((percentage) => byPercentage.get(percentage)!);
+}
+
+// O valor armazenado continua sendo o rateio total do item; a base é o custo unitário.
+export function allocatePurchaseCosts(total: number, unitCosts: number[]) {
+	return allocateMoney(total, unitCosts.map((cost) => Math.max(0, roundMoney(cost))));
+}
+
 export function isIsoDate(value: string) {
 	if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
 	const date = new Date(`${value}T12:00:00Z`);

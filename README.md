@@ -11,10 +11,15 @@ Essa migração adiciona motivo/data de cancelamento, rateio dos itens e víncul
 As novas compras geram contas a pagar na mesma transação do estoque. Compras anteriores
 à migração não recebem parcelas retroativamente.
 
-O rateio usa o valor dos produtos após os descontos individuais como base. Frete, seguro,
-outras despesas e desconto geral entram proporcionalmente no custo de aquisição.
-Os centavos restantes são distribuídos pelas maiores frações para fechar o total da nota.
+Em bancos existentes, aplique também `database/compras_remover_desconto_geral.sql`.
+Essa migração remove o desconto geral da compra e preserva os totais, rateios e contas
+a pagar já registrados. Os descontos individuais dos itens continuam disponíveis.
+
+O rateio usa o custo unitário dos produtos como base. Frete, seguro e outras despesas
+entram proporcionalmente no custo de aquisição, com exibição do rateio por unidade.
+Parcelas com o mesmo percentual recebem o mesmo valor, mantendo a soma da nota.
+Se o total não permitir essa divisão em centavos, a gravação é bloqueada com uma mensagem.
 
 Verificação: `node scripts/test-compras.mjs`. Exige `DATABASE_URL` local e cadastros ativos
-de fornecedor, produto e condição com parcelas. Os registros do teste são desfeitos com rollback;
+de fornecedor, dois produtos e condição com parcelas. Os registros do teste são desfeitos com rollback;
 as sequências de identificação podem avançar.

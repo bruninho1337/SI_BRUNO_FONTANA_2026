@@ -117,7 +117,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 				valorFrete: moneyValue(compra.valor_frete),
 				valorSeguro: moneyValue(compra.valor_seguro),
 				outrasDespesas: moneyValue(compra.outras_despesas),
-				valorDesconto: moneyValue(compra.valor_desconto),
+				valorTotal: Number(compra.valor_total),
 				observacoes: String(compra.observacoes ?? ""),
 				status: String(compra.status),
 				motivoCancelamento: String(compra.motivo_cancelamento ?? ""),

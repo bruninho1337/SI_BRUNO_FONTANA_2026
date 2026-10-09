@@ -26,7 +26,7 @@ export async function listarCompras() {
 	return queryRows<CompraListRow>(
 		`select c.modelo, c.serie, c.numero_nota, c.codfornecedor, c.data_emissao, c.data_chegada,
 			c.valor_produtos, c.valor_frete, c.valor_seguro, c.outras_despesas,
-			c.valor_desconto, c.valor_total, c.status, c.ativo,
+			c.valor_total, c.status, c.ativo,
 			c.data_cadastro as data_criacao, c.data_ult_alteracao as data_atualizacao,
 			f.fornecedor, cp.condicao_pagamento,
 			(select count(*)::int
@@ -87,7 +87,7 @@ export async function buscarCompraPorChave(chave: CompraKey) {
 		queryMaybeSingle(
 			`select c.codfornecedor, c.codcondicao_pagamento, c.modelo, c.serie,
 				c.numero_nota, c.data_emissao, c.data_chegada, c.valor_produtos,
-				c.valor_frete, c.valor_seguro, c.outras_despesas, c.valor_desconto,
+				c.valor_frete, c.valor_seguro, c.outras_despesas,
 				c.valor_total, c.status, c.observacoes, c.ativo, c.motivo_cancelamento,
 				c.data_cadastro as data_criacao, c.data_ult_alteracao as data_atualizacao,
 				f.fornecedor, cp.condicao_pagamento

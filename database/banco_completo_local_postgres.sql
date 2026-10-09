@@ -891,7 +891,6 @@ create table if not exists public.compras (
 	valor_frete numeric(14,2) not null default 0 check (valor_frete >= 0),
 	valor_seguro numeric(14,2) not null default 0 check (valor_seguro >= 0),
 	outras_despesas numeric(14,2) not null default 0 check (outras_despesas >= 0),
-	valor_desconto numeric(14,2) not null default 0 check (valor_desconto >= 0),
 	valor_total numeric(14,2) not null check (valor_total > 0),
 	status varchar(20) not null default 'CONFIRMADA' check (status in ('CONFIRMADA', 'CANCELADA')),
 	observacoes text check (observacoes is null or char_length(observacoes) <= 255),
@@ -900,8 +899,7 @@ create table if not exists public.compras (
 	data_ult_alteracao timestamp not null default current_timestamp,
 	usuario_ult_alteracao integer references public.usuarios(codusuario),
 	constraint compras_pkey primary key (modelo, serie, numero_nota, codfornecedor),
-	check (data_chegada >= data_emissao),
-	check (valor_desconto <= valor_produtos + valor_frete + valor_seguro + outras_despesas)
+	check (data_chegada >= data_emissao)
 );
 
 create unique index if not exists compras_nota_fornecedor_unique_idx
