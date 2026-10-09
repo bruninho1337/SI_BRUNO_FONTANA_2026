@@ -74,6 +74,7 @@ html:has([data-cadastro-embedded]) body {
 @layer base {
   html,
   body {
+    background-color: white;
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;

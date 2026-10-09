@@ -36,12 +36,13 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" suppressHydrationWarning>
-			<body className={`${geistSans.className} antialiased`}>
+		<html lang="en" className="light" style={{ colorScheme: "light" }} suppressHydrationWarning>
+			<body className={`${geistSans.className} min-h-screen bg-white text-neutral-900 antialiased`}>
 				<ThemeProvider
 					attribute="class"
-					defaultTheme="system"
-					enableSystem
+					defaultTheme="light"
+					forcedTheme="light"
+					enableSystem={false}
 					disableTransitionOnChange
 				>
 					<NavigationLoading />

@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 function LoadingOverlay() {
 	return (
 		<div
-			className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/80 backdrop-blur-sm"
+			className="fixed inset-0 z-[9999] flex items-center justify-center bg-white"
 			role="status"
 			aria-live="polite"
 			aria-label="Carregando"
