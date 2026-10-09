@@ -433,7 +433,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			</div>
 
 			<p className="text-right text-lg font-semibold text-black">Total dos produtos: {currency(totals.produtos)}</p>
-			<div className="grid gap-4 pt-3 md:grid-cols-12">
+			<div className="grid gap-4 pt-3 md:w-[70%] md:grid-cols-12">
 				{moneyFields.map((field) => (
 					<div key={field.name} className={`${fieldClass} md:col-span-4`}>
 						<Label htmlFor={field.name} className="text-sm text-neutral-800">{field.label}:</Label>
