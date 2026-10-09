@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 
 import { NavigationLoading } from "@/components/layout/navigation-loading";
+import { EmbeddedCadastroBridge } from "@/components/forms/embedded-cadastro-bridge";
 
 import "./globals.css";
 
@@ -43,6 +45,7 @@ export default function RootLayout({
 					disableTransitionOnChange
 				>
 					<NavigationLoading />
+					<Suspense fallback={null}><EmbeddedCadastroBridge /></Suspense>
 					{children}
 					<Toaster richColors position="top-right" closeButton />
 				</ThemeProvider>

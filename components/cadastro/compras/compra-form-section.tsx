@@ -2,6 +2,7 @@ import { CancelCompraForm } from "@/components/cadastro/compras/cancel-compra-fo
 import { CompraForm, type PurchaseInitial } from "@/components/cadastro/compras/compra-form";
 import { FormFeedback } from "@/components/cadastro/form-feedback";
 import { buscarCompraPorChave, carregarOpcoesCompra } from "@/lib/data/compras";
+import { roundMoney } from "@/lib/compras-calculos";
 
 type CompraFormSectionProps = {
 	searchParams?: Promise<{
@@ -23,7 +24,7 @@ function dateValue(value: unknown) {
 }
 
 function moneyValue(value: unknown) {
-	return Number(value ?? 0).toFixed(2).replace(".", ",");
+	return roundMoney(String(value ?? 0)).toFixed(2).replace(".", ",");
 }
 
 function dateTimeValue(value: unknown) {
@@ -80,7 +81,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 	const produtoOptions = (produtos ?? []).map((item) => ({
 		id: String(item.codproduto),
 		label: String(item.produto),
-		precoCusto: Number(item.preco_custo ?? 0),
+		precoCusto: String(item.preco_custo ?? 0),
 		estoque: Number(item.quantidade_estoque ?? 0),
 		unidade: String(item.unidade_medida ?? "UN"),
 	}));
@@ -98,7 +99,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 			produtoOptions.push({
 				id: String(item.codproduto),
 				label: String(item.produto),
-				precoCusto: Number(item.valor_unitario ?? 0),
+				precoCusto: String(item.valor_unitario ?? 0),
 				estoque: Number(item.quantidade_estoque ?? 0),
 				unidade: String(item.unidade_medida ?? "UN"),
 			});
@@ -131,6 +132,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 					codproduto: String(item.codproduto),
 					quantidade: String(item.quantidade),
 					valor_unitario: moneyValue(item.valor_unitario),
+					valor_unitario_preciso: String(item.valor_unitario),
 					valor_desconto: moneyValue(item.valor_desconto),
 					valorRateio: item.valor_rateio == null ? undefined : Number(item.valor_rateio),
 				})),

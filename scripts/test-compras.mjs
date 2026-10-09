@@ -22,6 +22,16 @@ function loadTs(path, dependencies = {}) {
 
 async function main() {
 	const calc = loadTs('lib/compras-calculos.ts');
+	assert.equal(calc.roundMoney(10.075), 10.08);
+	assert.equal(calc.roundMoney(-1.005), -1.01);
+	assert.equal(calc.sumMoney([0.1, 0.2, 0.01]), 0.31);
+	assert.equal(calc.purchaseItemTotal(3, '33.3366666666666667', 0), 100.01);
+	assert.equal(calc.purchaseItemTotal(3, '0.005', 0), 0.02);
+	assert.equal(calc.purchaseDiscountExceedsTotal(1, '0.0099999999999999999', 0.01), true);
+	assert.equal(calc.validPaymentPercentages([33.3333, 33.3333, 33.3334]), true);
+	assert.equal(calc.validPaymentPercentages([33.3333, 33.3333, 33.3333]), false);
+	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(0.02, [0.09, 0.27])), '[0.01,0.01]');
+	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(0.01, ['0.004', '0.006'])), '[0,0.01]');
 	assert.equal(JSON.stringify(calc.allocateMoney(10, [1, 1, 1])), '[3.34,3.33,3.33]');
 	assert.equal(JSON.stringify(calc.allocateMoney(30, [100, 200])), '[10,20]');
 	assert.equal(JSON.stringify(calc.allocateMoney(-0.05, [1, 1, 1])), '[-0.02,-0.02,-0.01]');
@@ -196,6 +206,30 @@ async function main() {
 		assert.match(impossibleResult.get('error'), /mantendo valores iguais/);
 		assert.equal((await client.query(`select 1 from public.compras where ${purchaseWhere}`, [key[0], key[1], String(Number(note) + 2), key[3]])).rowCount, 0);
 		console.log('OK: rateio por custo unitario com quantidades diferentes, percentuais iguais e bloqueio de divisao impossivel.');
+
+		await client.query('update public.condicoes_pagamento set parcelas=1 where codcondicao_pagamento=$1', [condition.codcondicao_pagamento]);
+		await client.query('delete from public.condicoes_pagamento_parcelas where codcondicao_pagamento=$1 and num_parcela=2', [condition.codcondicao_pagamento]);
+		await client.query('update public.condicoes_pagamento_parcelas set percentual=100 where codcondicao_pagamento=$1', [condition.codcondicao_pagamento]);
+		const preciseData = {
+			numero_nota: String(Number(note) + 3), valor_frete: '0,01', valor_seguro: '0,00', outras_despesas: '0,00',
+			itens_json: JSON.stringify([{ codproduto: product.codproduto, quantidade: '3', valor_unitario: '100,00', valor_desconto: '0,00' }]),
+			vencimentos_json: '[null]',
+		};
+		const preciseResult = await invoke(actions.createCompraAction, preciseData);
+		assert.ok(preciseResult.has('success'), preciseResult.get('error'));
+		const preciseProduct = (await client.query('select preco_custo, abs(preco_custo * 3 - 300.01) < 0.000000000001 as accurate from public.produtos where codproduto=$1', [product.codproduto])).rows[0];
+		assert.equal(preciseProduct.accurate, true);
+		assert.ok(Number(preciseProduct.preco_custo) > 100 && Number(preciseProduct.preco_custo) < 100.01);
+		const nextPreciseNote = String(Number(note) + 4);
+		const preciseItem = { codproduto: product.codproduto, quantidade: '3', valor_unitario: '100,00', valor_unitario_preciso: preciseProduct.preco_custo, valor_desconto: '0,00' };
+		const reimported = await invoke(actions.createCompraAction, { ...preciseData, numero_nota: nextPreciseNote, valor_frete: '0,00', itens_json: JSON.stringify([preciseItem]) });
+		assert.ok(reimported.has('success'), reimported.get('error'));
+		const reimportedItem = (await client.query(`select valor_unitario, valor_total from public.compras_itens where ${purchaseWhere}`, [key[0], key[1], nextPreciseNote, key[3]])).rows[0];
+		assert.equal(reimportedItem.valor_unitario, preciseProduct.preco_custo);
+		assert.equal(Number(reimportedItem.valor_total), 300.01);
+		assert.ok((await invoke(actions.createCompraAction, { ...preciseData, valor_frete: '0,001' })).has('error'));
+		assert.ok((await invoke(actions.createCompraAction, { ...preciseData, itens_json: JSON.stringify([{ ...preciseItem, valor_unitario: '99,00' }]) })).has('error'));
+		console.log('OK: fracao de centavo preservada no custo, reutilizacao sem truncamento e validacao de entradas.');
 	} finally {
 		await client.query('rollback');
 		client.release();

@@ -10,13 +10,18 @@ type CadastroMarcasPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		embedded?: string;
 		mode?: string;
 		edit?: string;
 		q?: string;
 	}>;
 };
 
-export default function CadastroMarcasPage({ searchParams }: CadastroMarcasPageProps) {
+export default async function CadastroMarcasPage({ searchParams }: CadastroMarcasPageProps) {
+	const params = await searchParams;
+	if (params?.embedded === "1") {
+		return <main className="p-3 sm:p-5" data-cadastro-embedded><MarcaFormSection searchParams={Promise.resolve(params)} /></main>;
+	}
 	return (
 		<CadastroPageShell
 			title="Marcas"

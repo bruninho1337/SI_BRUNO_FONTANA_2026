@@ -10,15 +10,20 @@ type CadastroClientesPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		embedded?: string;
 		mode?: string;
 		edit?: string;
 		q?: string;
 	}>;
 };
 
-export default function CadastroClientesPage({
+export default async function CadastroClientesPage({
 	searchParams,
 }: CadastroClientesPageProps) {
+	const params = await searchParams;
+	if (params?.embedded === "1") {
+		return <main className="p-3 sm:p-5" data-cadastro-embedded><ClienteFormSection searchParams={Promise.resolve(params)} /></main>;
+	}
 	return (
 		<CadastroPageShell
 			title="Clientes"

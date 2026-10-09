@@ -10,15 +10,20 @@ type CadastroCondicoesPagamentoPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		embedded?: string;
 		mode?: string;
 		edit?: string;
 		q?: string;
 	}>;
 };
 
-export default function CadastroCondicoesPagamentoPage({
+export default async function CadastroCondicoesPagamentoPage({
 	searchParams,
 }: CadastroCondicoesPagamentoPageProps) {
+	const params = await searchParams;
+	if (params?.embedded === "1") {
+		return <main className="p-3 sm:p-5" data-cadastro-embedded><CondicaoPagamentoFormSection searchParams={Promise.resolve(params)} /></main>;
+	}
 	return (
 		<CadastroPageShell
 			title="Condições de Pagamento"

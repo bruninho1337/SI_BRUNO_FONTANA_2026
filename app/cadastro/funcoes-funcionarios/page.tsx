@@ -10,15 +10,20 @@ type CadastroFuncoesFuncionariosPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		embedded?: string;
 		mode?: string;
 		edit?: string;
 		q?: string;
 	}>;
 };
 
-export default function CadastroFuncoesFuncionariosPage({
+export default async function CadastroFuncoesFuncionariosPage({
 	searchParams,
 }: CadastroFuncoesFuncionariosPageProps) {
+	const params = await searchParams;
+	if (params?.embedded === "1") {
+		return <main className="p-3 sm:p-5" data-cadastro-embedded><FuncaoFuncionarioFormSection searchParams={Promise.resolve(params)} /></main>;
+	}
 	return (
 		<CadastroPageShell
 			title="Funções de Funcionários"

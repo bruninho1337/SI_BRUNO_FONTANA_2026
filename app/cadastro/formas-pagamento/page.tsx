@@ -10,15 +10,20 @@ type CadastroFormasPagamentoPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		embedded?: string;
 		mode?: string;
 		edit?: string;
 		q?: string;
 	}>;
 };
 
-export default function CadastroFormasPagamentoPage({
+export default async function CadastroFormasPagamentoPage({
 	searchParams,
 }: CadastroFormasPagamentoPageProps) {
+	const params = await searchParams;
+	if (params?.embedded === "1") {
+		return <main className="p-3 sm:p-5" data-cadastro-embedded><FormaPagamentoFormSection searchParams={Promise.resolve(params)} /></main>;
+	}
 	return (
 		<CadastroPageShell
 			title="Formas de Pagamento"

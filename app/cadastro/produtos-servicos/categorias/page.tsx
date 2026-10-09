@@ -10,13 +10,18 @@ type CadastroCategoriasPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		embedded?: string;
 		mode?: string;
 		edit?: string;
 		q?: string;
 	}>;
 };
 
-export default function CadastroCategoriasPage({ searchParams }: CadastroCategoriasPageProps) {
+export default async function CadastroCategoriasPage({ searchParams }: CadastroCategoriasPageProps) {
+	const params = await searchParams;
+	if (params?.embedded === "1") {
+		return <main className="p-3 sm:p-5" data-cadastro-embedded><CategoriaFormSection searchParams={Promise.resolve(params)} /></main>;
+	}
 	return (
 		<CadastroPageShell
 			title="Categorias"

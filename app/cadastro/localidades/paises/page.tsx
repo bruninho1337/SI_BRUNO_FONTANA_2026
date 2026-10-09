@@ -10,13 +10,18 @@ type CadastroPaisesPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		embedded?: string;
 		mode?: string;
 		edit?: string;
 		q?: string;
 	}>;
 };
 
-export default function CadastroPaisesPage({ searchParams }: CadastroPaisesPageProps) {
+export default async function CadastroPaisesPage({ searchParams }: CadastroPaisesPageProps) {
+	const params = await searchParams;
+	if (params?.embedded === "1") {
+		return <main className="p-3 sm:p-5" data-cadastro-embedded><PaisFormSection searchParams={Promise.resolve(params)} /></main>;
+	}
 	return (
 		<CadastroPageShell
 			title="Países"

@@ -10,15 +10,20 @@ type CadastroUnidadesMedidaPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		embedded?: string;
 		mode?: string;
 		edit?: string;
 		q?: string;
 	}>;
 };
 
-export default function CadastroUnidadesMedidaPage({
+export default async function CadastroUnidadesMedidaPage({
 	searchParams,
 }: CadastroUnidadesMedidaPageProps) {
+	const params = await searchParams;
+	if (params?.embedded === "1") {
+		return <main className="p-3 sm:p-5" data-cadastro-embedded><UnidadeMedidaFormSection searchParams={Promise.resolve(params)} /></main>;
+	}
 	return (
 		<CadastroPageShell
 			title="Unidades de Medida"

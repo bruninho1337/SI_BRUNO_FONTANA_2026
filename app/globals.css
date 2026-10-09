@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Os formulários dentro dos pop-ups usam fundo branco, inclusive no tema escuro. */
+html:has([data-cadastro-embedded]) {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  background-color: white;
+  color-scheme: light;
+}
+
+html:has([data-cadastro-embedded]) body {
+  background-color: white;
+  color: #171717;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

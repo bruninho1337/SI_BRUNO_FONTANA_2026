@@ -914,7 +914,7 @@ create table if not exists public.compras_itens (
 	num_item integer not null check (num_item >= 1),
 	codproduto integer not null,
 	quantidade integer not null check (quantidade > 0),
-	valor_unitario numeric(14,2) not null check (valor_unitario >= 0),
+	valor_unitario numeric not null check (valor_unitario >= 0),
 	valor_desconto numeric(14,2) not null default 0 check (valor_desconto >= 0),
 	valor_total numeric(14,2) not null check (valor_total >= 0),
 	constraint compras_itens_pkey primary key (modelo, serie, numero_nota, codfornecedor, num_item),

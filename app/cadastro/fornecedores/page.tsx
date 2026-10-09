@@ -10,15 +10,20 @@ type CadastroFornecedoresPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		embedded?: string;
 		mode?: string;
 		edit?: string;
 		q?: string;
 	}>;
 };
 
-export default function CadastroFornecedoresPage({
+export default async function CadastroFornecedoresPage({
 	searchParams,
 }: CadastroFornecedoresPageProps) {
+	const params = await searchParams;
+	if (params?.embedded === "1") {
+		return <main className="p-3 sm:p-5" data-cadastro-embedded><FornecedorFormSection searchParams={Promise.resolve(params)} /></main>;
+	}
 	return (
 		<CadastroPageShell
 			title="Fornecedores"

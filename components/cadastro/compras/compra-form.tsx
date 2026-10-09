@@ -15,16 +15,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
 
-import { addDays, allocateInstallments, allocatePurchaseCosts, isIsoDate, purchaseToday, roundMoney, type PaymentTerm } from "@/lib/compras-calculos";
+import { addDays, allocateInstallments, allocatePurchaseCosts, isIsoDate, purchaseDiscountExceedsTotal, purchaseItemTotal, purchaseToday, roundMoney, sumMoney, validPaymentPercentages, type PaymentTerm } from "@/lib/compras-calculos";
 
 type SupplierOption = { id: string; label: string; codcondicaoPagamento: string };
 type Option = { id: string; label: string };
-type ProductOption = Option & { precoCusto: number; estoque: number; unidade: string };
+type ProductOption = Option & { precoCusto: string; estoque: number; unidade: string };
 type PurchaseItem = {
 	id: string;
 	codproduto: string;
 	quantidade: string;
 	valor_unitario: string;
+	valor_unitario_preciso?: string;
 	valor_desconto: string;
 	valorRateio?: number;
 };
@@ -64,8 +65,17 @@ function parseDecimal(value: string) {
 	return Number.isFinite(result) ? result : 0;
 }
 
-function decimalText(value: number) {
-	return value.toFixed(2).replace(".", ",");
+function decimalText(value: number | string) {
+	return roundMoney(value).toFixed(2).replace(".", ",");
+}
+
+function itemUnitCost(item: PurchaseItem) {
+	return item.valor_unitario_preciso ?? parseDecimal(item.valor_unitario);
+}
+
+function itemTotal(item: PurchaseItem) {
+	const quantity = Number(item.quantidade);
+	return Math.max(0, purchaseItemTotal(Number.isSafeInteger(quantity) && quantity > 0 ? quantity : 0, itemUnitCost(item), parseDecimal(item.valor_desconto)));
 }
 
 function currency(value: number) {
@@ -172,11 +182,8 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	}
 
 	const totals = useMemo(() => {
-		const produtosTotal = items.reduce((total, item) => {
-			const quantidade = Number(item.quantidade) || 0;
-			return roundMoney(total + Math.max(0, quantidade * roundMoney(parseDecimal(item.valor_unitario)) - roundMoney(parseDecimal(item.valor_desconto))));
-		}, 0);
-		const total = initialPurchase?.valorTotal ?? produtosTotal + roundMoney(parseDecimal(valorFrete)) + roundMoney(parseDecimal(valorSeguro)) + roundMoney(parseDecimal(outrasDespesas));
+		const produtosTotal = sumMoney(items.map(itemTotal));
+		const total = initialPurchase?.valorTotal ?? sumMoney([produtosTotal, parseDecimal(valorFrete), parseDecimal(valorSeguro), parseDecimal(outrasDespesas)]);
 		return { produtos: produtosTotal, total: Math.max(0, roundMoney(total)) };
 	}, [items, outrasDespesas, valorFrete, valorSeguro, initialPurchase?.valorTotal]);
 
@@ -185,8 +192,9 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			if (item.id !== id) return item;
 			if (field === "codproduto") {
 				const product = produtos.find((option) => option.id === value);
-				return { ...item, codproduto: value, valor_unitario: decimalText(product?.precoCusto ?? 0) };
+				return { ...item, codproduto: value, valor_unitario: decimalText(product?.precoCusto ?? 0), valor_unitario_preciso: product?.precoCusto ?? "0" };
 			}
+			if (field === "valor_unitario") return { ...item, valor_unitario: value, valor_unitario_preciso: undefined };
 			return { ...item, [field]: value };
 		}));
 	}
@@ -225,11 +233,11 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			error = "Informe quantidades inteiras maiores que zero.";
 		} else if (items.some((item) => !validMoney(item.valor_unitario) || !validMoney(item.valor_desconto))) {
 			error = "Informe custos e descontos válidos, com até duas casas decimais.";
-		} else if (items.some((item) => parseDecimal(item.valor_desconto) > Number(item.quantidade) * parseDecimal(item.valor_unitario))) {
+		} else if (items.some((item) => purchaseDiscountExceedsTotal(Number(item.quantidade), itemUnitCost(item), parseDecimal(item.valor_desconto)))) {
 			error = "O desconto de um item não pode superar seu valor bruto.";
 		} else if ([valorFrete, valorSeguro, outrasDespesas].some((value) => !validMoney(value))) {
 			error = "Informe frete, seguro e despesas válidos, com até duas casas decimais.";
-		} else if (totals.produtos <= 0 || totals.total <= 0 || !Number.isFinite(totals.total)) {
+		} else if (totals.produtos <= 0 || totals.total <= 0 || !Number.isFinite(totals.total) || totals.total >= 1e12) {
 			error = "O total dos produtos e o total da nota devem ser maiores que zero. Confira os descontos.";
 		}
 		setStepError(error);
@@ -239,7 +247,9 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	const terms = condicoesPagamento.find((option) => option.id === condicaoId)?.parcelas ?? [];
 	const installmentValues = allocateInstallments(totals.total, terms.map((term) => term.percentual));
 	const installmentError = !readOnly && terms.length > 0
-		? installmentValues === null
+		? !validPaymentPercentages(terms.map((term) => term.percentual))
+			? "Os percentuais da condição de pagamento devem totalizar exatamente 100%."
+			: installmentValues === null
 			? "Não é possível fechar o total em centavos mantendo valores iguais para percentuais iguais. Revise o total ou os percentuais da condição de pagamento."
 			: installmentValues.some((value) => value <= 0) ? "O total da nota é insuficiente para gerar todas as parcelas." : ""
 		: "";
@@ -247,9 +257,9 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 		...term, dataVencimento: dueDates[`${condicaoId}:${dataEmissao}:${term.num_parcela}`] ?? addDays(dataEmissao, term.dias_vencimento),
 		valor: installmentValues?.[index] ?? 0, status: "PREVISTA",
 	}));
-	const unitCosts = items.map((item) => roundMoney(parseDecimal(item.valor_unitario)));
-	const totalUnitCosts = unitCosts.reduce((sum, value) => sum + value, 0);
-	const allocations = allocatePurchaseCosts(roundMoney(totals.total - totals.produtos), unitCosts);
+	const unitCosts = items.map(itemUnitCost);
+	const totalUnitCosts = unitCosts.reduce<number>((sum, value) => sum + Number(value), 0);
+	const allocations = allocatePurchaseCosts(sumMoney([parseDecimal(valorFrete), parseDecimal(valorSeguro), parseDecimal(outrasDespesas)]), unitCosts);
 
 	const moneyFields = [
 		{ name: "valor_frete", label: "Frete", value: valorFrete, setter: setValorFrete },
@@ -367,7 +377,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 				<div className="space-y-3">
 					{items.map((item, index) => {
-						const subtotal = Math.max(0, roundMoney((Number(item.quantidade) || 0) * roundMoney(parseDecimal(item.valor_unitario)) - roundMoney(parseDecimal(item.valor_desconto))));
+						const subtotal = itemTotal(item);
 						const allocation = readOnly ? item.valorRateio : allocations[index];
 						const quantity = Number(item.quantidade) || 1;
 						const unitAllocation = (allocation ?? 0) / quantity;
@@ -413,7 +423,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 										<Input id={`desconto-${item.id}`} inputMode="decimal" disabled={productsDisabled} value={item.valor_desconto} onChange={(event) => updateItem(item.id, "valor_desconto", normalizeMoneyInput(event.target.value))} className={inputClass} />
 									</div>
 								</div>
-								{allocation !== undefined && <p className="mt-3 text-sm text-neutral-600">{!readOnly && <>Participação pelo custo unitário: {totalUnitCosts > 0 ? (unitCosts[index] / totalUnitCosts * 100).toFixed(2).replace(".", ",") : "0,00"}% · </>}Rateio por unidade: {currency(unitAllocation)} · Custo unitário com rateio: {currency(roundMoney(subtotal / quantity + unitAllocation))}</p>}
+								{allocation !== undefined && <p className="mt-3 text-sm text-neutral-600">{!readOnly && <>Participação pelo custo unitário: {totalUnitCosts > 0 ? (Number(unitCosts[index]) / totalUnitCosts * 100).toFixed(2).replace(".", ",") : "0,00"}% · </>}Rateio por unidade: {currency(unitAllocation)} · Custo unitário com rateio: {currency(sumMoney([subtotal, allocation]) / quantity)}</p>}
 								<div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-end">
 									<div className={`${fieldClass} w-full sm:w-48`}>
 										<Label className="text-sm text-neutral-800">Total do Item:</Label>

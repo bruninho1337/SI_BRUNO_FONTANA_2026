@@ -10,13 +10,18 @@ type CadastroProdutosPageProps = {
 	searchParams?: Promise<{
 		success?: string;
 		error?: string;
+		embedded?: string;
 		mode?: string;
 		edit?: string;
 		q?: string;
 	}>;
 };
 
-export default function CadastroProdutosPage({ searchParams }: CadastroProdutosPageProps) {
+export default async function CadastroProdutosPage({ searchParams }: CadastroProdutosPageProps) {
+	const params = await searchParams;
+	if (params?.embedded === "1") {
+		return <main className="p-3 sm:p-5" data-cadastro-embedded><ProdutoFormSection searchParams={Promise.resolve(params)} /></main>;
+	}
 	return (
 		<CadastroPageShell
 			title="Produtos"

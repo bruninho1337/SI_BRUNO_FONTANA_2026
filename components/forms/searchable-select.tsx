@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, ChevronDown, Pencil, Plus, Search, X } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
 import { cn } from "@/lib/shared/utils";
+import { CadastroFormDialog } from "@/components/forms/cadastro-form-dialog";
 
 type Option = {
 	id: string;
@@ -59,7 +60,23 @@ export function SearchableSelect({
 	const [isOpen, setIsOpen] = useState(false);
 	const [search, setSearch] = useState("");
 	const [selectedId, setSelectedId] = useState(defaultValue);
+	const [cadastro, setCadastro] = useState<{ href: string; title: string } | null>(null);
+	const router = useRouter();
+	const closeCadastro = useCallback(() => setCadastro(null), []);
+	const savedCadastro = useCallback(() => {
+		setCadastro(null);
+		setSearch("");
+		router.refresh();
+	}, [router]);
 	const currentValue = value ?? selectedId;
+
+	function openCadastro(href: string, title: string) {
+		if (window.parent !== window && window.name === "cadastro-embedded") {
+			window.parent.postMessage({ type: "cadastro:open", href, title }, window.location.origin);
+			return;
+		}
+		setCadastro({ href, title });
+	}
 
 	const filteredOptions = useMemo(() => {
 		const term = search.trim().toLowerCase();
@@ -103,7 +120,7 @@ export function SearchableSelect({
 
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
-			if (event.key === "Escape") {
+			if (event.key === "Escape" && !cadastro) {
 				setIsOpen(false);
 			}
 		}
@@ -113,7 +130,7 @@ export function SearchableSelect({
 		return () => {
 			document.removeEventListener("keydown", handleKeyDown);
 		};
-	}, []);
+	}, [cadastro]);
 
 	useEffect(() => {
 		if (!isOpen) {
@@ -180,6 +197,7 @@ export function SearchableSelect({
 
 			{isOpen && typeof document !== "undefined" ? createPortal(
 				<div
+					inert={Boolean(cadastro)}
 					className="fixed inset-0 z-[1000] flex min-h-dvh w-screen items-center justify-center bg-neutral-950/40 p-4"
 					role="dialog"
 					aria-modal="true"
@@ -202,15 +220,16 @@ export function SearchableSelect({
 							</div>
 							<div className="flex shrink-0 items-center gap-2">
 								{createHref ? (
-									<Link
-										href={createHref}
+									<button
+										type="button"
+										onClick={() => openCadastro(createHref, label)}
 										aria-label={createLabel}
 										title={createLabel}
 										className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-neutral-900 px-3 text-sm font-medium text-white transition hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 									>
 										<Plus className="h-4 w-4" aria-hidden="true" />
 										<span>Novo</span>
-									</Link>
+									</button>
 								) : null}
 								<button
 									type="button"
@@ -287,14 +306,15 @@ export function SearchableSelect({
 													</button>
 												)}
 												{editHref ? (
-													<Link
-														href={editHref}
+													<button
+														type="button"
+														onClick={() => openCadastro(editHref, label)}
 														aria-label={`Editar ${option.label}`}
 														title={`Editar ${option.label}`}
 														className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 													>
 														<Pencil className="h-4 w-4" aria-hidden="true" />
-													</Link>
+													</button>
 												) : null}
 											</div>
 										);
@@ -320,6 +340,7 @@ export function SearchableSelect({
 				</div>,
 				document.body
 			) : null}
+			{cadastro && <CadastroFormDialog href={cadastro.href} title={cadastro.title} onClose={closeCadastro} onSaved={savedCadastro} />}
 		</div>
 	);
 }
