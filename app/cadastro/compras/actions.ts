@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 import { allocateInstallments, allocatePurchaseCosts, addDays, isIsoDate, purchaseDiscountExceedsTotal, purchaseItemTotal, purchaseToday, roundMoney, sumMoney, validPaymentPercentages, type PaymentTerm } from "@/lib/compras-calculos";
 import { db } from "@/lib/database/db";
 
+import { validPurchaseDigits, validPurchaseInteger, validPurchaseMoney, validPurchasePreciseCost } from "@/lib/compras-validacao";
+
 const COMPRAS_PATH = "/cadastro/compras";
 
 type SubmittedItem = {
@@ -63,15 +65,10 @@ function databaseMessage(error: unknown) {
 	return dbError.message ?? "Nao foi possivel salvar a compra.";
 }
 
-function validMoneyInput(value: unknown) {
-	if (typeof value === "number") return Number.isFinite(value) && /^\d+(?:\.\d{1,2})?$/.test(String(value));
-	return /^(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d{1,2})?$/.test(String(value ?? "").trim());
-}
-
 export async function validateCompraKeyAction(key: { codfornecedor: string; modelo: string; serie: string; numeroNota: string }) {
 	const supplier = Number(key.codfornecedor);
-	if (!Number.isSafeInteger(supplier) || supplier <= 0 || !key.modelo.trim() || key.modelo.trim().length > 2 || !key.serie.trim() || key.serie.trim().length > 3 || !key.numeroNota.trim() || key.numeroNota.trim().length > 9) {
-		return { valid: false, message: "Preencha fornecedor, modelo, série e número da nota." };
+	if (!validPurchaseInteger(key.codfornecedor) || !validPurchaseDigits(key.modelo, 2) || !validPurchaseDigits(key.serie, 3) || !validPurchaseDigits(key.numeroNota, 9)) {
+		return { valid: false, message: "Selecione o fornecedor e informe apenas dígitos no modelo (até 2), série (até 3) e número da nota (até 9)." };
 	}
 	try {
 		const result = await db.query(`select 1 from public.compras where codfornecedor = $1
@@ -84,7 +81,7 @@ export async function validateCompraKeyAction(key: { codfornecedor: string; mode
 }
 
 export async function createCompraAction(formData: FormData) {
-	if (["valor_frete", "valor_seguro", "outras_despesas"].some((name) => !validMoneyInput(formData.get(name)))) {
+	if (["valor_frete", "valor_seguro", "outras_despesas"].some((name) => !validPurchaseMoney(formData.get(name)))) {
 		fail(formData, "Informe frete, seguro e despesas validos, com ate duas casas decimais.");
 	}
 	const codfornecedorValue = getText(formData, "codfornecedor");
@@ -101,24 +98,24 @@ export async function createCompraAction(formData: FormData) {
 	const codfornecedor = Number(codfornecedorValue);
 	const codcondicaoPagamento = Number(codcondicaoValue);
 
-	if (!codfornecedorValue || !Number.isInteger(codfornecedor) || codfornecedor <= 0) {
+	if (!validPurchaseInteger(codfornecedorValue)) {
 		fail(formData, "Selecione o fornecedor da compra.");
 	}
 
-	if (!codcondicaoValue || !Number.isInteger(codcondicaoPagamento) || codcondicaoPagamento <= 0) {
+	if (!validPurchaseInteger(codcondicaoValue)) {
 		fail(formData, "Selecione a condicao de pagamento.");
 	}
 
-	if (modelo.length < 1 || modelo.length > 2) {
-		fail(formData, "Modelo da nota deve ter entre 1 e 2 caracteres.");
+	if (!validPurchaseDigits(modelo, 2)) {
+		fail(formData, "Modelo da nota deve ter entre 1 e 2 digitos.");
 	}
 
-	if (serie.length < 1 || serie.length > 3) {
-		fail(formData, "Serie da nota deve ter entre 1 e 3 caracteres.");
+	if (!validPurchaseDigits(serie, 3)) {
+		fail(formData, "Serie da nota deve ter entre 1 e 3 digitos.");
 	}
 
-	if (numeroNota.length < 1 || numeroNota.length > 9) {
-		fail(formData, "Numero da nota deve ter entre 1 e 9 caracteres.");
+	if (!validPurchaseDigits(numeroNota, 9)) {
+		fail(formData, "Numero da nota deve ter entre 1 e 9 digitos.");
 	}
 
 	if (!isIsoDate(dataEmissao) || dataEmissao > purchaseToday()) {
@@ -150,8 +147,14 @@ export async function createCompraAction(formData: FormData) {
 		fail(formData, "Adicione ao menos um item a compra.");
 	}
 
-	if (submittedItems.some((item) => !validMoneyInput(item.valor_unitario) || !validMoneyInput(item.valor_desconto))) {
+	if (submittedItems.some((item) => !validPurchaseMoney(item.valor_unitario) || !validPurchaseMoney(item.valor_desconto))) {
 		fail(formData, "Informe custos e descontos validos, com ate duas casas decimais.");
+	}
+	if (submittedItems.some((item) => !validPurchaseInteger(item.codproduto) || !validPurchaseInteger(item.quantidade))) {
+		fail(formData, "Produto e quantidade devem ser numeros inteiros positivos, de ate 2147483647.");
+	}
+	if (submittedItems.some((item) => item.valor_unitario_preciso !== undefined && !validPurchasePreciseCost(item.valor_unitario_preciso))) {
+		fail(formData, "O custo unitario preciso esta invalido. Selecione o produto novamente.");
 	}
 	const items = submittedItems.map((item) => ({
 		codproduto: Number(item.codproduto),

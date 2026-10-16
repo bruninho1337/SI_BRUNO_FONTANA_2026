@@ -17,6 +17,8 @@ import { RequiredLabel } from "@/components/ui/required-label";
 
 import { addDays, allocateInstallments, allocatePurchaseCosts, isIsoDate, purchaseDiscountExceedsTotal, purchaseItemTotal, purchaseToday, roundMoney, sumMoney, validPaymentPercentages, type PaymentTerm } from "@/lib/compras-calculos";
 
+import { canTypePurchaseMoney, MAX_PURCHASE_INTEGER, PURCHASE_MONEY_PATTERN, validPurchaseDigits, validPurchaseInteger, validPurchaseMoney, validPurchasePreciseCost } from "@/lib/compras-validacao";
+
 type SupplierOption = { id: string; label: string; codcondicaoPagamento: string };
 type Option = { id: string; label: string };
 type ProductOption = Option & { precoCusto: string; estoque: number; unidade: string };
@@ -92,10 +94,6 @@ function newItem(index: number, id = `item-${Date.now()}-${index}`): PurchaseIte
 	};
 }
 
-function normalizeMoneyInput(value: string) {
-	return value.replace(/[^\d,.]/g, "").slice(0, 18);
-}
-
 export function CompraForm({ fornecedores, condicoesPagamento, produtos, disabled = false, initialPurchase }: CompraFormProps) {
 	const readOnly = Boolean(initialPurchase);
 	const [fornecedorId, setFornecedorId] = useState(initialPurchase?.codfornecedor ?? "");
@@ -134,7 +132,11 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 		setKeyMessage("");
 	}
 	async function validateKey() {
-		if (keyDisabled || !fornecedorId || !modelo.trim() || !serie.trim() || !numeroNota.trim()) return;
+		if (keyDisabled) return;
+		if (!validPurchaseInteger(fornecedorId) || !validPurchaseDigits(modelo, 2) || !validPurchaseDigits(serie, 3) || !validPurchaseDigits(numeroNota, 9)) {
+			setKeyMessage("Selecione o fornecedor e preencha modelo, série e número da nota somente com dígitos.");
+			return;
+		}
 		const request = ++requestId.current;
 		setValidating(true);
 		setKeyMessage("");
@@ -159,8 +161,14 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			if (rawItems) {
 				try {
 					const restored = JSON.parse(rawItems) as PurchaseItem[];
-					if (Array.isArray(restored) && restored.length > 0) {
-						setItems(restored.map((item, index) => ({ ...item, id: item.id || `restored-${index}` })));
+					if (Array.isArray(restored) && restored.length > 0 && restored.every((item) => item && typeof item === "object" && typeof item.quantidade === "string" && typeof item.valor_unitario === "string" && typeof item.valor_desconto === "string")) {
+						setItems(restored.map((item, index) => ({
+							...item, id: item.id || `restored-${index}`,
+							quantidade: validPurchaseInteger(item.quantidade) ? item.quantidade : "",
+							valor_unitario: validPurchaseMoney(item.valor_unitario) ? item.valor_unitario : "",
+							valor_desconto: validPurchaseMoney(item.valor_desconto) ? item.valor_desconto : "",
+							valor_unitario_preciso: validPurchasePreciseCost(item.valor_unitario_preciso) ? item.valor_unitario_preciso : undefined,
+						})));
 					}
 				} catch {
 					// Mantem o item inicial quando o rascunho antigo nao e valido.
@@ -223,14 +231,14 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 	function validateProducts() {
 		if (productsDisabled) return;
-		const validMoney = (value: string) => /^(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d{1,2})?$/.test(value.trim()) && Number.isFinite(parseDecimal(value));
+		const validMoney = validPurchaseMoney;
 		let error = "";
 		if (!items.length || items.some((item) => !produtos.some((product) => product.id === item.codproduto))) {
 			error = "Selecione um produto válido em todos os itens.";
 		} else if (new Set(items.map((item) => item.codproduto)).size !== items.length) {
 			error = "Cada produto deve aparecer apenas uma vez.";
-		} else if (items.some((item) => !Number.isSafeInteger(Number(item.quantidade)) || Number(item.quantidade) <= 0)) {
-			error = "Informe quantidades inteiras maiores que zero.";
+		} else if (items.some((item) => !validPurchaseInteger(item.quantidade))) {
+			error = "Informe quantidades inteiras de 1 a 2147483647.";
 		} else if (items.some((item) => !validMoney(item.valor_unitario) || !validMoney(item.valor_desconto))) {
 			error = "Informe custos e descontos válidos, com até duas casas decimais.";
 		} else if (items.some((item) => purchaseDiscountExceedsTotal(Number(item.quantidade), itemUnitCost(item), parseDecimal(item.valor_desconto)))) {
@@ -268,7 +276,14 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	];
 
 	return (
-		<form ref={formRef} action={readOnly ? undefined : createCompraAction} className="space-y-5" onSubmit={(event) => { if (!readOnly && (paymentDisabled || installmentError)) event.preventDefault(); }} onKeyDown={(event) => {
+		<form ref={formRef} action={readOnly ? undefined : createCompraAction} className="space-y-5" onSubmit={(event) => {
+			if (readOnly) return;
+			if (paymentDisabled || installmentError || !installments.length) { event.preventDefault(); return; }
+			if (installments.some((parcela) => !isIsoDate(parcela.dataVencimento) || parcela.dataVencimento < dataEmissao)) {
+				event.preventDefault();
+				setStepError("Informe vencimentos válidos, iguais ou posteriores à emissão.");
+			} else { setStepError(""); }
+		}} onKeyDown={(event) => {
 			if (event.key !== "Enter" || !(event.target instanceof HTMLInputElement) || step === "payment") return;
 			event.preventDefault();
 			if (event.target.id === "numero_nota") void validateKey();
@@ -307,18 +322,18 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 					<div className={`${fieldClass} md:col-span-2 md:col-start-1`}>
 						<RequiredLabel htmlFor="modelo" className="text-sm text-neutral-800">Modelo:</RequiredLabel>
-						<Input id="modelo" name="modelo_display" maxLength={2} required={!readOnly} disabled={keyDisabled} value={modelo} onChange={(event) => { setModelo(event.target.value); invalidateKey(); }} placeholder="55" className={inputClass} />
+						<Input id="modelo" name="modelo_display" maxLength={2} inputMode="numeric" pattern="[0-9]+" title="Informe somente dígitos." required={!readOnly} disabled={keyDisabled} value={modelo} onChange={(event) => { if (/^[0-9]{0,2}$/.test(event.target.value)) { setModelo(event.target.value); invalidateKey(); } }} placeholder="55" className={inputClass} />
 					</div>
 					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="serie" className="text-sm text-neutral-800">Série:</RequiredLabel>
-						<Input id="serie" name="serie_display" maxLength={3} required={!readOnly} disabled={keyDisabled} value={serie} onChange={(event) => { setSerie(event.target.value); invalidateKey(); }} placeholder="1" className={inputClass} />
+						<Input id="serie" name="serie_display" maxLength={3} inputMode="numeric" pattern="[0-9]+" title="Informe somente dígitos." required={!readOnly} disabled={keyDisabled} value={serie} onChange={(event) => { if (/^[0-9]{0,3}$/.test(event.target.value)) { setSerie(event.target.value); invalidateKey(); } }} placeholder="1" className={inputClass} />
 					</div>
 					<div className={`${fieldClass} md:col-span-4`}>
 						<RequiredLabel htmlFor="numero_nota" className="text-sm text-neutral-800">Número da nota:</RequiredLabel>
-						<Input id="numero_nota" name="numero_nota_display" maxLength={9} required={!readOnly} disabled={keyDisabled} value={numeroNota} onBlur={(event) => {
+						<Input id="numero_nota" name="numero_nota_display" maxLength={9} inputMode="numeric" pattern="[0-9]+" title="Informe somente dígitos." required={!readOnly} disabled={keyDisabled} value={numeroNota} onBlur={(event) => {
 							if (event.relatedTarget instanceof Element && event.relatedTarget.closest('[data-purchase-step="key"]')) return;
 							void validateKey();
-						}} onChange={(event) => { setNumeroNota(event.target.value); invalidateKey(); }} placeholder="Ex: 000012345" className={inputClass} />
+						}} onChange={(event) => { if (/^[0-9]{0,9}$/.test(event.target.value)) { setNumeroNota(event.target.value); invalidateKey(); } }} placeholder="Ex: 000012345" className={inputClass} />
 					</div>
 			</div>
 			{!readOnly && step === "key" && <div className="space-y-2">
@@ -412,15 +427,15 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 									/>
 									<div className={`${fieldClass} md:col-span-2`}>
 										<RequiredLabel htmlFor={`quantidade-${item.id}`} className="text-sm text-neutral-800">Quantidade:</RequiredLabel>
-										<Input id={`quantidade-${item.id}`} type="number" min={1} step={1} required={!readOnly} disabled={productsDisabled} value={item.quantidade} onChange={(event) => updateItem(item.id, "quantidade", event.target.value)} className={inputClass} />
+										<Input id={`quantidade-${item.id}`} type="text" inputMode="numeric" pattern="[0-9]+" maxLength={10} title="Informe um inteiro de 1 a 2147483647." required={!readOnly} disabled={productsDisabled} value={item.quantidade} onChange={(event) => { const value = event.target.value; if (value === "" || (/^[0-9]+$/.test(value) && Number(value) <= MAX_PURCHASE_INTEGER)) updateItem(item.id, "quantidade", value); }} className={inputClass} />
 									</div>
 									<div className={`${fieldClass} md:col-span-2`}>
 										<RequiredLabel htmlFor={`unitario-${item.id}`} className="text-sm text-neutral-800">Custo unitário:</RequiredLabel>
-										<Input id={`unitario-${item.id}`} inputMode="decimal" required={!readOnly} disabled={productsDisabled} value={item.valor_unitario} onChange={(event) => updateItem(item.id, "valor_unitario", normalizeMoneyInput(event.target.value))} className={inputClass} />
+										<Input id={`unitario-${item.id}`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title="Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)." required={!readOnly} disabled={productsDisabled} value={item.valor_unitario} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) updateItem(item.id, "valor_unitario", event.target.value); }} className={inputClass} />
 									</div>
 									<div className={`${fieldClass} md:col-span-2`}>
 										<Label htmlFor={`desconto-${item.id}`} className="text-sm text-neutral-800">Desconto:</Label>
-										<Input id={`desconto-${item.id}`} inputMode="decimal" disabled={productsDisabled} value={item.valor_desconto} onChange={(event) => updateItem(item.id, "valor_desconto", normalizeMoneyInput(event.target.value))} className={inputClass} />
+										<Input id={`desconto-${item.id}`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title="Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)." disabled={productsDisabled} value={item.valor_desconto} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) updateItem(item.id, "valor_desconto", event.target.value); }} className={inputClass} />
 									</div>
 								</div>
 								{allocation !== undefined && <p className="mt-3 text-sm text-neutral-600">{!readOnly && <>Participação pelo custo unitário: {totalUnitCosts > 0 ? (Number(unitCosts[index]) / totalUnitCosts * 100).toFixed(2).replace(".", ",") : "0,00"}% · </>}Rateio por unidade: {currency(unitAllocation)} · Custo unitário com rateio: {currency(sumMoney([subtotal, allocation]) / quantity)}</p>}
@@ -447,7 +462,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 				{moneyFields.map((field) => (
 					<div key={field.name} className={`${fieldClass} md:col-span-4`}>
 						<Label htmlFor={field.name} className="text-sm text-neutral-800">{field.label}:</Label>
-						<Input id={field.name} name={`${field.name}_display`} inputMode="decimal" disabled={productsDisabled} value={field.value} onChange={(event) => field.setter(normalizeMoneyInput(event.target.value))} className={inputClass} />
+						<Input id={field.name} name={`${field.name}_display`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title="Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)." disabled={productsDisabled} value={field.value} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) field.setter(event.target.value); }} className={inputClass} />
 					</div>
 				))}
 			</div>
@@ -468,6 +483,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			</div>
 
 			{installmentError && <p role="alert" className="text-sm text-red-700">{installmentError}</p>}
+			{!readOnly && step === "payment" && stepError && <p role="alert" className="text-sm text-red-700">{stepError}</p>}
 			<ParcelasLayout
 				title="Parcelas da condição de pagamento"
 				description="Vencimentos calculados a partir da emissão da nota."

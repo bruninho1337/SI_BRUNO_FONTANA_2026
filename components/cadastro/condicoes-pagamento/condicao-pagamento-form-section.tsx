@@ -120,7 +120,7 @@ export async function CondicaoPagamentoFormSection({
 				<div className="grid gap-4 md:grid-cols-12">
 					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="juro" className="text-sm text-neutral-800">
-							Juro (%):
+							Juros (%):
 						</RequiredLabel>
 						<Input
 							id="juro"

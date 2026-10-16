@@ -88,6 +88,7 @@ async function main() {
 		};
 		const actions = loadTs('app/cadastro/compras/actions.ts', {
 			'@/lib/compras-calculos': calc,
+			'@/lib/compras-validacao': loadTs('lib/compras-validacao.ts'),
 			'@/lib/database/db': { db: { connect: async () => wrapped, query: (...args) => client.query(...args) } },
 			'next/cache': { revalidatePath() {} },
 			'next/navigation': { redirect(url) { const error = new Error('redirect'); error.url = url; throw error; } },
@@ -101,7 +102,7 @@ async function main() {
 		assert.ok(supplier && product && condition, 'Cadastre fornecedor, produto e condição com parcelas antes do teste.');
 		const terms = (await client.query('select * from public.condicoes_pagamento_parcelas where codcondicao_pagamento = $1 order by num_parcela', [condition.codcondicao_pagamento])).rows;
 		const note = String(100000000 + Date.now() % 900000000);
-		const key = ['55', 'TST', note, supplier.codfornecedor];
+		const key = ['55', '999', note, supplier.codfornecedor];
 		const data = {
 			modelo: key[0], serie: key[1], numero_nota: note, codfornecedor: String(supplier.codfornecedor),
 			codcondicao_pagamento: String(condition.codcondicao_pagamento), data_emissao: '2026-01-01', data_chegada: '2026-01-02',
@@ -130,7 +131,7 @@ async function main() {
 		// Rascunhos antigos não podem aplicar o campo removido pelo servidor.
 		const result = await invoke(actions.createCompraAction, { valor_desconto: '999,00' });
 		assert.ok(result.has('success'), result.get('error'));
-		const duplicate = await actions.validateCompraKeyAction({ modelo: ' 55 ', serie: 'tst', numeroNota: note.toLowerCase(), codfornecedor: data.codfornecedor });
+		const duplicate = await actions.validateCompraKeyAction({ modelo: '55', serie: '999', numeroNota: note, codfornecedor: data.codfornecedor });
 		assert.equal(duplicate.valid, false);
 		assert.ok((await invoke(actions.createCompraAction)).has('error'));
 		const purchaseWhere = 'modelo=$1 and serie=$2 and numero_nota=$3 and codfornecedor=$4';
