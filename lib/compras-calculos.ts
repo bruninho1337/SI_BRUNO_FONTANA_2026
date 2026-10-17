@@ -68,6 +68,19 @@ export function purchaseDiscountExceedsTotal(quantity: number, unitCost: Decimal
 	return deduction > unit * BigInt(quantity);
 }
 
+// O banco mantém o desconto total do item para preservar as compras existentes.
+export function purchaseUnitDiscountTotal(quantity: number, unitDiscount: DecimalValue) {
+	return purchaseItemTotal(quantity, unitDiscount, 0);
+}
+
+export function purchaseItemTotalWithUnitDiscount(quantity: number, unitCost: DecimalValue, unitDiscount: DecimalValue) {
+	if (!Number.isSafeInteger(quantity)) throw new Error("Quantidade inválida.");
+	const [unit, deduction] = integerWeights([unitCost, unitDiscount]);
+	const scale = Math.max(decimalParts(unitCost).scale, decimalParts(unitDiscount).scale);
+	const amount = (unit - deduction) * BigInt(quantity);
+	return fromCents(scale <= 2 ? amount * TEN ** BigInt(2 - scale) : roundedDivision(amount, TEN ** BigInt(scale - 2)));
+}
+
 export function validPaymentPercentages(percentages: number[]) {
 	if (!percentages.length || percentages.some((value) => !Number.isFinite(value) || value <= 0)) return false;
 	const weights = integerWeights([...percentages, 100]);
@@ -131,8 +144,10 @@ export function allocateInstallments(total: number, percentages: number[]): numb
 	return percentages.map((percentage) => byPercentage.get(percentage)!);
 }
 
-export function allocatePurchaseCosts(total: number, unitCosts: DecimalValue[]) {
-	return allocateMoney(total, unitCosts);
+// Rateio = (total líquido do item / total dos produtos) * despesas gerais.
+// A distribuição em centavos garante que a soma feche com as despesas.
+export function allocatePurchaseCosts(total: number, itemTotals: DecimalValue[]) {
+	return allocateMoney(total, itemTotals);
 }
 
 export function isIsoDate(value: string) {

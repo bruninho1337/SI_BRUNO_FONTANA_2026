@@ -157,7 +157,7 @@ export function SearchableSelect({
 	}
 
 	return (
-		<div ref={containerRef} className={cn("space-y-2", className)}>
+		<div ref={containerRef} className={cn("min-w-0 space-y-2", className)}>
 			{required ? (
 				<RequiredLabel htmlFor={`${fieldId}-trigger`} className="text-sm text-neutral-800">
 					{label}:
@@ -178,14 +178,14 @@ export function SearchableSelect({
 				aria-expanded={isOpen}
 				onClick={() => setIsOpen(true)}
 				className={cn(
-					"flex h-11 w-full items-center justify-between rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600 disabled:opacity-100",
+					"flex h-11 w-full items-center justify-between gap-2 rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600 disabled:opacity-100",
 					error ? "border-red-500 focus-visible:ring-red-500" : "border-neutral-300"
 				)}
 			>
-				<span className={selectedOption ? "text-neutral-900" : "text-neutral-500"}>
+				<span title={selectedOption?.label ?? selectPlaceholder} className={cn("min-w-0 truncate text-left", selectedOption ? "text-neutral-900" : "text-neutral-500")}>
 					{selectedOption?.label ?? selectPlaceholder}
 				</span>
-				<span className="text-neutral-500">
+				<span className="shrink-0 text-neutral-500">
 					<ChevronDown className="h-4 w-4" aria-hidden="true" />
 				</span>
 			</button>

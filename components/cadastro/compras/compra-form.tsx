@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
 
-import { addDays, allocateInstallments, allocatePurchaseCosts, isIsoDate, purchaseDiscountExceedsTotal, purchaseItemTotal, purchaseToday, roundMoney, sumMoney, validPaymentPercentages, type PaymentTerm } from "@/lib/compras-calculos";
+import { addDays, allocateInstallments, allocatePurchaseCosts, isIsoDate, purchaseDiscountExceedsTotal, purchaseItemTotal, purchaseItemTotalWithUnitDiscount, purchaseUnitDiscountTotal, purchaseToday, roundMoney, sumMoney, validPaymentPercentages, type PaymentTerm } from "@/lib/compras-calculos";
 
 import { canTypePurchaseMoney, MAX_PURCHASE_INTEGER, PURCHASE_MONEY_PATTERN, validPurchaseDigits, validPurchaseInteger, validPurchaseMoney, validPurchasePreciseCost } from "@/lib/compras-validacao";
 
@@ -75,9 +75,10 @@ function itemUnitCost(item: PurchaseItem) {
 	return item.valor_unitario_preciso ?? parseDecimal(item.valor_unitario);
 }
 
-function itemTotal(item: PurchaseItem) {
+function itemTotal(item: PurchaseItem, readOnly = false) {
 	const quantity = Number(item.quantidade);
-	return Math.max(0, purchaseItemTotal(Number.isSafeInteger(quantity) && quantity > 0 ? quantity : 0, itemUnitCost(item), parseDecimal(item.valor_desconto)));
+	const calculate = readOnly ? purchaseItemTotal : purchaseItemTotalWithUnitDiscount;
+	return Math.max(0, calculate(Number.isSafeInteger(quantity) && quantity > 0 ? quantity : 0, itemUnitCost(item), parseDecimal(item.valor_desconto)));
 }
 
 function currency(value: number) {
@@ -166,7 +167,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 							...item, id: item.id || `restored-${index}`,
 							quantidade: validPurchaseInteger(item.quantidade) ? item.quantidade : "",
 							valor_unitario: validPurchaseMoney(item.valor_unitario) ? item.valor_unitario : "",
-							valor_desconto: validPurchaseMoney(item.valor_desconto) ? item.valor_desconto : "",
+							valor_desconto: detail.desconto_tipo === "UNITARIO" && validPurchaseMoney(item.valor_desconto) ? item.valor_desconto : "",
 							valor_unitario_preciso: validPurchasePreciseCost(item.valor_unitario_preciso) ? item.valor_unitario_preciso : undefined,
 						})));
 					}
@@ -190,10 +191,10 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	}
 
 	const totals = useMemo(() => {
-		const produtosTotal = sumMoney(items.map(itemTotal));
+		const produtosTotal = sumMoney(items.map((item) => itemTotal(item, readOnly)));
 		const total = initialPurchase?.valorTotal ?? sumMoney([produtosTotal, parseDecimal(valorFrete), parseDecimal(valorSeguro), parseDecimal(outrasDespesas)]);
 		return { produtos: produtosTotal, total: Math.max(0, roundMoney(total)) };
-	}, [items, outrasDespesas, valorFrete, valorSeguro, initialPurchase?.valorTotal]);
+	}, [items, outrasDespesas, valorFrete, valorSeguro, initialPurchase?.valorTotal, readOnly]);
 
 	function updateItem(id: string, field: keyof Omit<PurchaseItem, "id">, value: string) {
 		setItems((current) => current.map((item) => {
@@ -241,8 +242,8 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			error = "Informe quantidades inteiras de 1 a 2147483647.";
 		} else if (items.some((item) => !validMoney(item.valor_unitario) || !validMoney(item.valor_desconto))) {
 			error = "Informe custos e descontos válidos, com até duas casas decimais.";
-		} else if (items.some((item) => purchaseDiscountExceedsTotal(Number(item.quantidade), itemUnitCost(item), parseDecimal(item.valor_desconto)))) {
-			error = "O desconto de um item não pode superar seu valor bruto.";
+		} else if (items.some((item) => purchaseDiscountExceedsTotal(1, itemUnitCost(item), parseDecimal(item.valor_desconto)))) {
+			error = "O desconto por unidade não pode superar o custo unitário.";
 		} else if ([valorFrete, valorSeguro, outrasDespesas].some((value) => !validMoney(value))) {
 			error = "Informe frete, seguro e despesas válidos, com até duas casas decimais.";
 		} else if (totals.produtos <= 0 || totals.total <= 0 || !Number.isFinite(totals.total) || totals.total >= 1e12) {
@@ -265,9 +266,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 		...term, dataVencimento: dueDates[`${condicaoId}:${dataEmissao}:${term.num_parcela}`] ?? addDays(dataEmissao, term.dias_vencimento),
 		valor: installmentValues?.[index] ?? 0, status: "PREVISTA",
 	}));
-	const unitCosts = items.map(itemUnitCost);
-	const totalUnitCosts = unitCosts.reduce<number>((sum, value) => sum + Number(value), 0);
-	const allocations = allocatePurchaseCosts(sumMoney([parseDecimal(valorFrete), parseDecimal(valorSeguro), parseDecimal(outrasDespesas)]), unitCosts);
+	const allocations = allocatePurchaseCosts(sumMoney([parseDecimal(valorFrete), parseDecimal(valorSeguro), parseDecimal(outrasDespesas)]), items.map((item) => itemTotal(item, readOnly)));
 
 	const moneyFields = [
 		{ name: "valor_frete", label: "Frete", value: valorFrete, setter: setValorFrete },
@@ -290,6 +289,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			if (event.target.id === "data_chegada") validateDates();
 			if (event.target.id === "outras_despesas") validateProducts();
 		}}>
+			{!readOnly && <input type="hidden" name="desconto_tipo" value="UNITARIO" />}
 			{readOnly ? null : <FormStatePersistence formKey="compras" onRestore={restoreDraft} />}
 			{readOnly ? null : <><input type="hidden" name="vencimentos_json" value={JSON.stringify(installments.map((p) => p.dataVencimento))} /><input type="hidden" name="vencimentos_rascunho" value={JSON.stringify(dueDates)} /></>}
 			{readOnly ? null : <input type="hidden" name="itens_json" value={JSON.stringify(items)} readOnly />}
@@ -392,14 +392,16 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 				<div className="space-y-3">
 					{items.map((item, index) => {
-						const subtotal = itemTotal(item);
+						const subtotal = itemTotal(item, readOnly);
 						const allocation = readOnly ? item.valorRateio : allocations[index];
-						const quantity = Number(item.quantidade) || 1;
-						const unitAllocation = (allocation ?? 0) / quantity;
+						const storedDiscount = parseDecimal(item.valor_desconto);
+						const unitDiscount = readOnly ? storedDiscount / Number(item.quantidade) : 0;
+						const approximateDiscount = readOnly && purchaseUnitDiscountTotal(Number(item.quantidade), roundMoney(unitDiscount)) !== storedDiscount;
+						const discountDisplay = readOnly ? decimalText(unitDiscount) : item.valor_desconto;
 
 						return (
 							<div key={item.id} className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-								<div className="grid gap-4 md:grid-cols-12">
+								<div className="grid items-end gap-4 md:grid-cols-12">
 									<div className={`${fieldClass} md:col-span-1`}>
 										<Label htmlFor={`item-numero-${item.id}`} className="text-sm font-medium text-neutral-800">Item:</Label>
 										<Input id={`item-numero-${item.id}`} value={index + 1} readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
@@ -421,7 +423,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 										disabled={productsDisabled}
 										value={item.codproduto}
 										onValueChange={(value) => updateItem(item.id, "codproduto", value)}
-										className="md:col-span-5"
+										className="min-w-0 md:col-span-5"
 										createHref={productsDisabled ? undefined : "/cadastro/produtos-servicos/produtos?mode=create"}
 										createLabel="Novo produto"
 									/>
@@ -434,12 +436,16 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 										<Input id={`unitario-${item.id}`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title="Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)." required={!readOnly} disabled={productsDisabled} value={item.valor_unitario} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) updateItem(item.id, "valor_unitario", event.target.value); }} className={inputClass} />
 									</div>
 									<div className={`${fieldClass} md:col-span-2`}>
-										<Label htmlFor={`desconto-${item.id}`} className="text-sm text-neutral-800">Desconto:</Label>
-										<Input id={`desconto-${item.id}`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title="Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)." disabled={productsDisabled} value={item.valor_desconto} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) updateItem(item.id, "valor_desconto", event.target.value); }} className={inputClass} />
+										<Label htmlFor={`desconto-${item.id}`} className="text-sm text-neutral-800">Desconto unitário (R$):</Label>
+										<Input id={`desconto-${item.id}`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title={readOnly ? `Desconto total registrado no item: ${currency(storedDiscount)}.${approximateDiscount ? " Valor unitário aproximado." : ""}` : "Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)."} disabled={productsDisabled} value={discountDisplay} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) updateItem(item.id, "valor_desconto", event.target.value); }} className={inputClass} />
 									</div>
+
 								</div>
-								{allocation !== undefined && <p className="mt-3 text-sm text-neutral-600">{!readOnly && <>Participação pelo custo unitário: {totalUnitCosts > 0 ? (Number(unitCosts[index]) / totalUnitCosts * 100).toFixed(2).replace(".", ",") : "0,00"}% · </>}Rateio por unidade: {currency(unitAllocation)} · Custo unitário com rateio: {currency(sumMoney([subtotal, allocation]) / quantity)}</p>}
 								<div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-end">
+									<div className={`${fieldClass} w-full sm:w-48`}>
+										<Label htmlFor={`rateio-${item.id}`} className="text-sm text-neutral-800">Rateio (R$):</Label>
+										<Input id={`rateio-${item.id}`} value={currency(allocation ?? 0)} readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
+									</div>
 									<div className={`${fieldClass} w-full sm:w-48`}>
 										<Label className="text-sm text-neutral-800">Total do Item:</Label>
 										<div className="flex h-11 items-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-semibold text-neutral-900">{currency(subtotal)}</div>

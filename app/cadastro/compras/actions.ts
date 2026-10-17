@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { allocateInstallments, allocatePurchaseCosts, addDays, isIsoDate, purchaseDiscountExceedsTotal, purchaseItemTotal, purchaseToday, roundMoney, sumMoney, validPaymentPercentages, type PaymentTerm } from "@/lib/compras-calculos";
+import { allocateInstallments, allocatePurchaseCosts, addDays, isIsoDate, purchaseDiscountExceedsTotal, purchaseItemTotal, purchaseUnitDiscountTotal, purchaseToday, roundMoney, sumMoney, validPaymentPercentages, type PaymentTerm } from "@/lib/compras-calculos";
 import { db } from "@/lib/database/db";
 
 import { validPurchaseDigits, validPurchaseInteger, validPurchaseMoney, validPurchasePreciseCost } from "@/lib/compras-validacao";
@@ -81,6 +81,9 @@ export async function validateCompraKeyAction(key: { codfornecedor: string; mode
 }
 
 export async function createCompraAction(formData: FormData) {
+	if (getText(formData, "desconto_tipo") !== "UNITARIO") {
+		fail(formData, "O desconto agora e informado por unidade. Recarregue o formulario e confira os descontos antes de salvar.");
+	}
 	if (["valor_frete", "valor_seguro", "outras_despesas"].some((name) => !validPurchaseMoney(formData.get(name)))) {
 		fail(formData, "Informe frete, seguro e despesas validos, com ate duas casas decimais.");
 	}
@@ -183,8 +186,15 @@ export async function createCompraAction(formData: FormData) {
 	if (items.some((item, index) => roundMoney(item.valorUnitario) !== roundMoney(parseDecimal(submittedItems[index].valor_unitario)))) {
 		fail(formData, "O custo unitario informado diverge do valor exibido. Selecione o produto novamente.");
 	}
-	if (items.some((item) => !Number.isFinite(item.valorDesconto) || item.valorDesconto < 0 || purchaseDiscountExceedsTotal(item.quantidade, item.valorUnitario, item.valorDesconto))) {
-		fail(formData, "O desconto de um item nao pode superar seu valor bruto.");
+	if (items.some((item) => !Number.isFinite(item.valorDesconto) || item.valorDesconto < 0 || purchaseDiscountExceedsTotal(1, item.valorUnitario, item.valorDesconto))) {
+		fail(formData, "O desconto por unidade nao pode superar o custo unitario.");
+	}
+
+	for (const item of items) {
+		item.valorDesconto = purchaseUnitDiscountTotal(item.quantidade, item.valorDesconto);
+		if (!Number.isFinite(item.valorDesconto) || item.valorDesconto >= 1e12) {
+			fail(formData, "O desconto total do item excede o limite permitido.");
+		}
 	}
 
 	const valorProdutos = sumMoney(items.map((item) => purchaseItemTotal(item.quantidade, item.valorUnitario, item.valorDesconto)));
@@ -235,7 +245,7 @@ export async function createCompraAction(formData: FormData) {
 		const installmentValues = allocateInstallments(valorTotal, terms.map((term) => Number(term.percentual)));
 		if (installmentValues === null) throw new Error("Não é possível fechar o total em centavos mantendo valores iguais para percentuais iguais. Revise o total ou os percentuais da condição de pagamento.");
 		if (installmentValues.some((value) => value <= 0)) throw new Error("O total da nota é insuficiente para gerar todas as parcelas.");
-		const allocations = allocatePurchaseCosts(sumMoney([valorFrete, valorSeguro, outrasDespesas]), items.map((item) => item.valorUnitario));
+		const allocations = allocatePurchaseCosts(sumMoney([valorFrete, valorSeguro, outrasDespesas]), items.map((item) => purchaseItemTotal(item.quantidade, item.valorUnitario, item.valorDesconto)));
 
 		const produtos = await client.query<{ codproduto: number }>(
 			"select codproduto from public.produtos where codproduto = any($1::int[]) and ativo = 'S' order by codproduto for update",

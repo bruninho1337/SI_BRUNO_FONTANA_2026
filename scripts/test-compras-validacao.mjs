@@ -43,6 +43,7 @@ const actions = loadTs('app/cadastro/compras/actions.ts', {
 });
 const item = { codproduto: '1', quantidade: '2', valor_unitario: '100,00', valor_desconto: '0,00' };
 const data = {
+			desconto_tipo: 'UNITARIO',
 	codfornecedor: '1', codcondicao_pagamento: '1', modelo: '55', serie: '001', numero_nota: '000012345',
 	data_emissao: calc.purchaseToday(), data_chegada: calc.purchaseToday(),
 	valor_frete: '0,00', valor_seguro: '0,00', outras_despesas: '0,00',
@@ -60,6 +61,9 @@ async function invoke(overrides = {}) {
 	}
 }
 assert.equal(await invoke(), 'valid');
+assert.equal(await invoke({ desconto_tipo: '' }), 'invalid', 'Formulario antigo deve pedir revisao do desconto');
+assert.equal(await invoke({ itens_json: JSON.stringify([{ ...item, valor_desconto: '100,01' }]) }), 'invalid', 'Desconto unitario acima do custo deve ser rejeitado mesmo abaixo do total bruto');
+assert.equal(await invoke({ itens_json: JSON.stringify([{ ...item, valor_desconto: '2,00' }]) }), 'valid');
 for (const field of ['modelo', 'serie', 'numero_nota']) {
 	for (const value of ['-1', 'A', '1!', '1e2']) assert.equal(await invoke({ [field]: value }), 'invalid', `${field}: ${value}`);
 }
