@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, X } from "lucide-react";
+import { confirmDiscardChanges } from "@/lib/forms/unsaved-changes";
 
 type CadastroFormDialogProps = {
 	href: string;
@@ -30,6 +31,8 @@ export function CadastroFormDialog({ href, title, onClose, onSaved }: CadastroFo
 	const [loaded, setLoaded] = useState<Set<number>>(() => new Set());
 	const active = screens[screens.length - 1];
 	const goBack = useCallback((saved = false) => {
+		const doc = frames.current.get(active.id)?.contentDocument;
+		if (!saved && doc && !confirmDiscardChanges([doc])) return;
 		if (screens.length === 1) {
 			if (saved) onSaved();
 			else onClose();
@@ -44,6 +47,10 @@ export function CadastroFormDialog({ href, title, onClose, onSaved }: CadastroFo
 		});
 		if (saved) frames.current.get(previous.id)?.contentWindow?.postMessage({ type: "cadastro:refresh" }, window.location.origin);
 	}, [screens, active.id, onClose, onSaved]);
+	function closeAll() {
+		const documents = Array.from(frames.current.values()).flatMap((frame) => frame.contentDocument ? [frame.contentDocument] : []);
+		if (confirmDiscardChanges(documents)) onClose();
+	}
 
 	useEffect(() => {
 		const previousFocus = document.activeElement as HTMLElement | null;
@@ -94,7 +101,7 @@ export function CadastroFormDialog({ href, title, onClose, onSaved }: CadastroFo
 						</button>}
 						<h2 id={titleId} className="truncate text-lg font-semibold text-neutral-900">{active.title}</h2>
 					</div>
-					<button ref={closeRef} type="button" onClick={onClose} aria-label="Fechar cadastro"
+					<button ref={closeRef} type="button" onClick={closeAll} aria-label="Fechar cadastro"
 						className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-300 hover:bg-neutral-100">
 						<X className="h-4 w-4" aria-hidden="true" />
 					</button>

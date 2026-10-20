@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 
 import { NavigationLoading } from "@/components/layout/navigation-loading";
 import { EmbeddedCadastroBridge } from "@/components/forms/embedded-cadastro-bridge";
+import { UnsavedNavigationGuard } from "@/components/forms/unsaved-changes-guard";
 
 import "./globals.css";
 
@@ -45,6 +46,7 @@ export default function RootLayout({
 					enableSystem={false}
 					disableTransitionOnChange
 				>
+					<UnsavedNavigationGuard />
 					<NavigationLoading />
 					<Suspense fallback={null}><EmbeddedCadastroBridge /></Suspense>
 					{children}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { UnsavedFormGuard } from "@/components/forms/unsaved-changes-guard";
 
 type FormStatePersistenceProps = {
 	formKey: string;
@@ -176,7 +177,8 @@ export function FormStatePersistence({ formKey, onRestore }: FormStatePersistenc
 
 		window.dispatchEvent(new CustomEvent("form-draft-restored", { detail: draft }));
 		onRestoreRef.current?.(draft);
+		form.dispatchEvent(new Event("forms:draft-restored"));
 	}, [hasError, storageKey]);
 
-	return <input ref={markerRef} type="hidden" name="_form_error_url" value={cleanUrl} readOnly />;
+	return <><UnsavedFormGuard identity={cleanUrl} /><input ref={markerRef} type="hidden" name="_form_error_url" value={cleanUrl} readOnly /></>;
 }
