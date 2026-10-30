@@ -1,3 +1,4 @@
+import { Textarea } from "@/components/ui/textarea";
 import {
 	createFuncaoFuncionarioAction,
 	updateFuncaoFuncionarioAction,
@@ -96,7 +97,7 @@ export async function FuncaoFuncionarioFormSection({
 					<Label htmlFor="descricao" className="text-sm text-neutral-800">
 						Descrição:
 					</Label>
-					<textarea
+					<Textarea
 						id="descricao"
 						name="descricao"
 						placeholder="Descreva responsabilidades, comissoes ou observacoes da funcao"

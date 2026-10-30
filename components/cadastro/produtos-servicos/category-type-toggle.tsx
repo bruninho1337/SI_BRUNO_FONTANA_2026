@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { RequiredLabel } from "@/components/ui/required-label";
 import { cn } from "@/lib/shared/utils";
 
-type CategoriaTipo = "PRODUTO" | "SERVICO" | "AMBOS";
+type CategoriaTipo = "PRODUTO" | "SERVICO";
 
 type CategoryTypeToggleProps = {
 	name: string;
@@ -16,12 +16,11 @@ type CategoryTypeToggleProps = {
 const options: Array<{ value: CategoriaTipo; label: string }> = [
 	{ value: "PRODUTO", label: "Produto" },
 	{ value: "SERVICO", label: "Serviço" },
-	{ value: "AMBOS", label: "Ambos" },
 ];
 
 export function CategoryTypeToggle({
 	name,
-	defaultValue = "AMBOS",
+	defaultValue = "PRODUTO",
 	className,
 }: CategoryTypeToggleProps) {
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -29,13 +28,16 @@ export function CategoryTypeToggle({
 
 	useEffect(() => {
 		function handleDraftRestored() {
-			const nextValue = inputRef.current?.value;
+			const input = inputRef.current;
 
-			if (nextValue === "PRODUTO" || nextValue === "SERVICO" || nextValue === "AMBOS") {
+			if (input) {
+				const nextValue = input.value === "SERVICO" ? "SERVICO" : "PRODUTO";
+				input.value = nextValue;
 				setValue(nextValue);
 			}
 		}
 
+		handleDraftRestored();
 		window.addEventListener("form-draft-restored", handleDraftRestored);
 
 		return () => {

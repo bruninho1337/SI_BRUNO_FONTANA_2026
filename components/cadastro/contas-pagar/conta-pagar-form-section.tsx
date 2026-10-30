@@ -1,3 +1,4 @@
+import { Textarea } from "@/components/ui/textarea";
 import {
 	createContaPagarAction,
 	updateContaPagarAction,
@@ -277,7 +278,7 @@ export async function ContaPagarFormSection({
 					<Label htmlFor="observacoes" className="text-sm text-neutral-800">
 						Observações:
 					</Label>
-					<textarea
+					<Textarea
 						id="observacoes"
 						name="observacoes"
 						placeholder="Detalhes da conta, negociação ou baixa"

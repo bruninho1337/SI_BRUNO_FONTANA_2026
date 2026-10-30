@@ -1,5 +1,6 @@
 "use client";
 
+import { Textarea } from "@/components/ui/textarea";
 import { useMemo, useState } from "react";
 import { FileSearch, FileText, Package, Receipt, Truck } from "lucide-react";
 
@@ -439,7 +440,7 @@ export default function NFeWorkspace() {
 
                 <div className="space-y-2">
                   <Label>Informacoes complementares</Label>
-                  <textarea
+                  <Textarea
                     className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-900"
                     placeholder="Observacoes fiscais, dados adicionais da mercadoria ou texto de auditoria."
                   />

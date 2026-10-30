@@ -281,14 +281,14 @@ export async function deleteCategoriaAction(formData: FormData) {
 async function saveCategoria(formData: FormData, codcategoria?: number) {
 	const categoria = getText(formData, "categoria");
 	const descricao = getText(formData, "descricao");
-	const tipo = getText(formData, "tipo").toUpperCase() || "AMBOS";
+	const tipo = getText(formData, "tipo").toUpperCase();
 	const ativo = getText(formData, "ativo").toUpperCase() || "S";
 
 	if (!isLengthBetween(categoria, 2, 50)) {
 		redirect(buildRedirect(getErrorPath(formData, CATEGORIAS_PATH), "error", "Categoria deve ter entre 2 e 50 caracteres."));
 	}
 
-	if (!["PRODUTO", "SERVICO", "AMBOS"].includes(tipo)) {
+	if (!["PRODUTO", "SERVICO"].includes(tipo)) {
 		redirect(buildRedirect(getErrorPath(formData, CATEGORIAS_PATH), "error", "Selecione um tipo valido para a categoria."));
 	}
 

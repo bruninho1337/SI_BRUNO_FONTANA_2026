@@ -1,5 +1,6 @@
 "use client";
 
+import { Textarea } from "@/components/ui/textarea";
 import { useRef, useState } from "react";
 import { Calendar } from "lucide-react";
 
@@ -511,7 +512,7 @@ export function ClienteFormFields({
 					<Label htmlFor="observacoes" className="text-sm text-neutral-800">
 						Observações:
 					</Label>
-					<textarea
+					<Textarea
 						id="observacoes"
 						name="observacoes"
 						maxLength={110}

@@ -1,5 +1,6 @@
 "use client";
 
+import { Textarea } from "@/components/ui/textarea";
 import { useRef, useState } from "react";
 
 import { ActiveToggle } from "@/components/forms/active-toggle";
@@ -556,7 +557,7 @@ export function FuncionarioFormFields({
 				<Label htmlFor="observacoes" className="text-sm text-neutral-800">
 					Observacoes:
 				</Label>
-				<textarea
+				<Textarea
 					id="observacoes"
 					name="observacoes"
 					maxLength={110}

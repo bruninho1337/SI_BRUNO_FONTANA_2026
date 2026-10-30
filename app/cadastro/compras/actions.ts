@@ -151,13 +151,13 @@ export async function createCompraAction(formData: FormData) {
 	}
 
 	if (submittedItems.some((item) => !validPurchaseMoney(item.valor_unitario) || !validPurchaseMoney(item.valor_desconto))) {
-		fail(formData, "Informe custos e descontos validos, com ate duas casas decimais.");
+		fail(formData, "Informe valores unitarios e descontos validos, com ate duas casas decimais.");
 	}
 	if (submittedItems.some((item) => !validPurchaseInteger(item.codproduto) || !validPurchaseInteger(item.quantidade))) {
 		fail(formData, "Produto e quantidade devem ser numeros inteiros positivos, de ate 2147483647.");
 	}
 	if (submittedItems.some((item) => item.valor_unitario_preciso !== undefined && !validPurchasePreciseCost(item.valor_unitario_preciso))) {
-		fail(formData, "O custo unitario preciso esta invalido. Selecione o produto novamente.");
+		fail(formData, "O valor unitario preciso esta invalido. Selecione o produto novamente.");
 	}
 	const items = submittedItems.map((item) => ({
 		codproduto: Number(item.codproduto),
@@ -180,14 +180,14 @@ export async function createCompraAction(formData: FormData) {
 	}
 
 	if (items.some((item) => !Number.isFinite(Number(item.valorUnitario)) || Number(item.valorUnitario) < 0 || Number(item.valorUnitario) >= 1e12 || !/^\d+(?:\.\d{1,32})?$/.test(String(item.valorUnitario)))) {
-		fail(formData, "O custo unitario dos itens nao pode ser negativo.");
+		fail(formData, "O valor unitario dos itens nao pode ser negativo.");
 	}
 
 	if (items.some((item, index) => roundMoney(item.valorUnitario) !== roundMoney(parseDecimal(submittedItems[index].valor_unitario)))) {
-		fail(formData, "O custo unitario informado diverge do valor exibido. Selecione o produto novamente.");
+		fail(formData, "O valor unitario informado diverge do valor exibido. Selecione o produto novamente.");
 	}
 	if (items.some((item) => !Number.isFinite(item.valorDesconto) || item.valorDesconto < 0 || purchaseDiscountExceedsTotal(1, item.valorUnitario, item.valorDesconto))) {
-		fail(formData, "O desconto por unidade nao pode superar o custo unitario.");
+		fail(formData, "O desconto por unidade nao pode superar o valor unitario.");
 	}
 
 	for (const item of items) {

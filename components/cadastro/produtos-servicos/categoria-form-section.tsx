@@ -1,3 +1,4 @@
+import { Textarea } from "@/components/ui/textarea";
 import { createCategoriaAction, updateCategoriaAction } from "@/app/cadastro/produtos-servicos/actions";
 import { ActiveToggle } from "@/components/forms/active-toggle";
 import { AuditDates } from "@/components/cadastro/audit-dates";
@@ -28,7 +29,7 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 					{categoriaEditando ? "Editar Categoria" : "Nova Categoria"}
 				</h2>
 				<p className="mt-1 text-sm text-neutral-500">
-					Cadastre categorias para organizar produtos, servicos ou ambos.
+					Cadastre categorias para organizar produtos ou serviços.
 				</p>
 			</div>
 
@@ -75,7 +76,7 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 					defaultValue={
 						categoriaEditando?.tipo === "PRODUTO" || categoriaEditando?.tipo === "SERVICO"
 							? categoriaEditando.tipo
-							: "AMBOS"
+							: "PRODUTO"
 					}
 					className="md:col-span-3"
 				/>
@@ -91,7 +92,7 @@ export async function CategoriaFormSection({ searchParams }: CategoriaFormSectio
 					<Label htmlFor="descricao" className="text-sm text-neutral-800">
 						Descrição:
 					</Label>
-					<textarea
+					<Textarea
 						id="descricao"
 						name="descricao"
 						placeholder="Descreva rapidamente a categoria"

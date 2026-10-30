@@ -1,5 +1,6 @@
 "use client";
 
+import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useId, useRef, useState } from "react";
 import { Ban } from "lucide-react";
 
@@ -74,7 +75,7 @@ export function CancelCompraForm({ modelo, serie, numeroNota, codfornecedor, dis
 
 						<div className="mt-5 space-y-2">
 							<label htmlFor={titleId + "-motivo"} className="block text-sm font-medium">Motivo do cancelamento *</label>
-							<textarea autoFocus id={titleId + "-motivo"} form={titleId + "-form"} name="motivo_cancelamento" required maxLength={500} rows={4} value={motivo} onChange={(event) => setMotivo(event.target.value)} className="w-full rounded-xl border border-neutral-300 p-3 text-sm" />
+							<Textarea autoFocus id={titleId + "-motivo"} form={titleId + "-form"} name="motivo_cancelamento" required maxLength={500} rows={4} value={motivo} onChange={(event) => setMotivo(event.target.value)} className="w-full rounded-xl border border-neutral-300 p-3 text-sm" />
 						</div>
 						<div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 							<Button type="button" variant="outline" className="h-10 rounded-xl border-neutral-300" disabled={pending} onClick={() => setIsOpen(false)}>

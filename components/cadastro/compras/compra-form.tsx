@@ -1,5 +1,6 @@
 "use client";
 
+import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Plus, Trash2 } from "lucide-react";
@@ -71,14 +72,14 @@ function decimalText(value: number | string) {
 	return roundMoney(value).toFixed(2).replace(".", ",");
 }
 
-function itemUnitCost(item: PurchaseItem) {
+function itemUnitValue(item: PurchaseItem) {
 	return item.valor_unitario_preciso ?? parseDecimal(item.valor_unitario);
 }
 
 function itemTotal(item: PurchaseItem, readOnly = false) {
 	const quantity = Number(item.quantidade);
 	const calculate = readOnly ? purchaseItemTotal : purchaseItemTotalWithUnitDiscount;
-	return Math.max(0, calculate(Number.isSafeInteger(quantity) && quantity > 0 ? quantity : 0, itemUnitCost(item), parseDecimal(item.valor_desconto)));
+	return Math.max(0, calculate(Number.isSafeInteger(quantity) && quantity > 0 ? quantity : 0, itemUnitValue(item), parseDecimal(item.valor_desconto)));
 }
 
 function currency(value: number) {
@@ -241,9 +242,9 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 		} else if (items.some((item) => !validPurchaseInteger(item.quantidade))) {
 			error = "Informe quantidades inteiras de 1 a 2147483647.";
 		} else if (items.some((item) => !validMoney(item.valor_unitario) || !validMoney(item.valor_desconto))) {
-			error = "Informe custos e descontos válidos, com até duas casas decimais.";
-		} else if (items.some((item) => purchaseDiscountExceedsTotal(1, itemUnitCost(item), parseDecimal(item.valor_desconto)))) {
-			error = "O desconto por unidade não pode superar o custo unitário.";
+			error = "Informe valores unitários e descontos válidos, com até duas casas decimais.";
+		} else if (items.some((item) => purchaseDiscountExceedsTotal(1, itemUnitValue(item), parseDecimal(item.valor_desconto)))) {
+			error = "O desconto por unidade não pode superar o valor unitário.";
 		} else if ([valorFrete, valorSeguro, outrasDespesas].some((value) => !validMoney(value))) {
 			error = "Informe frete, seguro e despesas válidos, com até duas casas decimais.";
 		} else if (totals.produtos <= 0 || totals.total <= 0 || !Number.isFinite(totals.total) || totals.total >= 1e12) {
@@ -394,6 +395,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 					{items.map((item, index) => {
 						const subtotal = itemTotal(item, readOnly);
 						const allocation = readOnly ? item.valorRateio : allocations[index];
+						const unitCost = sumMoney([itemUnitValue(item), allocation ?? 0]);
 						const storedDiscount = parseDecimal(item.valor_desconto);
 						const unitDiscount = readOnly ? storedDiscount / Number(item.quantidade) : 0;
 						const approximateDiscount = readOnly && purchaseUnitDiscountTotal(Number(item.quantidade), roundMoney(unitDiscount)) !== storedDiscount;
@@ -432,7 +434,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 										<Input id={`quantidade-${item.id}`} type="text" inputMode="numeric" pattern="[0-9]+" maxLength={10} title="Informe um inteiro de 1 a 2147483647." required={!readOnly} disabled={productsDisabled} value={item.quantidade} onChange={(event) => { const value = event.target.value; if (value === "" || (/^[0-9]+$/.test(value) && Number(value) <= MAX_PURCHASE_INTEGER)) updateItem(item.id, "quantidade", value); }} className={inputClass} />
 									</div>
 									<div className={`${fieldClass} md:col-span-2`}>
-										<RequiredLabel htmlFor={`unitario-${item.id}`} className="text-sm text-neutral-800">Custo unitário:</RequiredLabel>
+										<RequiredLabel htmlFor={`unitario-${item.id}`} className="text-sm text-neutral-800">Valor unitário:</RequiredLabel>
 										<Input id={`unitario-${item.id}`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title="Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)." required={!readOnly} disabled={productsDisabled} value={item.valor_unitario} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) updateItem(item.id, "valor_unitario", event.target.value); }} className={inputClass} />
 									</div>
 									<div className={`${fieldClass} md:col-span-2`}>
@@ -445,6 +447,10 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 									<div className={`${fieldClass} w-full sm:w-48`}>
 										<Label htmlFor={`rateio-${item.id}`} className="text-sm text-neutral-800">Rateio (R$):</Label>
 										<Input id={`rateio-${item.id}`} value={currency(allocation ?? 0)} readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
+									</div>
+									<div className={`${fieldClass} w-full sm:w-48`}>
+										<Label htmlFor={`custo-unitario-${item.id}`} className="text-sm text-neutral-800">Custo unitário:</Label>
+										<Input id={`custo-unitario-${item.id}`} value={currency(unitCost)} title="Valor unitário + rateio do produto." readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
 									</div>
 									<div className={`${fieldClass} w-full sm:w-48`}>
 										<Label className="text-sm text-neutral-800">Total do Item:</Label>
@@ -534,7 +540,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 			<div className="flex flex-col gap-2">
 				<Label htmlFor="observacoes" className="text-sm text-neutral-800">Observações:</Label>
-				<textarea id="observacoes" name="observacoes" maxLength={255} rows={4} disabled={paymentDisabled} defaultValue={initialPurchase?.observacoes} placeholder="Informações adicionais da nota ou do recebimento" className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600" />
+				<Textarea id="observacoes" name="observacoes" maxLength={255} rows={4} disabled={paymentDisabled} defaultValue={initialPurchase?.observacoes} placeholder="Informações adicionais da nota ou do recebimento" className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600" />
 			</div>
 
 			<div className="flex flex-col gap-4 border-t border-neutral-200 pt-5 sm:flex-row sm:items-end sm:justify-between">
