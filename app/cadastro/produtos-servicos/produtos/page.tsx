@@ -17,10 +17,24 @@ type CadastroProdutosPageProps = {
 	}>;
 };
 
-export default async function CadastroProdutosPage({ searchParams }: CadastroProdutosPageProps) {
+export default function CadastroProdutosPage(props: CadastroProdutosPageProps) {
+	return (
+		<Suspense fallback={<CadastroSectionFallback title="Cadastro" />}>
+			<CadastroProdutosRoute {...props} />
+		</Suspense>
+	);
+}
+
+async function CadastroProdutosRoute({ searchParams }: CadastroProdutosPageProps) {
 	const params = await searchParams;
 	if (params?.embedded === "1") {
-		return <main className="p-3 sm:p-5" data-cadastro-embedded><ProdutoFormSection searchParams={Promise.resolve(params)} /></main>;
+		return (
+			<main className="p-3 sm:p-5" data-cadastro-embedded>
+				<Suspense fallback={<CadastroSectionFallback title="Formulário" />}>
+					<ProdutoFormSection searchParams={Promise.resolve(params)} />
+				</Suspense>
+			</main>
+		);
 	}
 	return (
 		<CadastroPageShell

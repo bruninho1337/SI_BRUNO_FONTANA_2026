@@ -17,12 +17,24 @@ type CadastroFormasPagamentoPageProps = {
 	}>;
 };
 
-export default async function CadastroFormasPagamentoPage({
-	searchParams,
-}: CadastroFormasPagamentoPageProps) {
+export default function CadastroFormasPagamentoPage(props: CadastroFormasPagamentoPageProps) {
+	return (
+		<Suspense fallback={<CadastroSectionFallback title="Cadastro" />}>
+			<CadastroFormasPagamentoRoute {...props} />
+		</Suspense>
+	);
+}
+
+async function CadastroFormasPagamentoRoute({ searchParams }: CadastroFormasPagamentoPageProps) {
 	const params = await searchParams;
 	if (params?.embedded === "1") {
-		return <main className="p-3 sm:p-5" data-cadastro-embedded><FormaPagamentoFormSection searchParams={Promise.resolve(params)} /></main>;
+		return (
+			<main className="p-3 sm:p-5" data-cadastro-embedded>
+				<Suspense fallback={<CadastroSectionFallback title="Formulário" />}>
+					<FormaPagamentoFormSection searchParams={Promise.resolve(params)} />
+				</Suspense>
+			</main>
+		);
 	}
 	return (
 		<CadastroPageShell

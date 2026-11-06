@@ -184,7 +184,7 @@ export function SearchableSelect({
 				</span>
 			</button>
 			{error ? (
-				<p id={`${fieldId}-error`} className="text-sm text-red-600">
+				<p id={`${fieldId}-error`} role="alert" className="text-sm text-red-600">
 					{error}
 				</p>
 			) : null}

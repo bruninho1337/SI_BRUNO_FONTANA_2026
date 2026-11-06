@@ -60,7 +60,7 @@ type CompraFormProps = {
 	initialPurchase?: PurchaseInitial;
 };
 
-const inputClass = "h-11 rounded-xl border border-neutral-300 bg-white px-4 text-neutral-900 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600 disabled:opacity-100";
+const inputClass = "h-11 rounded-xl border border-neutral-300 bg-white px-4 text-neutral-900 aria-invalid:border-red-500 aria-invalid:focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600 disabled:opacity-100";
 const fieldClass = "flex flex-col gap-2";
 
 function parseDecimal(value: string) {
@@ -107,6 +107,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	const [dataChegada, setDataChegada] = useState(initialPurchase?.dataChegada ?? purchaseToday());
 	const [step, setStep] = useState<"key" | "dates" | "products" | "payment">("key");
 	const [stepError, setStepError] = useState("");
+	const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
 	const [dueDates, setDueDates] = useState<Record<string, string>>({});
 	const [validatedKey, setValidatedKey] = useState("");
 	const [validating, setValidating] = useState(false);
@@ -117,7 +118,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	useEffect(() => {
 		if (previousStep.current === step) return;
 		previousStep.current = step;
-		const selector = { key: '[name="codfornecedor_display"]', dates: '#data_emissao', products: '[data-purchase-step="products"] button[id$="-trigger"]', payment: '#codcondicao_pagamento-trigger' }[step];
+		const selector = { key: '#codfornecedor_display-trigger', dates: '#data_emissao', products: '[data-purchase-step="products"] button[id$="-trigger"]', payment: '#codcondicao_pagamento-trigger' }[step];
 		formRef.current?.querySelector<HTMLElement>(selector)?.focus();
 	}, [step]);
 	const key = JSON.stringify([fornecedorId, modelo.trim(), serie.trim(), numeroNota.trim()]);
@@ -135,10 +136,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	}
 	async function validateKey() {
 		if (keyDisabled) return;
-		if (!validPurchaseInteger(fornecedorId) || !validPurchaseDigits(modelo, 2) || !validPurchaseDigits(serie, 3) || !validPurchaseDigits(numeroNota, 9)) {
-			setKeyMessage("Selecione o fornecedor e preencha modelo, série e número da nota somente com dígitos.");
-			return;
-		}
+		if (!validateFields(keyFields)) return;
 		const request = ++requestId.current;
 		setValidating(true);
 		setKeyMessage("");
@@ -146,7 +144,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			const result = await validateCompraKeyAction({ codfornecedor: fornecedorId, modelo, serie, numeroNota });
 			if (request !== requestId.current) return;
 			setValidatedKey(result.valid ? key : "");
-			setKeyMessage(result.valid ? "Chave validada e bloqueada. Confira as datas para continuar." : result.message);
+			setKeyMessage(result.valid ? "" : result.message);
 			if (result.valid) setStep("dates");
 		} catch { if (request === requestId.current) setKeyMessage("Falha ao validar a nota. Tente novamente."); }
 		finally { if (request === requestId.current) setValidating(false); }
@@ -185,6 +183,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			setDataEmissao(detail?.data_emissao ?? purchaseToday());
 			setDataChegada(detail?.data_chegada ?? purchaseToday());
 			invalidateKey();
+			setTouchedFields({});
 			try { setDueDates(JSON.parse(detail?.vencimentos_rascunho ?? "{}")); } catch { setDueDates({}); }
 			setValorFrete(detail?.valor_frete ?? "0,00");
 			setValorSeguro(detail?.valor_seguro ?? "0,00");
@@ -219,37 +218,17 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 	function validateDates() {
 		if (datesDisabled) return;
-		if (!isIsoDate(dataEmissao) || dataEmissao > purchaseToday()) {
-			setStepError("A emissão deve ser uma data válida, igual ou anterior a hoje.");
-			return;
-		}
-		if (!isIsoDate(dataChegada) || dataChegada < dataEmissao || dataChegada > purchaseToday()) {
-			setStepError("A chegada deve ser uma data válida, igual ou posterior à emissão e igual ou anterior a hoje.");
-			return;
-		}
+		if (!validateFields(dateFields)) return;
 		setStepError("");
 		setStep("products");
 	}
 
 	function validateProducts() {
 		if (productsDisabled) return;
-		const validMoney = validPurchaseMoney;
-		let error = "";
-		if (!items.length || items.some((item) => !produtos.some((product) => product.id === item.codproduto))) {
-			error = "Selecione um produto válido em todos os itens.";
-		} else if (new Set(items.map((item) => item.codproduto)).size !== items.length) {
-			error = "Cada produto deve aparecer apenas uma vez.";
-		} else if (items.some((item) => !validPurchaseInteger(item.quantidade))) {
-			error = "Informe quantidades inteiras de 1 a 2147483647.";
-		} else if (items.some((item) => !validMoney(item.valor_unitario) || !validMoney(item.valor_desconto))) {
-			error = "Informe valores unitários e descontos válidos, com até duas casas decimais.";
-		} else if (items.some((item) => purchaseDiscountExceedsTotal(1, itemUnitValue(item), parseDecimal(item.valor_desconto)))) {
-			error = "O desconto por unidade não pode superar o valor unitário.";
-		} else if ([valorFrete, valorSeguro, outrasDespesas].some((value) => !validMoney(value))) {
-			error = "Informe frete, seguro e despesas válidos, com até duas casas decimais.";
-		} else if (totals.produtos <= 0 || totals.total <= 0 || !Number.isFinite(totals.total) || totals.total >= 1e12) {
-			error = "O total dos produtos e o total da nota devem ser maiores que zero. Confira os descontos.";
-		}
+		if (!validateFields(productFields)) return;
+		const error = !items.length ? "Adicione ao menos um produto à compra."
+			: totals.produtos <= 0 || totals.total <= 0 || !Number.isFinite(totals.total) || totals.total >= 1e12
+				? "O total dos produtos e o total da nota devem ser maiores que zero e inferiores a um trilhão. Confira os valores e descontos." : "";
 		setStepError(error);
 		if (!error) setStep("payment");
 	}
@@ -275,20 +254,73 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 		{ name: "outras_despesas", label: "Outras despesas", value: outrasDespesas, setter: setOutrasDespesas },
 	];
 
+	const keyFields = ["codfornecedor_display-trigger", "modelo", "serie", "numero_nota"];
+	const dateFields = ["data_emissao", "data_chegada"];
+	const productFields = [
+		...items.flatMap((item) => [`produto-${item.id}-trigger`, `quantidade-${item.id}`, `unitario-${item.id}`, `desconto-${item.id}`]),
+		...moneyFields.map((field) => field.name),
+	];
+	const paymentFields = ["codcondicao_pagamento-trigger", ...installments.map((parcela) => `compra-parcela-${parcela.num_parcela}-vencimento`)];
+	const fieldErrors: Record<string, string> = {};
+	if (!validPurchaseInteger(fornecedorId) || !fornecedores.some((supplier) => supplier.id === fornecedorId)) fieldErrors[keyFields[0]] = "Selecione um fornecedor válido.";
+	if (!validPurchaseDigits(modelo, 2)) fieldErrors.modelo = "Informe o modelo com 1 ou 2 dígitos.";
+	if (!validPurchaseDigits(serie, 3)) fieldErrors.serie = "Informe a série com 1 a 3 dígitos.";
+	if (!validPurchaseDigits(numeroNota, 9)) fieldErrors.numero_nota = "Informe o número da nota com 1 a 9 dígitos.";
+	if (!isIsoDate(dataEmissao) || dataEmissao > purchaseToday()) fieldErrors.data_emissao = "Informe uma emissão válida, igual ou anterior a hoje.";
+	if (!isIsoDate(dataChegada) || dataChegada > purchaseToday()) fieldErrors.data_chegada = "Informe uma chegada válida, igual ou anterior a hoje.";
+	else if (isIsoDate(dataEmissao) && dataChegada < dataEmissao) fieldErrors.data_chegada = "A chegada deve ser igual ou posterior à emissão.";
+	for (const item of items) {
+		if (!produtos.some((product) => product.id === item.codproduto)) fieldErrors[`produto-${item.id}-trigger`] = "Selecione um produto válido.";
+		else if (items.some((other) => other.id !== item.id && other.codproduto === item.codproduto)) fieldErrors[`produto-${item.id}-trigger`] = "Este produto já está em outro item.";
+		if (!validPurchaseInteger(item.quantidade)) fieldErrors[`quantidade-${item.id}`] = "Informe uma quantidade inteira de 1 a 2147483647.";
+		if (!validPurchaseMoney(item.valor_unitario)) fieldErrors[`unitario-${item.id}`] = "Informe um valor não negativo, com até duas casas decimais.";
+		if (!validPurchaseMoney(item.valor_desconto)) fieldErrors[`desconto-${item.id}`] = "Informe um desconto não negativo, com até duas casas decimais.";
+		else if (validPurchaseMoney(item.valor_unitario) && purchaseDiscountExceedsTotal(1, itemUnitValue(item), parseDecimal(item.valor_desconto))) fieldErrors[`desconto-${item.id}`] = "O desconto por unidade não pode superar o valor unitário.";
+	}
+	for (const field of moneyFields) {
+		if (!validPurchaseMoney(field.value)) fieldErrors[field.name] = "Informe um valor não negativo, com até duas casas decimais. Use 0,00 se não houver despesa.";
+	}
+	if (!terms.length) fieldErrors["codcondicao_pagamento-trigger"] = "Selecione uma condição com parcelas cadastradas.";
+	for (const parcela of installments) {
+		if (!isIsoDate(parcela.dataVencimento) || parcela.dataVencimento < dataEmissao) fieldErrors[`compra-parcela-${parcela.num_parcela}-vencimento`] = "Informe um vencimento válido, igual ou posterior à emissão.";
+	}
+
+	function fieldError(id: string) {
+		return !readOnly && touchedFields[id] ? fieldErrors[id] : undefined;
+	}
+
+	function fieldValidationProps(id: string) {
+		return { "aria-invalid": fieldError(id) ? true : undefined, "aria-describedby": fieldError(id) ? `${id}-error` : undefined } as const;
+	}
+
+	function fieldFeedback(id: string) {
+		const error = fieldError(id);
+		return error ? <p id={`${id}-error`} role="alert" className="text-sm text-red-700">{error}</p> : null;
+	}
+
+	function validateFields(ids: string[]) {
+		setTouchedFields((current) => ({ ...current, ...Object.fromEntries(ids.map((id) => [id, true])) }));
+		setStepError("");
+		const firstInvalid = ids.find((id) => fieldErrors[id]);
+		if (firstInvalid) formRef.current?.querySelector<HTMLElement>(`#${CSS.escape(firstInvalid)}`)?.focus();
+		return !firstInvalid;
+	}
+
 	return (
-		<form ref={formRef} action={readOnly ? undefined : createCompraAction} className="space-y-5" onSubmit={(event) => {
+		<form ref={formRef} action={readOnly ? undefined : createCompraAction} noValidate={!readOnly} className="space-y-5" onBlur={(event) => {
+			const field = event.target;
+			if (readOnly || disabled || !(field instanceof HTMLInputElement || field instanceof HTMLButtonElement) || field.disabled || field.getAttribute("aria-expanded") === "true") return;
+			if (![...keyFields, ...dateFields, ...productFields, ...paymentFields].includes(field.id)) return;
+			setTouchedFields((current) => ({ ...current, [field.id]: true }));
+		}} onChangeCapture={() => { if (stepError) setStepError(""); }} onSubmit={(event) => {
 			if (readOnly) return;
-			if (paymentDisabled || installmentError || !installments.length) { event.preventDefault(); return; }
-			if (installments.some((parcela) => !isIsoDate(parcela.dataVencimento) || parcela.dataVencimento < dataEmissao)) {
-				event.preventDefault();
-				setStepError("Informe vencimentos válidos, iguais ou posteriores à emissão.");
-			} else { setStepError(""); }
+			if (paymentDisabled || !validateFields(paymentFields) || installmentError) event.preventDefault();
 		}} onKeyDown={(event) => {
-			if (event.key !== "Enter" || !(event.target instanceof HTMLInputElement) || step === "payment") return;
+			if (event.defaultPrevented || event.nativeEvent.isComposing || event.key !== "Enter" || !(event.target instanceof HTMLInputElement) || !event.currentTarget.contains(event.target) || step === "payment") return;
 			event.preventDefault();
-			if (event.target.id === "numero_nota") void validateKey();
-			if (event.target.id === "data_chegada") validateDates();
-			if (event.target.id === "outras_despesas") validateProducts();
+			if (step === "key") void validateKey();
+			if (step === "dates") validateDates();
+			if (step === "products") validateProducts();
 		}}>
 			{!readOnly && <input type="hidden" name="desconto_tipo" value="UNITARIO" />}
 			{readOnly ? null : <FormStatePersistence formKey="compras" onRestore={restoreDraft} />}
@@ -304,7 +336,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 			}</p>}
 
 			<div data-purchase-step="key" className="grid gap-4 md:grid-cols-12">
-					<SearchableSelect name="codfornecedor_display" label="Fornecedor" searchLabel="Pesquisar fornecedor" searchPlaceholder="Digite o nome do fornecedor" selectPlaceholder="Selecione um fornecedor" options={fornecedores} required={!readOnly} disabled={keyDisabled} value={fornecedorId} onValueChange={selectSupplier} className="md:col-span-6" createHref={keyDisabled ? undefined : "/cadastro/fornecedores?mode=create"} createLabel="Novo fornecedor" />
+					<SearchableSelect name="codfornecedor_display" label="Fornecedor" searchLabel="Pesquisar fornecedor" searchPlaceholder="Digite o nome do fornecedor" selectPlaceholder="Selecione um fornecedor" options={fornecedores} required={!readOnly} disabled={keyDisabled} value={fornecedorId} onValueChange={selectSupplier} error={fieldError("codfornecedor_display-trigger")} className="md:col-span-6" createHref={keyDisabled ? undefined : "/cadastro/fornecedores?mode=create"} createLabel="Novo fornecedor" />
 					{readOnly ? (
 						<div className={`${fieldClass} w-fit md:col-span-2 md:col-start-11 md:justify-self-end`}>
 							<Label className="text-sm text-neutral-800">Status:</Label>
@@ -323,27 +355,25 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 					<div className={`${fieldClass} md:col-span-2 md:col-start-1`}>
 						<RequiredLabel htmlFor="modelo" className="text-sm text-neutral-800">Modelo:</RequiredLabel>
-						<Input id="modelo" name="modelo_display" maxLength={2} inputMode="numeric" pattern="[0-9]+" title="Informe somente dígitos." required={!readOnly} disabled={keyDisabled} value={modelo} onChange={(event) => { if (/^[0-9]{0,2}$/.test(event.target.value)) { setModelo(event.target.value); invalidateKey(); } }} placeholder="55" className={inputClass} />
+						<Input id="modelo" {...fieldValidationProps("modelo")} name="modelo_display" maxLength={2} inputMode="numeric" pattern="[0-9]+" title="Informe somente dígitos." required={!readOnly} disabled={keyDisabled} value={modelo} onChange={(event) => { if (/^[0-9]{0,2}$/.test(event.target.value)) { setModelo(event.target.value); invalidateKey(); } }} placeholder="55" className={inputClass} />
+						{fieldFeedback("modelo")}
 					</div>
 					<div className={`${fieldClass} md:col-span-2`}>
 						<RequiredLabel htmlFor="serie" className="text-sm text-neutral-800">Série:</RequiredLabel>
-						<Input id="serie" name="serie_display" maxLength={3} inputMode="numeric" pattern="[0-9]+" title="Informe somente dígitos." required={!readOnly} disabled={keyDisabled} value={serie} onChange={(event) => { if (/^[0-9]{0,3}$/.test(event.target.value)) { setSerie(event.target.value); invalidateKey(); } }} placeholder="1" className={inputClass} />
+						<Input id="serie" {...fieldValidationProps("serie")} name="serie_display" maxLength={3} inputMode="numeric" pattern="[0-9]+" title="Informe somente dígitos." required={!readOnly} disabled={keyDisabled} value={serie} onChange={(event) => { if (/^[0-9]{0,3}$/.test(event.target.value)) { setSerie(event.target.value); invalidateKey(); } }} placeholder="1" className={inputClass} />
+						{fieldFeedback("serie")}
 					</div>
 					<div className={`${fieldClass} md:col-span-4`}>
 						<RequiredLabel htmlFor="numero_nota" className="text-sm text-neutral-800">Número da nota:</RequiredLabel>
-						<Input id="numero_nota" name="numero_nota_display" maxLength={9} inputMode="numeric" pattern="[0-9]+" title="Informe somente dígitos." required={!readOnly} disabled={keyDisabled} value={numeroNota} onBlur={(event) => {
-							if (event.relatedTarget instanceof Element && event.relatedTarget.closest('[data-purchase-step="key"]')) return;
-							void validateKey();
-						}} onChange={(event) => { if (/^[0-9]{0,9}$/.test(event.target.value)) { setNumeroNota(event.target.value); invalidateKey(); } }} placeholder="Ex: 000012345" className={inputClass} />
+						<Input id="numero_nota" {...fieldValidationProps("numero_nota")} name="numero_nota_display" maxLength={9} inputMode="numeric" pattern="[0-9]+" title="Informe somente dígitos." required={!readOnly} disabled={keyDisabled} value={numeroNota} onChange={(event) => { if (/^[0-9]{0,9}$/.test(event.target.value)) { setNumeroNota(event.target.value); invalidateKey(); } }} placeholder="Ex: 000012345" className={inputClass} />
+						{fieldFeedback("numero_nota")}
 					</div>
 			</div>
 			{!readOnly && step === "key" && <div className="space-y-2">
-				<p role="status" className="text-sm text-neutral-600">{validating ? "Validando a nota..." : keyMessage || "Ao sair do número da nota ou pressionar Enter, a chave será validada automaticamente."}</p>
+				{keyMessage && <p role="alert" className="text-sm text-red-700">{keyMessage}</p>}
+				<Button type="button" onClick={() => void validateKey()} disabled={keyDisabled} aria-busy={validating} className="h-11 w-full rounded-xl sm:w-auto">{validating ? "Validando a nota..." : "Validar e continuar"}</Button>
 			</div>}
-			<fieldset data-purchase-step="dates" disabled={datesDisabled} className="min-w-0 space-y-5" onBlur={(event) => {
-				if (event.currentTarget.contains(event.relatedTarget)) return;
-				if (event.target.closest('[data-date-field="data_chegada"]')) validateDates();
-			}}>
+			<fieldset data-purchase-step="dates" disabled={datesDisabled} className="min-w-0 space-y-5">
 			<div className="grid gap-4 md:grid-cols-12">
 					<DatePickerInput
 						id="data_emissao"
@@ -351,6 +381,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 						label="Emissão"
 						max={purchaseToday()}
 						value={dataEmissao} onChange={setDataEmissao}
+						error={fieldError("data_emissao")}
 						required={!readOnly}
 						disabled={datesDisabled}
 						className={`${fieldClass} md:col-span-3 md:col-start-1`}
@@ -363,6 +394,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 						min={dataEmissao}
 						max={purchaseToday()}
 						value={dataChegada} onChange={setDataChegada}
+						error={fieldError("data_chegada")}
 						required={!readOnly}
 						disabled={datesDisabled}
 						className={`${fieldClass} md:col-span-3`}
@@ -372,14 +404,9 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 			</fieldset>
 			{!readOnly && step === "dates" && <div className="space-y-2">
-				<p className="text-sm text-neutral-600">{keyMessage}</p>
-				<p className="text-sm text-neutral-600">Ao sair da data de chegada ou pressionar Enter, as datas serão validadas automaticamente.</p>
-				{stepError && <p role="alert" className="text-sm text-red-700">{stepError}</p>}
+				<Button type="button" onClick={validateDates} disabled={datesDisabled} className="h-11 w-full rounded-xl sm:w-auto">Validar e continuar</Button>
 			</div>}
-			<fieldset data-purchase-step="products" disabled={productsDisabled} className="min-w-0 space-y-5" onBlur={(event) => {
-				if (event.currentTarget.contains(event.relatedTarget)) return;
-				if (event.target.id === "outras_despesas") validateProducts();
-			}}>
+			<fieldset data-purchase-step="products" disabled={productsDisabled} className="min-w-0 space-y-5">
 
 			<div className="pt-3">
 				<div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -403,7 +430,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 						return (
 							<div key={item.id} className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-								<div className="grid items-end gap-4 md:grid-cols-12">
+								<div className="grid items-start gap-4 md:grid-cols-12 md:[&_label]:block md:[&_label]:min-h-10">
 									<div className={`${fieldClass} md:col-span-1`}>
 										<Label htmlFor={`item-numero-${item.id}`} className="text-sm font-medium text-neutral-800">Item:</Label>
 										<Input id={`item-numero-${item.id}`} value={index + 1} readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
@@ -425,21 +452,25 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 										disabled={productsDisabled}
 										value={item.codproduto}
 										onValueChange={(value) => updateItem(item.id, "codproduto", value)}
+										error={fieldError(`produto-${item.id}-trigger`)}
 										className="min-w-0 md:col-span-5"
 										createHref={productsDisabled ? undefined : "/cadastro/produtos-servicos/produtos?mode=create"}
 										createLabel="Novo produto"
 									/>
 									<div className={`${fieldClass} md:col-span-2`}>
 										<RequiredLabel htmlFor={`quantidade-${item.id}`} className="text-sm text-neutral-800">Quantidade:</RequiredLabel>
-										<Input id={`quantidade-${item.id}`} type="text" inputMode="numeric" pattern="[0-9]+" maxLength={10} title="Informe um inteiro de 1 a 2147483647." required={!readOnly} disabled={productsDisabled} value={item.quantidade} onChange={(event) => { const value = event.target.value; if (value === "" || (/^[0-9]+$/.test(value) && Number(value) <= MAX_PURCHASE_INTEGER)) updateItem(item.id, "quantidade", value); }} className={inputClass} />
+										<Input id={`quantidade-${item.id}`} {...fieldValidationProps(`quantidade-${item.id}`)} type="text" inputMode="numeric" pattern="[0-9]+" maxLength={10} title="Informe um inteiro de 1 a 2147483647." required={!readOnly} disabled={productsDisabled} value={item.quantidade} onChange={(event) => { const value = event.target.value; if (value === "" || (/^[0-9]+$/.test(value) && Number(value) <= MAX_PURCHASE_INTEGER)) updateItem(item.id, "quantidade", value); }} className={inputClass} />
+										{fieldFeedback(`quantidade-${item.id}`)}
 									</div>
 									<div className={`${fieldClass} md:col-span-2`}>
 										<RequiredLabel htmlFor={`unitario-${item.id}`} className="text-sm text-neutral-800">Valor unitário:</RequiredLabel>
-										<Input id={`unitario-${item.id}`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title="Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)." required={!readOnly} disabled={productsDisabled} value={item.valor_unitario} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) updateItem(item.id, "valor_unitario", event.target.value); }} className={inputClass} />
+										<Input id={`unitario-${item.id}`} {...fieldValidationProps(`unitario-${item.id}`)} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title="Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)." required={!readOnly} disabled={productsDisabled} value={item.valor_unitario} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) updateItem(item.id, "valor_unitario", event.target.value); }} className={inputClass} />
+										{fieldFeedback(`unitario-${item.id}`)}
 									</div>
 									<div className={`${fieldClass} md:col-span-2`}>
 										<Label htmlFor={`desconto-${item.id}`} className="text-sm text-neutral-800">Desconto unitário (R$):</Label>
-										<Input id={`desconto-${item.id}`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title={readOnly ? `Desconto total registrado no item: ${currency(storedDiscount)}.${approximateDiscount ? " Valor unitário aproximado." : ""}` : "Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)."} disabled={productsDisabled} value={discountDisplay} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) updateItem(item.id, "valor_desconto", event.target.value); }} className={inputClass} />
+										<Input id={`desconto-${item.id}`} {...fieldValidationProps(`desconto-${item.id}`)} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title={readOnly ? `Desconto total registrado no item: ${currency(storedDiscount)}.${approximateDiscount ? " Valor unitário aproximado." : ""}` : "Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)."} disabled={productsDisabled} value={discountDisplay} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) updateItem(item.id, "valor_desconto", event.target.value); }} className={inputClass} />
+										{fieldFeedback(`desconto-${item.id}`)}
 									</div>
 
 								</div>
@@ -474,20 +505,22 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 				{moneyFields.map((field) => (
 					<div key={field.name} className={`${fieldClass} md:col-span-4`}>
 						<Label htmlFor={field.name} className="text-sm text-neutral-800">{field.label}:</Label>
-						<Input id={field.name} name={`${field.name}_display`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title="Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)." disabled={productsDisabled} value={field.value} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) field.setter(event.target.value); }} className={inputClass} />
+						<Input id={field.name} {...fieldValidationProps(field.name)} name={`${field.name}_display`} inputMode="decimal" maxLength={18} pattern={PURCHASE_MONEY_PATTERN} title="Informe um valor não negativo, com até duas casas decimais (ex.: 1.234,56)." disabled={productsDisabled} value={field.value} onChange={(event) => { if (canTypePurchaseMoney(event.target.value)) field.setter(event.target.value); }} className={inputClass} />
+						{fieldFeedback(field.name)}
 					</div>
 				))}
 			</div>
 
 			</fieldset>
 			{!readOnly && step === "products" && <div className="space-y-2">
-				<p className="text-sm text-neutral-600">Confira os produtos e as despesas. Ao sair de outras despesas ou pressionar Enter, o pagamento será liberado se os dados estiverem válidos.</p>
+				<p className="text-sm text-neutral-600">Confira os produtos e as despesas. Valide esta etapa para continuar ao pagamento.</p>
 				{stepError && <p role="alert" className="text-sm text-red-700">{stepError}</p>}
+				<Button type="button" onClick={validateProducts} disabled={productsDisabled} className="h-11 w-full rounded-xl sm:w-auto">Validar e continuar</Button>
 			</div>}
 			<fieldset disabled={paymentDisabled} className="min-w-0 space-y-5">
 
 			<div className="grid gap-4 md:grid-cols-12">
-				<SearchableSelect id="codcondicao_pagamento" name="codcondicao_pagamento_display" label="Condição de pagamento" searchLabel="Pesquisar condição" searchPlaceholder="Digite a condição de pagamento" selectPlaceholder="Selecione a condição" options={condicoesPagamento} required={!readOnly} disabled={paymentDisabled} value={condicaoId} onValueChange={setCondicaoId} className="md:col-span-5" createHref={paymentDisabled ? undefined : "/cadastro/condicoes-pagamento?mode=create"} createLabel="Nova condição" />
+				<SearchableSelect id="codcondicao_pagamento" name="codcondicao_pagamento_display" label="Condição de pagamento" searchLabel="Pesquisar condição" searchPlaceholder="Digite a condição de pagamento" selectPlaceholder="Selecione a condição" options={condicoesPagamento} required={!readOnly} disabled={paymentDisabled} value={condicaoId} onValueChange={setCondicaoId} error={fieldError("codcondicao_pagamento-trigger")} className="md:col-span-5" createHref={paymentDisabled ? undefined : "/cadastro/condicoes-pagamento?mode=create"} createLabel="Nova condição" />
 				<div className="md:col-span-7 md:text-right">
 					<p className="text-sm text-neutral-500">Valor total da nota</p>
 					<p className="mt-1 text-2xl font-bold text-neutral-900">{currency(totals.total)}</p>
@@ -526,6 +559,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 							min={dataEmissao}
 							disabled={paymentDisabled}
 							value={parcela.dataVencimento}
+							error={fieldError(`${prefix}-vencimento`)}
 							onChange={(value) => setDueDates((current) => ({ ...current, [`${condicaoId}:${dataEmissao}:${parcela.num_parcela}`]: value }))}
 							className="flex min-w-0 flex-col gap-2 md:col-span-5"
 							inputClassName={inputClass}

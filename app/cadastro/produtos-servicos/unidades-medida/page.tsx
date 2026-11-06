@@ -17,12 +17,24 @@ type CadastroUnidadesMedidaPageProps = {
 	}>;
 };
 
-export default async function CadastroUnidadesMedidaPage({
-	searchParams,
-}: CadastroUnidadesMedidaPageProps) {
+export default function CadastroUnidadesMedidaPage(props: CadastroUnidadesMedidaPageProps) {
+	return (
+		<Suspense fallback={<CadastroSectionFallback title="Cadastro" />}>
+			<CadastroUnidadesMedidaRoute {...props} />
+		</Suspense>
+	);
+}
+
+async function CadastroUnidadesMedidaRoute({ searchParams }: CadastroUnidadesMedidaPageProps) {
 	const params = await searchParams;
 	if (params?.embedded === "1") {
-		return <main className="p-3 sm:p-5" data-cadastro-embedded><UnidadeMedidaFormSection searchParams={Promise.resolve(params)} /></main>;
+		return (
+			<main className="p-3 sm:p-5" data-cadastro-embedded>
+				<Suspense fallback={<CadastroSectionFallback title="Formulário" />}>
+					<UnidadeMedidaFormSection searchParams={Promise.resolve(params)} />
+				</Suspense>
+			</main>
+		);
 	}
 	return (
 		<CadastroPageShell

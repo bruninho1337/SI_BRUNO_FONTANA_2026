@@ -17,10 +17,24 @@ type CadastroCategoriasPageProps = {
 	}>;
 };
 
-export default async function CadastroCategoriasPage({ searchParams }: CadastroCategoriasPageProps) {
+export default function CadastroCategoriasPage(props: CadastroCategoriasPageProps) {
+	return (
+		<Suspense fallback={<CadastroSectionFallback title="Cadastro" />}>
+			<CadastroCategoriasRoute {...props} />
+		</Suspense>
+	);
+}
+
+async function CadastroCategoriasRoute({ searchParams }: CadastroCategoriasPageProps) {
 	const params = await searchParams;
 	if (params?.embedded === "1") {
-		return <main className="p-3 sm:p-5" data-cadastro-embedded><CategoriaFormSection searchParams={Promise.resolve(params)} /></main>;
+		return (
+			<main className="p-3 sm:p-5" data-cadastro-embedded>
+				<Suspense fallback={<CadastroSectionFallback title="Formulário" />}>
+					<CategoriaFormSection searchParams={Promise.resolve(params)} />
+				</Suspense>
+			</main>
+		);
 	}
 	return (
 		<CadastroPageShell

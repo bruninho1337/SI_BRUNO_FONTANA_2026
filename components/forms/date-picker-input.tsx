@@ -20,6 +20,7 @@ type DatePickerInputProps = {
 	max?: string;
 	className?: string;
 	inputClassName?: string;
+	error?: string;
 };
 
 export function DatePickerInput({
@@ -35,6 +36,7 @@ export function DatePickerInput({
 	max,
 	className = "flex flex-col gap-2",
 	inputClassName = "h-11 rounded-xl border border-neutral-300 bg-white px-4 text-neutral-900",
+	error,
 }: DatePickerInputProps) {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const LabelComponent = required ? RequiredLabel : Label;
@@ -67,8 +69,10 @@ export function DatePickerInput({
 					max={max}
 					defaultValue={defaultValue}
 					value={value}
+					aria-invalid={error ? true : undefined}
+					aria-describedby={error ? `${id}-error` : undefined}
 					onChange={(event) => onChange?.(event.target.value)}
-					className={`${inputClassName} min-w-0 flex-1`}
+					className={`${inputClassName} min-w-0 flex-1 aria-invalid:border-red-500 aria-invalid:focus-visible:ring-red-500`}
 				/>
 				<button
 					type="button"
@@ -81,6 +85,7 @@ export function DatePickerInput({
 					<Calendar className="h-4 w-4" aria-hidden="true" />
 				</button>
 			</div>
+			{error && <p id={`${id}-error`} role="alert" className="text-sm text-red-700">{error}</p>}
 		</div>
 	);
 }

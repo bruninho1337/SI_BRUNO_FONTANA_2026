@@ -17,10 +17,24 @@ type CadastroCidadesPageProps = {
 	}>;
 };
 
-export default async function CadastroCidadesPage({ searchParams }: CadastroCidadesPageProps) {
+export default function CadastroCidadesPage(props: CadastroCidadesPageProps) {
+	return (
+		<Suspense fallback={<CadastroSectionFallback title="Cadastro" />}>
+			<CadastroCidadesRoute {...props} />
+		</Suspense>
+	);
+}
+
+async function CadastroCidadesRoute({ searchParams }: CadastroCidadesPageProps) {
 	const params = await searchParams;
 	if (params?.embedded === "1") {
-		return <main className="p-3 sm:p-5" data-cadastro-embedded><CidadeFormSection searchParams={Promise.resolve(params)} /></main>;
+		return (
+			<main className="p-3 sm:p-5" data-cadastro-embedded>
+				<Suspense fallback={<CadastroSectionFallback title="Formulário" />}>
+					<CidadeFormSection searchParams={Promise.resolve(params)} />
+				</Suspense>
+			</main>
+		);
 	}
 	return (
 		<CadastroPageShell

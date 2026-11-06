@@ -17,12 +17,24 @@ type CadastroFornecedoresPageProps = {
 	}>;
 };
 
-export default async function CadastroFornecedoresPage({
-	searchParams,
-}: CadastroFornecedoresPageProps) {
+export default function CadastroFornecedoresPage(props: CadastroFornecedoresPageProps) {
+	return (
+		<Suspense fallback={<CadastroSectionFallback title="Cadastro" />}>
+			<CadastroFornecedoresRoute {...props} />
+		</Suspense>
+	);
+}
+
+async function CadastroFornecedoresRoute({ searchParams }: CadastroFornecedoresPageProps) {
 	const params = await searchParams;
 	if (params?.embedded === "1") {
-		return <main className="p-3 sm:p-5" data-cadastro-embedded><FornecedorFormSection searchParams={Promise.resolve(params)} /></main>;
+		return (
+			<main className="p-3 sm:p-5" data-cadastro-embedded>
+				<Suspense fallback={<CadastroSectionFallback title="Formulário" />}>
+					<FornecedorFormSection searchParams={Promise.resolve(params)} />
+				</Suspense>
+			</main>
+		);
 	}
 	return (
 		<CadastroPageShell

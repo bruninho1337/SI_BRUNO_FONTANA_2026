@@ -17,12 +17,24 @@ type CadastroFuncoesFuncionariosPageProps = {
 	}>;
 };
 
-export default async function CadastroFuncoesFuncionariosPage({
-	searchParams,
-}: CadastroFuncoesFuncionariosPageProps) {
+export default function CadastroFuncoesFuncionariosPage(props: CadastroFuncoesFuncionariosPageProps) {
+	return (
+		<Suspense fallback={<CadastroSectionFallback title="Cadastro" />}>
+			<CadastroFuncoesFuncionariosRoute {...props} />
+		</Suspense>
+	);
+}
+
+async function CadastroFuncoesFuncionariosRoute({ searchParams }: CadastroFuncoesFuncionariosPageProps) {
 	const params = await searchParams;
 	if (params?.embedded === "1") {
-		return <main className="p-3 sm:p-5" data-cadastro-embedded><FuncaoFuncionarioFormSection searchParams={Promise.resolve(params)} /></main>;
+		return (
+			<main className="p-3 sm:p-5" data-cadastro-embedded>
+				<Suspense fallback={<CadastroSectionFallback title="Formulário" />}>
+					<FuncaoFuncionarioFormSection searchParams={Promise.resolve(params)} />
+				</Suspense>
+			</main>
+		);
 	}
 	return (
 		<CadastroPageShell

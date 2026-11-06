@@ -17,10 +17,24 @@ type CadastroServicosPageProps = {
 	}>;
 };
 
-export default async function CadastroServicosPage({ searchParams }: CadastroServicosPageProps) {
+export default function CadastroServicosPage(props: CadastroServicosPageProps) {
+	return (
+		<Suspense fallback={<CadastroSectionFallback title="Cadastro" />}>
+			<CadastroServicosRoute {...props} />
+		</Suspense>
+	);
+}
+
+async function CadastroServicosRoute({ searchParams }: CadastroServicosPageProps) {
 	const params = await searchParams;
 	if (params?.embedded === "1") {
-		return <main className="p-3 sm:p-5" data-cadastro-embedded><ServicoFormSection searchParams={Promise.resolve(params)} /></main>;
+		return (
+			<main className="p-3 sm:p-5" data-cadastro-embedded>
+				<Suspense fallback={<CadastroSectionFallback title="Formulário" />}>
+					<ServicoFormSection searchParams={Promise.resolve(params)} />
+				</Suspense>
+			</main>
+		);
 	}
 	return (
 		<CadastroPageShell

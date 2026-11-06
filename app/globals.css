@@ -134,6 +134,12 @@
 }
 
 @layer base {
+  /* Mantém o cursor de ação nos botões habilitados após a migração para o Tailwind 4. */
+  button:not(:disabled):not([aria-disabled='true']),
+  [role='button']:not(:disabled):not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+
   html,
   body {
     background-color: white;

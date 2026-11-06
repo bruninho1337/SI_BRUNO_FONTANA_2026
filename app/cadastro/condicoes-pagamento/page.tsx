@@ -17,12 +17,24 @@ type CadastroCondicoesPagamentoPageProps = {
 	}>;
 };
 
-export default async function CadastroCondicoesPagamentoPage({
-	searchParams,
-}: CadastroCondicoesPagamentoPageProps) {
+export default function CadastroCondicoesPagamentoPage(props: CadastroCondicoesPagamentoPageProps) {
+	return (
+		<Suspense fallback={<CadastroSectionFallback title="Cadastro" />}>
+			<CadastroCondicoesPagamentoRoute {...props} />
+		</Suspense>
+	);
+}
+
+async function CadastroCondicoesPagamentoRoute({ searchParams }: CadastroCondicoesPagamentoPageProps) {
 	const params = await searchParams;
 	if (params?.embedded === "1") {
-		return <main className="p-3 sm:p-5" data-cadastro-embedded><CondicaoPagamentoFormSection searchParams={Promise.resolve(params)} /></main>;
+		return (
+			<main className="p-3 sm:p-5" data-cadastro-embedded>
+				<Suspense fallback={<CadastroSectionFallback title="Formulário" />}>
+					<CondicaoPagamentoFormSection searchParams={Promise.resolve(params)} />
+				</Suspense>
+			</main>
+		);
 	}
 	return (
 		<CadastroPageShell

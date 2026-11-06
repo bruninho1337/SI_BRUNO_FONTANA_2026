@@ -17,12 +17,24 @@ type CadastroContasPagarPageProps = {
 	}>;
 };
 
-export default async function CadastroContasPagarPage({
-	searchParams,
-}: CadastroContasPagarPageProps) {
+export default function CadastroContasPagarPage(props: CadastroContasPagarPageProps) {
+	return (
+		<Suspense fallback={<CadastroSectionFallback title="Cadastro" />}>
+			<CadastroContasPagarRoute {...props} />
+		</Suspense>
+	);
+}
+
+async function CadastroContasPagarRoute({ searchParams }: CadastroContasPagarPageProps) {
 	const params = await searchParams;
 	if (params?.embedded === "1") {
-		return <main className="p-3 sm:p-5" data-cadastro-embedded><ContaPagarFormSection searchParams={Promise.resolve(params)} /></main>;
+		return (
+			<main className="p-3 sm:p-5" data-cadastro-embedded>
+				<Suspense fallback={<CadastroSectionFallback title="Formulário" />}>
+					<ContaPagarFormSection searchParams={Promise.resolve(params)} />
+				</Suspense>
+			</main>
+		);
 	}
 	return (
 		<CadastroPageShell
