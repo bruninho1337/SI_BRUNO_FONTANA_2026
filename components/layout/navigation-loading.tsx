@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 function LoadingOverlay() {
 	return (
 		<div
-			className="fixed inset-0 z-[9999] flex items-center justify-center bg-white"
+			className="fixed inset-0 z-9999 flex items-center justify-center bg-white"
 			role="status"
 			aria-live="polite"
 			aria-label="Carregando"
@@ -23,10 +23,13 @@ function NavigationLoadingInner() {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
+	const routeKey = `${pathname}?${searchParams.toString()}`;
+	const [previousRoute, setPreviousRoute] = useState(routeKey);
 
-	useEffect(() => {
+	if (previousRoute !== routeKey) {
+		setPreviousRoute(routeKey);
 		setIsLoading(false);
-	}, [pathname, searchParams]);
+	}
 
 	useEffect(() => {
 		function handleClick(event: MouseEvent) {

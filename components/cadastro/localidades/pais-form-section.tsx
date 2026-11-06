@@ -30,7 +30,7 @@ export async function PaisFormSection({ searchParams }: PaisFormSectionProps) {
 		: await buscarPaisPorId(editId);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<div className="mb-6">
 				<h2 className="text-xl font-semibold text-neutral-900">
 					{paisEditando ? "Editar País" : "Novo País"}

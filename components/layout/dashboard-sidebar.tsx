@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -91,37 +91,35 @@ const localidadesItems = [
 	},
 ];
 
+function useRouteDisclosure(active: boolean) {
+	const [state, setState] = useState({ active, open: active });
+
+	if (state.active !== active) {
+		setState({ active, open: active });
+	}
+
+	function toggle() {
+		setState((current) => ({ ...current, open: !current.open }));
+	}
+
+	return [state.open, toggle] as const;
+}
+
 export function DashboardSidebar() {
 	const pathname = usePathname();
 	const isFinanceiroRoute = financeiroItems.some((item) => pathname === item.href);
 	const isPessoasRoute = pessoasItems.some((item) => pathname === item.href);
 	const isProdutosServicosRoute = pathname.startsWith("/cadastro/produtos-servicos");
 	const isLocalidadesRoute = pathname.startsWith("/cadastro/localidades");
-	const [financeiroOpen, setFinanceiroOpen] = useState(isFinanceiroRoute);
-	const [pessoasOpen, setPessoasOpen] = useState(isPessoasRoute);
-	const [produtosServicosOpen, setProdutosServicosOpen] = useState(
+	const [financeiroOpen, toggleFinanceiro] = useRouteDisclosure(isFinanceiroRoute);
+	const [pessoasOpen, togglePessoas] = useRouteDisclosure(isPessoasRoute);
+	const [produtosServicosOpen, toggleProdutosServicos] = useRouteDisclosure(
 		isProdutosServicosRoute
 	);
-	const [localidadesOpen, setLocalidadesOpen] = useState(isLocalidadesRoute);
-
-	useEffect(() => {
-		setFinanceiroOpen(isFinanceiroRoute);
-	}, [isFinanceiroRoute]);
-
-	useEffect(() => {
-		setPessoasOpen(isPessoasRoute);
-	}, [isPessoasRoute]);
-
-	useEffect(() => {
-		setProdutosServicosOpen(isProdutosServicosRoute);
-	}, [isProdutosServicosRoute]);
-
-	useEffect(() => {
-		setLocalidadesOpen(isLocalidadesRoute);
-	}, [isLocalidadesRoute]);
+	const [localidadesOpen, toggleLocalidades] = useRouteDisclosure(isLocalidadesRoute);
 
 	return (
-		<aside className="w-full min-w-0 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm lg:w-72 lg:shrink-0 lg:self-start">
+		<aside className="w-full min-w-0 rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs lg:w-72 lg:shrink-0 lg:self-start">
 			<div className="mb-5">
 				<p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
 					Painel
@@ -146,10 +144,10 @@ export function DashboardSidebar() {
 									: "border-neutral-200 bg-neutral-50 text-neutral-800 hover:bg-neutral-100"
 							)}
 						>
-								<p className="break-words text-sm font-semibold">{item.label}</p>
+								<p className="wrap-break-word text-sm font-semibold">{item.label}</p>
 							<p
 								className={cn(
-										"mt-1 break-words text-xs",
+										"mt-1 wrap-break-word text-xs",
 									isActive ? "text-neutral-200" : "text-neutral-500"
 								)}
 							>
@@ -162,7 +160,7 @@ export function DashboardSidebar() {
 				<div className="rounded-2xl border border-neutral-200 bg-neutral-50">
 					<button
 						type="button"
-						onClick={() => setFinanceiroOpen((current) => !current)}
+						onClick={toggleFinanceiro}
 						className={cn(
 								"flex w-full min-w-0 items-center justify-between gap-3 px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
 							isFinanceiroRoute &&
@@ -196,7 +194,7 @@ export function DashboardSidebar() {
 										key={item.href}
 										href={item.href}
 										className={cn(
-												"rounded-xl px-3 py-2 text-sm transition break-words",
+												"rounded-xl px-3 py-2 text-sm transition wrap-break-word",
 											isActive
 												? "bg-neutral-900 text-white"
 												: "text-neutral-700 hover:bg-neutral-100"
@@ -213,7 +211,7 @@ export function DashboardSidebar() {
 				<div className="rounded-2xl border border-neutral-200 bg-neutral-50">
 					<button
 						type="button"
-						onClick={() => setPessoasOpen((current) => !current)}
+						onClick={togglePessoas}
 						className={cn(
 								"flex w-full min-w-0 items-center justify-between gap-3 px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
 							isPessoasRoute &&
@@ -247,7 +245,7 @@ export function DashboardSidebar() {
 										key={item.href}
 										href={item.href}
 										className={cn(
-												"rounded-xl px-3 py-2 text-sm transition break-words",
+												"rounded-xl px-3 py-2 text-sm transition wrap-break-word",
 											isActive
 												? "bg-neutral-900 text-white"
 												: "text-neutral-700 hover:bg-neutral-100"
@@ -264,7 +262,7 @@ export function DashboardSidebar() {
 				<div className="rounded-2xl border border-neutral-200 bg-neutral-50">
 					<button
 						type="button"
-						onClick={() => setProdutosServicosOpen((current) => !current)}
+						onClick={toggleProdutosServicos}
 						className={cn(
 								"flex w-full min-w-0 items-center justify-between gap-3 px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
 							isProdutosServicosRoute &&
@@ -300,7 +298,7 @@ export function DashboardSidebar() {
 										key={item.href}
 										href={item.href}
 										className={cn(
-												"rounded-xl px-3 py-2 text-sm transition break-words",
+												"rounded-xl px-3 py-2 text-sm transition wrap-break-word",
 											isActive
 												? "bg-neutral-900 text-white"
 												: "text-neutral-700 hover:bg-neutral-100"
@@ -317,7 +315,7 @@ export function DashboardSidebar() {
 				<div className="rounded-2xl border border-neutral-200 bg-neutral-50">
 					<button
 						type="button"
-						onClick={() => setLocalidadesOpen((current) => !current)}
+						onClick={toggleLocalidades}
 						className={cn(
 								"flex w-full min-w-0 items-center justify-between gap-3 px-4 py-3 text-left text-neutral-800 transition hover:bg-neutral-100",
 							isLocalidadesRoute && "rounded-t-2xl bg-neutral-900 text-white hover:bg-neutral-900"
@@ -350,7 +348,7 @@ export function DashboardSidebar() {
 										key={item.href}
 										href={item.href}
 										className={cn(
-												"rounded-xl px-3 py-2 text-sm transition break-words",
+												"rounded-xl px-3 py-2 text-sm transition wrap-break-word",
 											isActive
 												? "bg-neutral-900 text-white"
 												: "text-neutral-700 hover:bg-neutral-100"

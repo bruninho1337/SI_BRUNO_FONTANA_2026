@@ -50,7 +50,7 @@ export function DeleteConfirmForm({
 
 			{isOpen ? (
 				<div
-					className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/45 px-4 backdrop-blur-sm"
+					className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/45 px-4 backdrop-blur-xs"
 					role="dialog"
 					aria-modal="true"
 					aria-labelledby="delete-confirm-title"

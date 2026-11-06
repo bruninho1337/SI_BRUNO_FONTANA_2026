@@ -275,7 +275,7 @@ export function ClienteFormFields({
 										aria-label="Selecionar data de nascimento"
 										title="Selecionar data"
 										onClick={openDatePicker}
-										className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white text-neutral-700 shadow-sm transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+										className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white text-neutral-700 shadow-xs transition hover:bg-neutral-50 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
 									>
 										<Calendar className="h-4 w-4" aria-hidden="true" />
 									</button>
@@ -518,7 +518,7 @@ export function ClienteFormFields({
 						maxLength={110}
 						placeholder="Detalhes internos sobre preferências, histórico ou observações do cliente"
 						defaultValue={String(initialData?.observacoes ?? "")}
-						className="min-h-28 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
+						className="min-h-28 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-xs outline-hidden transition placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 			</div>
 

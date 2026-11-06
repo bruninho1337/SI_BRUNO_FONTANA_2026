@@ -81,7 +81,7 @@ export function CadastroFormDialog({ href, title, onClose, onSaved }: CadastroFo
 	}, [active.id, goBack]);
 
 	return createPortal(
-		<div ref={dialogRef} className="fixed inset-0 z-[1100] flex items-center justify-center bg-neutral-950/50 p-3 sm:p-6"
+		<div ref={dialogRef} className="fixed inset-0 z-1100 flex items-center justify-center bg-neutral-950/50 p-3 sm:p-6"
 			role="dialog" aria-modal="true" aria-labelledby={titleId}
 			onMouseDown={(event) => { event.stopPropagation(); }}
 			onKeyDown={(event) => {

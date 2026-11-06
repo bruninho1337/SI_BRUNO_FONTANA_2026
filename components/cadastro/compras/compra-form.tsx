@@ -540,7 +540,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 			<div className="flex flex-col gap-2">
 				<Label htmlFor="observacoes" className="text-sm text-neutral-800">Observações:</Label>
-				<Textarea id="observacoes" name="observacoes" maxLength={255} rows={4} disabled={paymentDisabled} defaultValue={initialPurchase?.observacoes} placeholder="Informações adicionais da nota ou do recebimento" className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600" />
+				<Textarea id="observacoes" name="observacoes" maxLength={255} rows={4} disabled={paymentDisabled} defaultValue={initialPurchase?.observacoes} placeholder="Informações adicionais da nota ou do recebimento" className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-hidden transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600" />
 			</div>
 
 			<div className="flex flex-col gap-4 border-t border-neutral-200 pt-5 sm:flex-row sm:items-end sm:justify-between">

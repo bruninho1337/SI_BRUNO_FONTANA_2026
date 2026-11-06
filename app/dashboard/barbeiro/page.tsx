@@ -6,7 +6,7 @@ import { DashboardRefresh } from "@/components/layout/dashboard-refresh";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { carregarDashboard } from "@/lib/data/dashboard";
 
-const panel = "min-w-0 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6";
+const panel = "min-w-0 rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs md:p-6";
 const linkStyle = "text-sm font-medium text-neutral-700 underline underline-offset-4 hover:text-black";
 
 function currency(value: string) {
@@ -62,7 +62,7 @@ async function DashboardContent() {
 							{cards.map((card) => (
 								<Link key={card.label} href={card.href} className={`${panel} transition hover:border-neutral-400`}>
 									<h2 className="text-sm text-neutral-500">{card.label}</h2>
-									<p className="mt-2 break-words text-2xl font-bold text-neutral-900">{card.value}</p>
+									<p className="mt-2 wrap-break-word text-2xl font-bold text-neutral-900">{card.value}</p>
 									<p className="mt-2 text-xs text-neutral-500">{card.detail}</p>
 								</Link>
 							))}
@@ -86,8 +86,8 @@ async function DashboardContent() {
 										<Link key={conta.codconta_pagar} href={`/cadastro/contas-pagar?edit=${conta.codconta_pagar}`}
 											className="flex flex-col gap-3 rounded-xl border border-neutral-200 p-4 transition hover:bg-neutral-50 sm:flex-row sm:items-center sm:justify-between">
 											<div className="min-w-0">
-												<p className="break-words font-semibold text-neutral-900">{conta.conta_pagar}</p>
-												<p className="break-words text-sm text-neutral-600">{conta.fornecedor}</p>
+												<p className="wrap-break-word font-semibold text-neutral-900">{conta.conta_pagar}</p>
+												<p className="wrap-break-word text-sm text-neutral-600">{conta.fornecedor}</p>
 												<p className="mt-1 text-xs text-neutral-500">Vencimento: {conta.vencimento}</p>
 											</div>
 											<div className="shrink-0 space-y-2 sm:text-right">

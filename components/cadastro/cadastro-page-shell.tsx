@@ -23,10 +23,10 @@ export function CadastroPageShell({
 				<DashboardSidebar />
 
 				<div className="min-w-0 flex-1 space-y-8">
-					<div className="min-w-0 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
+					<div className="min-w-0 rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs md:p-6">
 						<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 							<div className="min-w-0">
-								<h1 className="break-words text-2xl font-bold text-neutral-900 md:text-3xl">{title}</h1>
+								<h1 className="wrap-break-word text-2xl font-bold text-neutral-900 md:text-3xl">{title}</h1>
 								<p className="mt-2 text-sm text-neutral-600">{description}</p>
 							</div>
 

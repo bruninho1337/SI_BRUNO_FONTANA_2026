@@ -40,7 +40,7 @@ export async function ClientesListSection({ searchParams }: ClientesListSectionP
 	);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<CadastroListToolbar
 				title="Clientes cadastrados"
 				count={filtered.length}

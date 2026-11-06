@@ -42,7 +42,7 @@ export async function ComprasListSection({ searchParams }: ComprasListSectionPro
 	);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<CadastroListToolbar title="Compras cadastradas" count={filtered.length} createHref="/cadastro/compras?mode=create" searchValue={params?.q} searchPlaceholder="Pesquisar por fornecedor, nota, modelo, série ou condição" />
 			<FormFeedback params={params} />
 			{error ? (

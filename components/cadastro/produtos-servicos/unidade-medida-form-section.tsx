@@ -29,7 +29,7 @@ export async function UnidadeMedidaFormSection({
 		: await buscarUnidadeMedidaPorId(editId);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<div className="mb-6">
 				<h2 className="text-xl font-semibold text-neutral-900">
 					{unidadeEditando ? "Editar Unidade de Medida" : "Nova Unidade de Medida"}

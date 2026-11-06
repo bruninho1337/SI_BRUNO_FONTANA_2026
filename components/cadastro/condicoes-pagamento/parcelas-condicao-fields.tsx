@@ -36,7 +36,7 @@ type ParcelasCondicaoFieldsProps = {
 };
 
 const inputClass =
-	"h-11 rounded-xl border border-neutral-300 bg-white px-4 text-neutral-900 shadow-sm outline-none transition focus-visible:ring-1 focus-visible:ring-ring";
+	"h-11 rounded-xl border border-neutral-300 bg-white px-4 text-neutral-900 shadow-xs outline-hidden transition focus-visible:ring-1 focus-visible:ring-ring";
 const labelClass = "text-sm font-medium text-neutral-800";
 
 function createInitialParcelas(

@@ -36,7 +36,7 @@ export async function FornecedoresListSection({ searchParams }: FornecedoresList
 	);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<CadastroListToolbar
 				title="Fornecedores cadastrados"
 				count={filtered.length}

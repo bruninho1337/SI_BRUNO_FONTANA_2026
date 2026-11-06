@@ -31,7 +31,7 @@ export async function FuncaoFuncionarioFormSection({
 		: await buscarFuncaoFuncionarioPorId(editId);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<div className="mb-6">
 				<h2 className="text-xl font-semibold text-neutral-900">
 					{funcao ? "Editar Função de Funcionário" : "Nova Função de Funcionário"}
@@ -104,7 +104,7 @@ export async function FuncaoFuncionarioFormSection({
 						maxLength={255}
 						rows={4}
 						defaultValue={funcao?.descricao ?? ""}
-						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
+						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-hidden transition focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
 

@@ -33,7 +33,7 @@ export async function CondicoesPagamentoListSection({
 	);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<CadastroListToolbar
 				title="Condicoes de pagamento cadastradas"
 				count={filtered.length}

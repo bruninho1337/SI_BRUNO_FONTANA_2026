@@ -74,7 +74,7 @@ export async function ContaPagarFormSection({
 		})) ?? [];
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<div className="mb-6">
 				<h2 className="text-xl font-semibold text-neutral-900">
 					{contaPagar ? "Editar Conta a Pagar" : "Nova Conta a Pagar"}
@@ -285,7 +285,7 @@ export async function ContaPagarFormSection({
 						maxLength={110}
 						rows={4}
 						defaultValue={contaPagar?.observacoes ?? ""}
-						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring"
+						className="min-h-28 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-hidden transition focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
 

@@ -21,7 +21,7 @@ export async function CidadesListSection({ searchParams }: CidadesListSectionPro
 	);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<CadastroListToolbar
 				title="Cidades cadastradas"
 				count={filtered.length}

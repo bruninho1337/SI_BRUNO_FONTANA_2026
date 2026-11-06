@@ -1,20 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+function subscribeToDate(onChange: () => void) {
+	const interval = window.setInterval(onChange, 60_000);
+	return () => window.clearInterval(interval);
+}
+
+function getCurrentDate() {
+	return new Date().toLocaleDateString("pt-BR", {
+		weekday: "long",
+		day: "2-digit",
+		month: "long",
+		year: "numeric",
+	});
+}
+
+const getServerDate = () => "";
 
 export function DashboardCurrentDate() {
-	const [hoje, setHoje] = useState("");
-
-	useEffect(() => {
-		const dataAtual = new Date().toLocaleDateString("pt-BR", {
-			weekday: "long",
-			day: "2-digit",
-			month: "long",
-			year: "numeric",
-		});
-
-		setHoje(dataAtual);
-	}, []);
+	const hoje = useSyncExternalStore(subscribeToDate, getCurrentDate, getServerDate);
 
 	if (!hoje) {
 		return (

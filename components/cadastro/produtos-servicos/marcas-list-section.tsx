@@ -18,7 +18,7 @@ export async function MarcasListSection({ searchParams }: MarcasListSectionProps
 	);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<CadastroListToolbar
 				title="Marcas cadastradas"
 				count={filtered.length}

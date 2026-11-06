@@ -96,12 +96,6 @@ export function SearchableSelect({
 	);
 
 	useEffect(() => {
-		if (value !== undefined) {
-			setSelectedId(value);
-		}
-	}, [value]);
-
-	useEffect(() => {
 		function handleDraftRestored() {
 			const nextValue = inputRef.current?.value;
 
@@ -178,7 +172,7 @@ export function SearchableSelect({
 				aria-expanded={isOpen}
 				onClick={() => setIsOpen(true)}
 				className={cn(
-					"flex h-11 w-full items-center justify-between gap-2 rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600 disabled:opacity-100",
+					"flex h-11 w-full items-center justify-between gap-2 rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-hidden transition focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600 disabled:opacity-100",
 					error ? "border-red-500 focus-visible:ring-red-500" : "border-neutral-300"
 				)}
 			>
@@ -198,7 +192,7 @@ export function SearchableSelect({
 			{isOpen && typeof document !== "undefined" ? createPortal(
 				<div
 					inert={Boolean(cadastro)}
-					className="fixed inset-0 z-[1000] flex min-h-dvh w-screen items-center justify-center bg-neutral-950/40 p-4"
+					className="fixed inset-0 z-1000 flex min-h-dvh w-screen items-center justify-center bg-neutral-950/40 p-4"
 					role="dialog"
 					aria-modal="true"
 					aria-labelledby={`${fieldId}-dialog-title`}
@@ -225,7 +219,7 @@ export function SearchableSelect({
 										onClick={() => openCadastro(createHref, label)}
 										aria-label={createLabel}
 										title={createLabel}
-										className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-neutral-900 px-3 text-sm font-medium text-white transition hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+										className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-neutral-900 px-3 text-sm font-medium text-white transition hover:bg-neutral-800 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
 									>
 										<Plus className="h-4 w-4" aria-hidden="true" />
 										<span>Novo</span>
@@ -236,7 +230,7 @@ export function SearchableSelect({
 									aria-label="Fechar"
 									title="Fechar"
 									onClick={() => setIsOpen(false)}
-									className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+									className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
 								>
 									<X className="h-4 w-4" aria-hidden="true" />
 								</button>
@@ -283,7 +277,7 @@ export function SearchableSelect({
 														setSearch("");
 														setIsOpen(false);
 													}}
-													className="min-w-0 rounded-md px-3 py-2 text-left text-sm text-neutral-900 transition focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+													className="min-w-0 rounded-md px-3 py-2 text-left text-sm text-neutral-900 transition focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
 												>
 													<span className="block truncate">{option.label}</span>
 												</button>
@@ -300,7 +294,7 @@ export function SearchableSelect({
 															setSearch("");
 															setIsOpen(false);
 														}}
-														className="inline-flex h-9 items-center justify-center rounded-md border border-neutral-300 bg-white px-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+														className="inline-flex h-9 items-center justify-center rounded-md border border-neutral-300 bg-white px-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-100 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
 													>
 														Selecionar
 													</button>
@@ -311,7 +305,7 @@ export function SearchableSelect({
 														onClick={() => openCadastro(editHref, label)}
 														aria-label={`Editar ${option.label}`}
 														title={`Editar ${option.label}`}
-														className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+														className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
 													>
 														<Pencil className="h-4 w-4" aria-hidden="true" />
 													</button>
@@ -331,7 +325,7 @@ export function SearchableSelect({
 							<button
 								type="button"
 								onClick={() => setIsOpen(false)}
-								className="inline-flex h-10 items-center justify-center rounded-md border border-neutral-300 bg-white px-4 text-sm font-medium text-neutral-800 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+								className="inline-flex h-10 items-center justify-center rounded-md border border-neutral-300 bg-white px-4 text-sm font-medium text-neutral-800 transition hover:bg-neutral-100 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
 							>
 								Fechar
 							</button>

@@ -30,7 +30,7 @@ export async function ServicoFormSection({ searchParams }: ServicoFormSectionPro
 		})) ?? [];
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<div className="mb-6">
 				<h2 className="text-xl font-semibold text-neutral-900">
 					{servicoEditando ? "Editar Servico" : "Novo Servico"}

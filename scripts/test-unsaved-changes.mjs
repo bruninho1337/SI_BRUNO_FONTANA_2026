@@ -26,7 +26,7 @@ try {
 	const editUrl = page.url();
 	await page.getByRole('link', { name: 'Voltar para dashboard' }).click();
 	assert.equal(page.url(), editUrl);
-	assert.equal(await page.locator('#categoria').inputValue(), 'Alteracao temporaria');
+	assert.equal(await page.locator('#categoria').inputValue(), 'ALTERACAO TEMPORARIA');
 	assert.equal(dialogs.at(-1), 'confirm');
 	assert.equal(await page.locator('[aria-label="Carregando"]').count(), 0, 'Cancelar saida nao deve abrir loading');
 	// Voltar do navegador deve manter tanto o formulario quanto a URL ao recusar.
@@ -34,11 +34,11 @@ try {
 	await page.goBack({ timeout: 5000 }).catch(() => {});
 	await page.waitForURL(editUrl);
 	assert.equal(dialogs.length, beforeBack + 1);
-	assert.equal(await page.locator('#categoria').inputValue(), 'Alteracao temporaria');
+	assert.equal(await page.locator('#categoria').inputValue(), 'ALTERACAO TEMPORARIA');
 	// Recarregar a aba usa o aviso nativo do navegador.
 	await page.reload({ timeout: 5000 }).catch(() => {});
 	assert.equal(dialogs.at(-1), 'beforeunload');
-	assert.equal(await page.locator('#categoria').inputValue(), 'Alteracao temporaria');
+	assert.equal(await page.locator('#categoria').inputValue(), 'ALTERACAO TEMPORARIA');
 	// Voltar ao valor original elimina o aviso.
 	await page.locator('#categoria').fill('');
 	await waitDirty(false);
@@ -59,7 +59,7 @@ try {
 	await page.locator('#categoria').evaluate((input) => { input.form.noValidate = true; });
 	const beforeSubmit = dialogs.length;
 	await page.getByRole('button', { name: 'Salvar categoria' }).click();
-	await page.waitForFunction(() => document.querySelector('#categoria')?.value === 'a' && !!document.querySelector('form[data-unsaved-changes="true"]'));
+	await page.waitForFunction(() => document.querySelector('#categoria')?.value === 'A' && !!document.querySelector('form[data-unsaved-changes="true"]'));
 	assert.equal(dialogs.length, beforeSubmit);
 	accept = true;
 	await page.getByRole('link', { name: 'Voltar para dashboard' }).click();
@@ -77,7 +77,7 @@ try {
 	const beforeClose = dialogs.length;
 	await page.getByRole('button', { name: 'Fechar cadastro', exact: true }).click();
 	assert.equal(dialogs.length, beforeClose + 1);
-	assert.equal(await frame.locator('input[name="pais"]').inputValue(), 'Pais temporario');
+	assert.equal(await frame.locator('input[name="pais"]').inputValue(), 'PAIS TEMPORARIO');
 	// Escape dentro do iframe passa pela mesma confirmacao.
 	const escapeDialog = page.waitForEvent('dialog');
 	await frame.locator('input[name="pais"]').press('Escape');
@@ -86,7 +86,7 @@ try {
 	accept = true;
 	await page.getByRole('button', { name: 'Fechar cadastro', exact: true }).click();
 	await page.locator('iframe[name="cadastro-embedded"]').waitFor({ state: 'detached' });
-	assert.equal(await page.locator('#nome-estado').inputValue(), 'Estado temporario');
+	assert.equal(await page.locator('#nome-estado').inputValue(), 'ESTADO TEMPORARIO');
 	// Um formulario anterior oculto tambem deve ser protegido ao fechar a pilha inteira.
 	await page.goto(`${base}/cadastro/localidades/cidades?mode=create`);
 	accept = false;
@@ -102,7 +102,7 @@ try {
 	await page.getByRole('button', { name: 'Fechar cadastro', exact: true }).click();
 	await hiddenParentDialog;
 	assert.equal(await page.locator('iframe[name="cadastro-embedded"]').count(), 2);
-	assert.equal(await stateFrame.locator('#nome-estado').inputValue(), 'Estado temporario no modal');
+	assert.equal(await stateFrame.locator('#nome-estado').inputValue(), 'ESTADO TEMPORARIO NO MODAL');
 	accept = true;
 	await page.getByRole('button', { name: 'Fechar cadastro', exact: true }).click();
 	await page.locator('iframe[name="cadastro-embedded"]').waitFor({ state: 'detached' });

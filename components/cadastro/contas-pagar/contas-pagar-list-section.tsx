@@ -61,7 +61,7 @@ export async function ContasPagarListSection({
 	);
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
 			<CadastroListToolbar
 				title="Contas a pagar cadastradas"
 				count={filtered.length}

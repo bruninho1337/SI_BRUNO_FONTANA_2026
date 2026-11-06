@@ -426,7 +426,7 @@ export function FornecedorFormFields({
 					name="observacoes"
 					maxLength={110}
 					defaultValue={String(initialData?.observacoes ?? "")}
-					className="min-h-28 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
+					className="min-h-28 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-xs outline-hidden transition placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
 				/>
 			</div>
 

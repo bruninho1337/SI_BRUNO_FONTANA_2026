@@ -154,7 +154,7 @@ function SelectField({
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <select className="flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-900">
+      <select className="flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-xs outline-hidden transition focus:border-slate-900">
         {options.map((option) => (
           <option key={option}>{option}</option>
         ))}
@@ -213,7 +213,7 @@ export default function NFeWorkspace() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Card className="rounded-3xl border-white/10 bg-white/10 text-white shadow-none backdrop-blur">
+              <Card className="rounded-3xl border-white/10 bg-white/10 text-white shadow-none backdrop-blur-sm">
                 <CardHeader className="pb-3">
                   <CardDescription className="text-slate-300">
                     Notas processadas
@@ -222,7 +222,7 @@ export default function NFeWorkspace() {
                 </CardHeader>
               </Card>
 
-              <Card className="rounded-3xl border-white/10 bg-white/10 text-white shadow-none backdrop-blur">
+              <Card className="rounded-3xl border-white/10 bg-white/10 text-white shadow-none backdrop-blur-sm">
                 <CardHeader className="pb-3">
                   <CardDescription className="text-slate-300">
                     Pendentes hoje
@@ -231,7 +231,7 @@ export default function NFeWorkspace() {
                 </CardHeader>
               </Card>
 
-              <Card className="rounded-3xl border-white/10 bg-white/10 text-white shadow-none backdrop-blur sm:col-span-2">
+              <Card className="rounded-3xl border-white/10 bg-white/10 text-white shadow-none backdrop-blur-sm sm:col-span-2">
                 <CardHeader className="pb-3">
                   <CardDescription className="text-slate-300">
                     Ultima sincronizacao
@@ -272,7 +272,7 @@ export default function NFeWorkspace() {
               note: "Parcelas abertas das ultimas NFes",
             },
           ].map((item) => (
-            <Card key={item.title} className="rounded-3xl border-slate-200 shadow-sm">
+            <Card key={item.title} className="rounded-3xl border-slate-200 shadow-xs">
               <CardContent className="flex items-start gap-4 p-6">
                 <div className="rounded-2xl bg-slate-950 p-3 text-white">
                   <item.icon className="h-5 w-5" />
@@ -290,7 +290,7 @@ export default function NFeWorkspace() {
         </section>
 
         <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-          <Card className="rounded-3xl border-slate-200 shadow-sm">
+          <Card className="rounded-3xl border-slate-200 shadow-xs">
             <CardHeader>
               <CardTitle className="text-2xl text-slate-950">
                 Cadastro de NFe
@@ -441,7 +441,7 @@ export default function NFeWorkspace() {
                 <div className="space-y-2">
                   <Label>Informacoes complementares</Label>
                   <Textarea
-                    className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-900"
+                    className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-xs outline-hidden transition focus:border-slate-900"
                     placeholder="Observacoes fiscais, dados adicionais da mercadoria ou texto de auditoria."
                   />
                 </div>
@@ -551,7 +551,7 @@ export default function NFeWorkspace() {
           </Card>
 
           <div className="space-y-6">
-            <Card className="rounded-3xl border-slate-200 shadow-sm">
+            <Card className="rounded-3xl border-slate-200 shadow-xs">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
                   <FileSearch className="h-5 w-5" />
@@ -577,7 +577,7 @@ export default function NFeWorkspace() {
                   <select
                     value={status}
                     onChange={(event) => setStatus(event.target.value)}
-                    className="flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-900"
+                    className="flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-xs outline-hidden transition focus:border-slate-900"
                   >
                     <option>Todas</option>
                     <option>Ativa</option>
@@ -604,7 +604,7 @@ export default function NFeWorkspace() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-3xl border-slate-200 shadow-sm">
+            <Card className="rounded-3xl border-slate-200 shadow-xs">
               <CardHeader>
                 <CardTitle className="text-xl text-slate-950">
                   Resultados da consulta
@@ -662,7 +662,7 @@ export default function NFeWorkspace() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-3xl border-slate-200 bg-white shadow-sm">
+            <Card className="rounded-3xl border-slate-200 bg-white shadow-xs">
               <CardHeader>
                 <CardTitle className="text-xl text-slate-950">
                   Mapeamento do banco

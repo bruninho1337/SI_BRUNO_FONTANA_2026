@@ -58,7 +58,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 
 	if (editRequested && (!compra || purchaseError)) {
 		return (
-			<div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
+			<div className="rounded-2xl border border-red-200 bg-white p-6 shadow-xs">
 				<h2 className="text-lg font-semibold text-neutral-900">Compra não encontrada</h2>
 				<p className="mt-2 text-sm text-red-600">{purchaseError?.message ?? "O registro informado não existe."}</p>
 			</div>
@@ -140,7 +140,7 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 		: undefined;
 
 	return (
-		<div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
+		<div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs md:p-6">
 			<div className="mb-6">
 				<h2 className="text-xl font-semibold text-neutral-900">{compra ? `Editar Compra` : "Nova Compra"}</h2>
 				<p className="mt-1 text-sm text-neutral-500">{compra ? "Consulte os dados registrados abaixo. Os campos ficam bloqueados após a confirmação." : "Preencha os dados da compra abaixo."}</p>

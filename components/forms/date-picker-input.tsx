@@ -76,7 +76,7 @@ export function DatePickerInput({
 					aria-label={`Selecionar ${label.toLowerCase()}`}
 					title="Selecionar data"
 					onClick={openDatePicker}
-					className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white text-neutral-700 shadow-sm transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400 disabled:opacity-100"
+					className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white text-neutral-700 shadow-xs transition hover:bg-neutral-50 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400 disabled:opacity-100"
 				>
 					<Calendar className="h-4 w-4" aria-hidden="true" />
 				</button>
