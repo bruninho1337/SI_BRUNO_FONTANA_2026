@@ -15,10 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
+import { purchaseAverageCost } from "@/lib/compras-calculos";
 
 import { addDays, allocateInstallments, allocatePurchaseCosts, isIsoDate, purchaseDiscountExceedsTotal, purchaseItemTotal, purchaseItemTotalWithUnitDiscount, purchaseUnitDiscountTotal, purchaseToday, roundMoney, sumMoney, validPaymentPercentages, type PaymentTerm } from "@/lib/compras-calculos";
 
-import { canTypePurchaseMoney, MAX_PURCHASE_INTEGER, PURCHASE_MONEY_PATTERN, validPurchaseDigits, validPurchaseInteger, validPurchaseMoney, validPurchasePreciseCost } from "@/lib/compras-validacao";
+import { canTypePurchaseMoney, canTypePurchaseQuantity, parsePurchaseQuantity, PURCHASE_MONEY_PATTERN, PURCHASE_QUANTITY_PATTERN, validPurchaseDigits, validPurchaseInteger, validPurchaseMoney, validPurchasePreciseCost, validPurchaseQuantity } from "@/lib/compras-validacao";
 
 type SupplierOption = { id: string; label: string; codcondicaoPagamento: string };
 type Option = { id: string; label: string };
@@ -77,20 +78,20 @@ function itemUnitValue(item: PurchaseItem) {
 }
 
 function itemTotal(item: PurchaseItem, readOnly = false) {
-	const quantity = Number(item.quantidade);
+	const quantity = validPurchaseQuantity(item.quantidade) ? parsePurchaseQuantity(item.quantidade) : 0;
 	const calculate = readOnly ? purchaseItemTotal : purchaseItemTotalWithUnitDiscount;
-	return Math.max(0, calculate(Number.isSafeInteger(quantity) && quantity > 0 ? quantity : 0, itemUnitValue(item), parseDecimal(item.valor_desconto)));
+	return Math.max(0, calculate(quantity, itemUnitValue(item), parseDecimal(item.valor_desconto)));
 }
 
-function currency(value: number) {
-	return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+function currency(value: number, maximumFractionDigits = 2) {
+	return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits });
 }
 
 function newItem(index: number, id = `item-${Date.now()}-${index}`): PurchaseItem {
 	return {
 		id,
 		codproduto: "",
-		quantidade: "1",
+		quantidade: "1,00",
 		valor_unitario: "0,00",
 		valor_desconto: "0,00",
 	};
@@ -164,7 +165,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 					if (Array.isArray(restored) && restored.length > 0 && restored.every((item) => item && typeof item === "object" && typeof item.quantidade === "string" && typeof item.valor_unitario === "string" && typeof item.valor_desconto === "string")) {
 						setItems(restored.map((item, index) => ({
 							...item, id: item.id || `restored-${index}`,
-							quantidade: validPurchaseInteger(item.quantidade) ? item.quantidade : "",
+							quantidade: validPurchaseQuantity(item.quantidade) ? decimalText(parsePurchaseQuantity(item.quantidade)) : "",
 							valor_unitario: validPurchaseMoney(item.valor_unitario) ? item.valor_unitario : "",
 							valor_desconto: detail.desconto_tipo === "UNITARIO" && validPurchaseMoney(item.valor_desconto) ? item.valor_desconto : "",
 							valor_unitario_preciso: validPurchasePreciseCost(item.valor_unitario_preciso) ? item.valor_unitario_preciso : undefined,
@@ -246,7 +247,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 		...term, dataVencimento: dueDates[`${condicaoId}:${dataEmissao}:${term.num_parcela}`] ?? addDays(dataEmissao, term.dias_vencimento),
 		valor: installmentValues?.[index] ?? 0, status: "PREVISTA",
 	}));
-	const allocations = allocatePurchaseCosts(sumMoney([parseDecimal(valorFrete), parseDecimal(valorSeguro), parseDecimal(outrasDespesas)]), items.map((item) => itemTotal(item, readOnly)));
+	const allocations = allocatePurchaseCosts(sumMoney([parseDecimal(valorFrete), parseDecimal(valorSeguro), parseDecimal(outrasDespesas)]), items.map(itemUnitValue));
 
 	const moneyFields = [
 		{ name: "valor_frete", label: "Frete", value: valorFrete, setter: setValorFrete },
@@ -272,7 +273,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 	for (const item of items) {
 		if (!produtos.some((product) => product.id === item.codproduto)) fieldErrors[`produto-${item.id}-trigger`] = "Selecione um produto válido.";
 		else if (items.some((other) => other.id !== item.id && other.codproduto === item.codproduto)) fieldErrors[`produto-${item.id}-trigger`] = "Este produto já está em outro item.";
-		if (!validPurchaseInteger(item.quantidade)) fieldErrors[`quantidade-${item.id}`] = "Informe uma quantidade inteira de 1 a 2147483647.";
+		if (!validPurchaseQuantity(item.quantidade)) fieldErrors[`quantidade-${item.id}`] = "Informe uma quantidade maior que zero, até 2147483647, com até duas casas decimais.";
 		if (!validPurchaseMoney(item.valor_unitario)) fieldErrors[`unitario-${item.id}`] = "Informe um valor não negativo, com até duas casas decimais.";
 		if (!validPurchaseMoney(item.valor_desconto)) fieldErrors[`desconto-${item.id}`] = "Informe um desconto não negativo, com até duas casas decimais.";
 		else if (validPurchaseMoney(item.valor_unitario) && purchaseDiscountExceedsTotal(1, itemUnitValue(item), parseDecimal(item.valor_desconto))) fieldErrors[`desconto-${item.id}`] = "O desconto por unidade não pode superar o valor unitário.";
@@ -410,7 +411,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 			<div className="pt-3">
 				<div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-					<div><h3 className="font-semibold text-neutral-900">Itens da compra</h3><p className="mt-1 text-sm text-neutral-500">Ao menos um produto é obrigatório.</p></div>
+					<div><h3 className="font-semibold text-neutral-900">Itens da compra</h3><p className="mt-1 text-sm text-neutral-500">Produtos, quantidades e valores que compõem a compra.</p></div>
 					{readOnly ? null : (
 						<Button type="button" variant="outline" onClick={() => setItems((current) => [...current, newItem(current.length)])} className="h-10 rounded-xl border-neutral-300">
 							<Plus className="h-4 w-4" aria-hidden="true" />Adicionar item
@@ -422,10 +423,18 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 					{items.map((item, index) => {
 						const subtotal = itemTotal(item, readOnly);
 						const allocation = readOnly ? item.valorRateio : allocations[index];
-						const unitCost = sumMoney([itemUnitValue(item), allocation ?? 0]);
+						const validQuantity = validPurchaseQuantity(item.quantidade);
+						const quantity = validQuantity ? parsePurchaseQuantity(item.quantidade) : 0;
+						const unitAllocation = validQuantity ? (allocation ?? 0) / quantity : 0;
+						const unitCost = validQuantity ? Number(itemUnitValue(item)) + unitAllocation : 0;
+						const product = produtos.find((product) => product.id === item.codproduto);
+						const averageCost = !readOnly && product && validQuantity
+							? purchaseAverageCost(product.estoque, Number(product.precoCusto), quantity, unitCost)
+							: null;
+						const approximateAllocation = validQuantity && purchaseItemTotal(quantity, unitAllocation.toFixed(6), 0) !== (allocation ?? 0);
 						const storedDiscount = parseDecimal(item.valor_desconto);
-						const unitDiscount = readOnly ? storedDiscount / Number(item.quantidade) : 0;
-						const approximateDiscount = readOnly && purchaseUnitDiscountTotal(Number(item.quantidade), roundMoney(unitDiscount)) !== storedDiscount;
+						const unitDiscount = readOnly && validQuantity ? storedDiscount / quantity : 0;
+						const approximateDiscount = readOnly && validQuantity && purchaseUnitDiscountTotal(quantity, roundMoney(unitDiscount)) !== storedDiscount;
 						const discountDisplay = readOnly ? decimalText(unitDiscount) : item.valor_desconto;
 
 						return (
@@ -446,20 +455,24 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 											.filter((product) => product.id === item.codproduto || !items.some((other) => other.id !== item.id && other.codproduto === product.id))
 											.map((product) => ({
 												id: product.id,
-												label: `${product.label} · estoque ${product.estoque} ${product.unidade}`,
+												label: product.label,
 											}))}
 										required={!readOnly}
 										disabled={productsDisabled}
 										value={item.codproduto}
 										onValueChange={(value) => updateItem(item.id, "codproduto", value)}
 										error={fieldError(`produto-${item.id}-trigger`)}
-										className="min-w-0 md:col-span-5"
+										className="min-w-0 md:col-span-3"
 										createHref={productsDisabled ? undefined : "/cadastro/produtos-servicos/produtos?mode=create"}
 										createLabel="Novo produto"
 									/>
 									<div className={`${fieldClass} md:col-span-2`}>
+										<Label htmlFor={`estoque-${item.id}`} className="text-sm text-neutral-800">Estoque atual:</Label>
+										<Input id={`estoque-${item.id}`} value={product ? `${product.estoque.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} ${product.unidade}` : ""} placeholder="—" title="Saldo atual do produto e sua unidade de medida." readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
+									</div>
+									<div className={`${fieldClass} md:col-span-2`}>
 										<RequiredLabel htmlFor={`quantidade-${item.id}`} className="text-sm text-neutral-800">Quantidade:</RequiredLabel>
-										<Input id={`quantidade-${item.id}`} {...fieldValidationProps(`quantidade-${item.id}`)} type="text" inputMode="numeric" pattern="[0-9]+" maxLength={10} title="Informe um inteiro de 1 a 2147483647." required={!readOnly} disabled={productsDisabled} value={item.quantidade} onChange={(event) => { const value = event.target.value; if (value === "" || (/^[0-9]+$/.test(value) && Number(value) <= MAX_PURCHASE_INTEGER)) updateItem(item.id, "quantidade", value); }} className={inputClass} />
+										<Input id={`quantidade-${item.id}`} {...fieldValidationProps(`quantidade-${item.id}`)} type="text" inputMode="decimal" pattern={PURCHASE_QUANTITY_PATTERN} maxLength={13} title="Informe uma quantidade maior que zero, com até duas casas decimais (ex.: 1,25)." required={!readOnly} disabled={productsDisabled} value={item.quantidade} onChange={(event) => { const value = event.target.value; if (canTypePurchaseQuantity(value)) updateItem(item.id, "quantidade", value); }} onBlur={() => { if (validPurchaseQuantity(item.quantidade)) updateItem(item.id, "quantidade", decimalText(parsePurchaseQuantity(item.quantidade))); }} className={inputClass} />
 										{fieldFeedback(`quantidade-${item.id}`)}
 									</div>
 									<div className={`${fieldClass} md:col-span-2`}>
@@ -474,15 +487,21 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 									</div>
 
 								</div>
-								<div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-end">
+								<div className="mt-4 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-end">
 									<div className={`${fieldClass} w-full sm:w-48`}>
-										<Label htmlFor={`rateio-${item.id}`} className="text-sm text-neutral-800">Rateio (R$):</Label>
-										<Input id={`rateio-${item.id}`} value={currency(allocation ?? 0)} readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
+										<Label htmlFor={`rateio-${item.id}`} className="text-sm text-neutral-800">Rateio por unidade (R$):</Label>
+										<Input id={`rateio-${item.id}`} value={currency(unitAllocation, 6)} title={`Rateio total do item: ${currency(allocation ?? 0)}.${approximateAllocation ? " Valor por unidade arredondado na exibição." : ""}`} readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
 									</div>
 									<div className={`${fieldClass} w-full sm:w-48`}>
 										<Label htmlFor={`custo-unitario-${item.id}`} className="text-sm text-neutral-800">Custo unitário:</Label>
-										<Input id={`custo-unitario-${item.id}`} value={currency(unitCost)} title="Valor unitário + rateio do produto." readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
+										<Input id={`custo-unitario-${item.id}`} value={currency(unitCost, 6)} title="Valor unitário + rateio por unidade." readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
 									</div>
+									{!readOnly && (
+										<div className={`${fieldClass} w-full sm:w-48`}>
+											<Label htmlFor={`custo-medio-${item.id}`} className="text-sm text-neutral-800">Custo médio:</Label>
+											<Input id={`custo-medio-${item.id}`} value={averageCost === null ? "" : currency(averageCost, 6)} placeholder="Selecione um produto" title="(Estoque atual × custo atual + quantidade comprada × custo unitário) ÷ (estoque atual + quantidade comprada). Recalculado ao salvar com o estoque atualizado." readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
+										</div>
+									)}
 									<div className={`${fieldClass} w-full sm:w-48`}>
 										<Label className="text-sm text-neutral-800">Total do Item:</Label>
 										<div className="flex h-11 items-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-semibold text-neutral-900">{currency(subtotal)}</div>

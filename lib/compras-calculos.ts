@@ -54,30 +54,53 @@ export function sumMoney(values: DecimalValue[]) {
 	return fromCents(values.reduce<bigint>((total, value) => total + cents(value), ZERO));
 }
 
-// Arredonda apenas o total final do item, preservando a precisão do custo por unidade.
+function quantityParts(quantity: number) {
+	if (!Number.isFinite(quantity) || quantity < 0) throw new Error("Quantidade inválida.");
+	const parts = decimalParts(quantity);
+	if (parts.scale > 2) throw new Error("Quantidade inválida.");
+	return parts;
+}
+
+function purchaseGrossAmount(quantity: number, unitCost: DecimalValue) {
+	const count = quantityParts(quantity);
+	const unit = decimalParts(unitCost);
+	return { coefficient: count.coefficient * unit.coefficient, scale: count.scale + unit.scale };
+}
+
+function purchaseAmounts(quantity: number, unitCost: DecimalValue, discount: DecimalValue) {
+	const gross = purchaseGrossAmount(quantity, unitCost);
+	const deduction = decimalParts(discount);
+	const scale = Math.max(gross.scale, deduction.scale);
+	return {
+		gross: gross.coefficient * TEN ** BigInt(scale - gross.scale),
+		deduction: deduction.coefficient * TEN ** BigInt(scale - deduction.scale),
+		scale,
+	};
+}
+
+// Arredonda apenas o total final do item, preservando quantidade e custo fracionados.
 export function purchaseItemTotal(quantity: number, unitCost: DecimalValue, discount: DecimalValue) {
-	if (!Number.isSafeInteger(quantity)) throw new Error("Quantidade inválida.");
-	const [unit, deduction] = integerWeights([unitCost, discount]);
-	const scale = Math.max(decimalParts(unitCost).scale, decimalParts(discount).scale);
-	const amount = unit * BigInt(quantity) - deduction;
+	const { gross, deduction, scale } = purchaseAmounts(quantity, unitCost, discount);
+	const amount = gross - deduction;
 	return fromCents(scale <= 2 ? amount * TEN ** BigInt(2 - scale) : roundedDivision(amount, TEN ** BigInt(scale - 2)));
 }
 
 export function purchaseDiscountExceedsTotal(quantity: number, unitCost: DecimalValue, discount: DecimalValue) {
-	const [unit, deduction] = integerWeights([unitCost, discount]);
-	return deduction > unit * BigInt(quantity);
+	const { gross, deduction } = purchaseAmounts(quantity, unitCost, discount);
+	return deduction > gross;
 }
 
 // O banco mantém o desconto total do item para preservar as compras existentes.
 export function purchaseUnitDiscountTotal(quantity: number, unitDiscount: DecimalValue) {
-	return purchaseItemTotal(quantity, unitDiscount, 0);
+	const { coefficient, scale } = purchaseGrossAmount(quantity, unitDiscount);
+	return Number(`${coefficient}e-${scale}`);
 }
 
 export function purchaseItemTotalWithUnitDiscount(quantity: number, unitCost: DecimalValue, unitDiscount: DecimalValue) {
-	if (!Number.isSafeInteger(quantity)) throw new Error("Quantidade inválida.");
+	const count = quantityParts(quantity);
 	const [unit, deduction] = integerWeights([unitCost, unitDiscount]);
-	const scale = Math.max(decimalParts(unitCost).scale, decimalParts(unitDiscount).scale);
-	const amount = (unit - deduction) * BigInt(quantity);
+	const scale = Math.max(decimalParts(unitCost).scale, decimalParts(unitDiscount).scale) + count.scale;
+	const amount = (unit - deduction) * count.coefficient;
 	return fromCents(scale <= 2 ? amount * TEN ** BigInt(2 - scale) : roundedDivision(amount, TEN ** BigInt(scale - 2)));
 }
 
@@ -144,10 +167,15 @@ export function allocateInstallments(total: number, percentages: number[]): numb
 	return percentages.map((percentage) => byPercentage.get(percentage)!);
 }
 
-// Rateio = (total líquido do item / total dos produtos) * despesas gerais.
-// A distribuição em centavos garante que a soma feche com as despesas.
-export function allocatePurchaseCosts(total: number, itemTotals: DecimalValue[]) {
-	return allocateMoney(total, itemTotals);
+// Despesa do item = (valor unitário bruto / soma dos valores unitários) * despesas gerais.
+// Retorna o total por item em centavos; divida pela quantidade para obter o rateio por unidade.
+export function allocatePurchaseCosts(total: number, unitValues: DecimalValue[]) {
+	return allocateMoney(total, unitValues);
+}
+
+export function purchaseAverageCost(stock: number, currentCost: number, quantity: number, unitCost: number) {
+	if (![stock, currentCost, quantity, unitCost].every(Number.isFinite) || stock < 0 || currentCost < 0 || quantity <= 0 || unitCost < 0) return null;
+	return (stock * currentCost + quantity * unitCost) / (stock + quantity);
 }
 
 export function isIsoDate(value: string) {

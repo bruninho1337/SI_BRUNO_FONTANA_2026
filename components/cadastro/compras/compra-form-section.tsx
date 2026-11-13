@@ -130,10 +130,10 @@ export async function CompraFormSection({ searchParams }: CompraFormSectionProps
 				itens: (itens ?? []).map((item) => ({
 					id: `item-${item.num_item}`,
 					codproduto: String(item.codproduto),
-					quantidade: String(item.quantidade),
+					quantidade: moneyValue(item.quantidade),
 					valor_unitario: moneyValue(item.valor_unitario),
 					valor_unitario_preciso: String(item.valor_unitario),
-					valor_desconto: moneyValue(item.valor_desconto),
+					valor_desconto: Number(item.valor_desconto ?? 0).toFixed(4).replace(".", ","),
 					valorRateio: item.valor_rateio == null ? undefined : Number(item.valor_rateio),
 				})),
 			}

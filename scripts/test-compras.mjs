@@ -22,6 +22,12 @@ function loadTs(path, dependencies = {}) {
 
 async function main() {
 	const calc = loadTs('lib/compras-calculos.ts');
+	assert.equal(calc.purchaseAverageCost(10, 20, 5, 26), 22);
+	assert.equal(calc.purchaseAverageCost(0, 99, 5, 26), 26);
+	assert.equal(calc.purchaseAverageCost(1.25, 10, 1.25, 20.008), 15.004);
+	assert.equal(calc.purchaseAverageCost(10, 0, 5, 30), 10);
+	assert.equal(calc.purchaseAverageCost(0, 0, 0, 26), null);
+	assert.equal(calc.purchaseAverageCost(10, 20, NaN, 26), null);
 	assert.equal(calc.roundMoney(10.075), 10.08);
 	assert.equal(calc.roundMoney(-1.005), -1.01);
 	assert.equal(calc.sumMoney([0.1, 0.2, 0.01]), 0.31);
@@ -30,6 +36,15 @@ async function main() {
 	assert.equal(calc.purchaseItemTotal(10, 20, 2), 198, 'Desconto total legado deve manter a interpretacao original');
 	assert.equal(calc.purchaseItemTotalWithUnitDiscount(10, 20, 2), 180);
 	assert.equal(calc.purchaseUnitDiscountTotal(10, 2), 20);
+	assert.equal(calc.purchaseItemTotal(1.25, '20.123456', 0), 25.15);
+	assert.equal(calc.purchaseItemTotalWithUnitDiscount(1.25, 20, 2), 22.5);
+	assert.equal(calc.purchaseUnitDiscountTotal(1.25, 0.01), 0.0125);
+	assert.equal(calc.purchaseItemTotal(1.25, 0.02, 0.0125), 0.01);
+	assert.equal(calc.purchaseItemTotalWithUnitDiscount(0.5, 0.01, 0.01), 0);
+	assert.equal(calc.purchaseItemTotal(0.5, 0.01, calc.purchaseUnitDiscountTotal(0.5, 0.01)), 0);
+	assert.equal(calc.purchaseDiscountExceedsTotal(0.5, 0.01, '0.0051'), true);
+	assert.equal(calc.purchaseDiscountExceedsTotal(0.5, 0.01, '0.005'), false);
+	for (const quantity of [NaN, Infinity, -1, 1.234]) assert.throws(() => calc.purchaseItemTotal(quantity, 10, 0));
 	assert.equal(calc.purchaseItemTotalWithUnitDiscount(3, '33.3366666666666667', '0.01'), 99.98);
 	assert.equal(calc.purchaseItemTotalWithUnitDiscount(10, 20, 20), 0);
 	assert.equal(calc.purchaseDiscountExceedsTotal(1, '0.0099999999999999999', 0.01), true);
@@ -47,20 +62,26 @@ async function main() {
 	assert.equal(JSON.stringify(calc.allocateInstallments(12, [100 / 3, 100 / 3, 100 / 3])), '[4,4,4]');
 	assert.equal(calc.allocateInstallments(10, [100 / 3, 100 / 3, 100 / 3]), null);
 	assert.equal(calc.allocateInstallments(10.01, [25, 25, 25, 25]), null);
-	// O peso é o total do item, já considerando quantidade e desconto.
+	// O peso é o valor unitário bruto, independentemente da quantidade e do desconto.
 	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(30, [100, 200])), '[10,20]');
 	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(-30, [100, 200])), '[-10,-20]');
 	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(10, [0, 100])), '[0,10]');
-	assert.equal(calc.roundMoney((1000 + calc.allocatePurchaseCosts(30, [1000, 200])[0]) / 10), 102.5);
-	assert.equal(calc.roundMoney(200 + calc.allocatePurchaseCosts(30, [1000, 200])[1]), 205);
-	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(30.01, [990, 200])), '[24.97,5.04]');
-	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(0, [990, 200])), '[0,0]');
+	const unitBasedAllocations = calc.allocatePurchaseCosts(30, [100, 200]);
+	assert.equal(unitBasedAllocations[0] / 10, 1);
+	assert.equal(unitBasedAllocations[1] / 1, 20);
+	assert.equal(calc.roundMoney(100 + unitBasedAllocations[0] / 10), 101);
+	assert.equal(calc.roundMoney(200 + unitBasedAllocations[1]), 220);
+	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(30, [100, 100])), '[15,15]');
+	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(30.01, [100, 200])), '[10,20.01]');
+	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(0, [100, 200])), '[0,0]');
+	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(30, [0, 0])), '[0,0]');
 	assert.equal(JSON.stringify(calc.allocatePurchaseCosts(30.01, [0, 200])), '[0,30.01]');
 	assert.equal(calc.addDays('2024-02-28', 2), '2024-03-01');
 	assert.equal(calc.addDays('2026-12-31', 30), '2027-01-30');
 	assert.equal(calc.isIsoDate('2026-02-30'), false);
 	assert.equal(calc.isIsoDate('2024-02-29'), true);
 	for (let cents = 1; cents < 1000; cents++) {
+		assert.equal(calc.sumMoney(calc.allocatePurchaseCosts(cents / 100, [100, 200, '0.004'])), cents / 100);
 		const values = calc.allocateMoney(cents / 100, [13.3333, 26.6667, 60]);
 		assert.equal(Math.round(values.reduce((a, b) => a + b, 0) * 100), cents);
 		for (const percentages of [[30, 30, 40], [20, 20, 20, 20, 20], [20, 20, 20, 20, 10, 10]]) {
@@ -102,7 +123,7 @@ async function main() {
 			'next/navigation': { redirect(url) { const error = new Error('redirect'); error.url = url; throw error; } },
 		});
 		const supplier = (await client.query("select codfornecedor from public.fornecedores where ativo = 'S' limit 1")).rows[0];
-		const product = (await client.query("select codproduto, quantidade_estoque from public.produtos where ativo = 'S' limit 1")).rows[0];
+		const product = (await client.query("select codproduto, quantidade_estoque, preco_custo from public.produtos where ativo = 'S' limit 1")).rows[0];
 		const condition = (await client.query(`select cp.codcondicao_pagamento, cp.parcelas from public.condicoes_pagamento cp
 			join public.condicoes_pagamento_parcelas p using (codcondicao_pagamento) where cp.ativo = 'S'
 			group by cp.codcondicao_pagamento having count(*) = cp.parcelas and abs(sum(p.percentual) - 100) < 0.0001
@@ -161,7 +182,7 @@ async function main() {
 		assert.equal(Number(item.valor_total), 160);
 		const updatedProduct = (await client.query('select * from public.produtos where codproduto=$1', [product.codproduto])).rows[0];
 		assert.equal(Number(updatedProduct.quantidade_estoque), Number(product.quantidade_estoque) + 2);
-		assert.equal(Number(updatedProduct.preco_custo), 95);
+		assert.ok(Math.abs(Number(updatedProduct.preco_custo) - calc.purchaseAverageCost(Number(product.quantidade_estoque), Number(product.preco_custo), 2, 115)) < 1e-9, 'Media ponderada com estoque anterior e rateio');
 		const accounts = (await client.query(`select cp.*, p.num_parcela from public.compras_parcelas p join public.contas_pagar cp using(codconta_pagar)
 			where p.modelo=$1 and p.serie=$2 and p.numero_nota=$3 and p.codfornecedor=$4 order by p.num_parcela`, key)).rows;
 		assert.equal(accounts.length, terms.length);
@@ -184,7 +205,8 @@ async function main() {
 		console.log('OK: criação, duplicidade, datas, parcelas, vencimento ajustado, custo, motivo, pagamento e cancelamento.');
 
 		const secondProduct = (await client.query("select codproduto from public.produtos where ativo = 'S' and codproduto <> $1 limit 1", [product.codproduto])).rows[0];
-		assert.ok(secondProduct, 'Cadastre dois produtos ativos para testar rateio pelo total dos itens.');
+		assert.ok(secondProduct, 'Cadastre dois produtos ativos para testar rateio pelo valor unitario.');
+		await client.query('update public.produtos set quantidade_estoque=0 where codproduto=any($1::int[])', [[product.codproduto, secondProduct.codproduto]]);
 		await client.query('update public.condicoes_pagamento set parcelas=3 where codcondicao_pagamento=$1', [condition.codcondicao_pagamento]);
 		await client.query('delete from public.condicoes_pagamento_parcelas where codcondicao_pagamento=$1', [condition.codcondicao_pagamento]);
 		for (const [index, percentage] of [30, 30, 40].entries()) {
@@ -204,10 +226,10 @@ async function main() {
 		const mixedResult = await invoke(actions.createCompraAction, mixedData);
 		assert.ok(mixedResult.has('success'), mixedResult.get('error'));
 		const mixedItems = (await client.query(`select valor_rateio from public.compras_itens where ${purchaseWhere} order by num_item`, mixedKey)).rows;
-		assert.deepEqual(mixedItems.map((item) => Number(item.valor_rateio)), [24.55, 5.46]);
+		assert.deepEqual(mixedItems.map((item) => Number(item.valor_rateio)), [10, 20.01]);
 		const mixedCosts = (await client.query('select codproduto, preco_custo from public.produtos where codproduto=any($1::int[])', [[product.codproduto, secondProduct.codproduto]])).rows;
-		assert.equal(Number(mixedCosts.find((item) => item.codproduto === product.codproduto).preco_custo), 92.455);
-		assert.equal(Number(mixedCosts.find((item) => item.codproduto === secondProduct.codproduto).preco_custo), 205.46);
+		assert.equal(Number(mixedCosts.find((item) => item.codproduto === product.codproduto).preco_custo), 101, 'Custo unitario = 100 + 10/10, mesmo com desconto de 10 por unidade');
+		assert.equal(Number(mixedCosts.find((item) => item.codproduto === secondProduct.codproduto).preco_custo), 220.01);
 		const mixedAccounts = (await client.query(`select cp.valor from public.compras_parcelas p join public.contas_pagar cp using(codconta_pagar)
 			where p.modelo=$1 and p.serie=$2 and p.numero_nota=$3 and p.codfornecedor=$4 order by p.num_parcela`, mixedKey)).rows;
 		assert.deepEqual(mixedAccounts.map((account) => Number(account.valor)), [339, 339, 452.01]);
@@ -217,7 +239,7 @@ async function main() {
 		const impossibleResult = await invoke(actions.createCompraAction, { ...mixedData, numero_nota: String(Number(note) + 2), vencimentos_json: '[null,null]' });
 		assert.match(impossibleResult.get('error'), /mantendo valores iguais/);
 		assert.equal((await client.query(`select 1 from public.compras where ${purchaseWhere}`, [key[0], key[1], String(Number(note) + 2), key[3]])).rowCount, 0);
-		console.log('OK: rateio pelo total liquido dos itens com quantidades e descontos diferentes, percentuais iguais e bloqueio de divisao impossivel.');
+		console.log('OK: rateio pelo valor unitario com quantidades e descontos diferentes, percentuais iguais e bloqueio de divisao impossivel.');
 
 		await client.query('update public.condicoes_pagamento set parcelas=1 where codcondicao_pagamento=$1', [condition.codcondicao_pagamento]);
 		await client.query('delete from public.condicoes_pagamento_parcelas where codcondicao_pagamento=$1 and num_parcela=2', [condition.codcondicao_pagamento]);
@@ -227,6 +249,7 @@ async function main() {
 			itens_json: JSON.stringify([{ codproduto: product.codproduto, quantidade: '3', valor_unitario: '100,00', valor_desconto: '0,00' }]),
 			vencimentos_json: '[null]',
 		};
+		await client.query('update public.produtos set quantidade_estoque=0 where codproduto=$1', [product.codproduto]);
 		const preciseResult = await invoke(actions.createCompraAction, preciseData);
 		assert.ok(preciseResult.has('success'), preciseResult.get('error'));
 		const preciseProduct = (await client.query('select preco_custo, abs(preco_custo * 3 - 300.01) < 0.000000000001 as accurate from public.produtos where codproduto=$1', [product.codproduto])).rows[0];
@@ -242,6 +265,25 @@ async function main() {
 		assert.ok((await invoke(actions.createCompraAction, { ...preciseData, valor_frete: '0,001' })).has('error'));
 		assert.ok((await invoke(actions.createCompraAction, { ...preciseData, itens_json: JSON.stringify([{ ...preciseItem, valor_unitario: '99,00' }]) })).has('error'));
 		console.log('OK: fracao de centavo preservada no custo, reutilizacao sem truncamento e validacao de entradas.');
+
+		const fractionalKey = [key[0], key[1], String(Number(note) + 5), key[3]];
+		const stockBeforeFraction = (await client.query('select quantidade_estoque, preco_custo from public.produtos where codproduto=$1', [product.codproduto])).rows[0];
+		const fractionalResult = await invoke(actions.createCompraAction, {
+			...preciseData, numero_nota: fractionalKey[2], valor_frete: '0,01',
+			itens_json: JSON.stringify([{ codproduto: product.codproduto, quantidade: '1,25', valor_unitario: '20,00', valor_desconto: '0,01' }]),
+		});
+		assert.ok(fractionalResult.has('success'), fractionalResult.get('error'));
+		const fractionalItem = (await client.query(`select * from public.compras_itens where ${purchaseWhere}`, fractionalKey)).rows[0];
+		assert.equal(Number(fractionalItem.quantidade), 1.25);
+		assert.equal(Number(fractionalItem.valor_desconto), 0.0125);
+		assert.equal(Number(fractionalItem.valor_total), 24.99);
+		const fractionalProduct = (await client.query('select quantidade_estoque, preco_custo from public.produtos where codproduto=$1', [product.codproduto])).rows[0];
+		assert.equal(Number(fractionalProduct.quantidade_estoque), Number(stockBeforeFraction.quantidade_estoque) + 1.25);
+		assert.ok(Math.abs(Number(fractionalProduct.preco_custo) - calc.purchaseAverageCost(Number(stockBeforeFraction.quantidade_estoque), Number(stockBeforeFraction.preco_custo), 1.25, 20.008)) < 1e-9);
+		const cancelledFraction = await invoke(actions.cancelCompraAction, { modelo: fractionalKey[0], serie: fractionalKey[1], numero_nota: fractionalKey[2], motivo_cancelamento: 'Teste de quantidade fracionada' });
+		assert.ok(cancelledFraction.has('success'), cancelledFraction.get('error'));
+		assert.equal(Number((await client.query('select quantidade_estoque from public.produtos where codproduto=$1', [product.codproduto])).rows[0].quantidade_estoque), Number(stockBeforeFraction.quantidade_estoque));
+		console.log('OK: quantidade decimal, desconto fracionado, custo preciso e estorno do estoque.');
 	} finally {
 		await client.query('rollback');
 		client.release();

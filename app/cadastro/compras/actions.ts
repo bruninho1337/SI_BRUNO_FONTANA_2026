@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { allocateInstallments, allocatePurchaseCosts, addDays, isIsoDate, purchaseDiscountExceedsTotal, purchaseItemTotal, purchaseUnitDiscountTotal, purchaseToday, roundMoney, sumMoney, validPaymentPercentages, type PaymentTerm } from "@/lib/compras-calculos";
 import { db } from "@/lib/database/db";
 
-import { validPurchaseDigits, validPurchaseInteger, validPurchaseMoney, validPurchasePreciseCost } from "@/lib/compras-validacao";
+import { parsePurchaseQuantity, validPurchaseDigits, validPurchaseInteger, validPurchaseMoney, validPurchasePreciseCost, validPurchaseQuantity } from "@/lib/compras-validacao";
 
 const COMPRAS_PATH = "/cadastro/compras";
 
@@ -153,15 +153,18 @@ export async function createCompraAction(formData: FormData) {
 	if (submittedItems.some((item) => !validPurchaseMoney(item.valor_unitario) || !validPurchaseMoney(item.valor_desconto))) {
 		fail(formData, "Informe valores unitarios e descontos validos, com ate duas casas decimais.");
 	}
-	if (submittedItems.some((item) => !validPurchaseInteger(item.codproduto) || !validPurchaseInteger(item.quantidade))) {
-		fail(formData, "Produto e quantidade devem ser numeros inteiros positivos, de ate 2147483647.");
+	if (submittedItems.some((item) => !validPurchaseInteger(item.codproduto))) {
+		fail(formData, "Selecione um produto valido em todos os itens.");
+	}
+	if (submittedItems.some((item) => !validPurchaseQuantity(item.quantidade))) {
+		fail(formData, "Informe quantidades maiores que zero, de ate 2147483647, com ate duas casas decimais.");
 	}
 	if (submittedItems.some((item) => item.valor_unitario_preciso !== undefined && !validPurchasePreciseCost(item.valor_unitario_preciso))) {
 		fail(formData, "O valor unitario preciso esta invalido. Selecione o produto novamente.");
 	}
 	const items = submittedItems.map((item) => ({
 		codproduto: Number(item.codproduto),
-		quantidade: Number(item.quantidade),
+		quantidade: parsePurchaseQuantity(item.quantidade!),
 		valorUnitario: item.valor_unitario_preciso ?? roundMoney(parseDecimal(item.valor_unitario)),
 		valorDesconto: roundMoney(parseDecimal(item.valor_desconto)),
 	}));
@@ -173,10 +176,6 @@ export async function createCompraAction(formData: FormData) {
 
 	if (new Set(productIds).size !== productIds.length) {
 		fail(formData, "Cada produto deve aparecer apenas uma vez na compra.");
-	}
-
-	if (items.some((item) => !Number.isInteger(item.quantidade) || item.quantidade <= 0 || item.quantidade > 2147483647)) {
-		fail(formData, "A quantidade dos itens deve ser um numero inteiro maior que zero.");
 	}
 
 	if (items.some((item) => !Number.isFinite(Number(item.valorUnitario)) || Number(item.valorUnitario) < 0 || Number(item.valorUnitario) >= 1e12 || !/^\d+(?:\.\d{1,32})?$/.test(String(item.valorUnitario)))) {
@@ -245,7 +244,7 @@ export async function createCompraAction(formData: FormData) {
 		const installmentValues = allocateInstallments(valorTotal, terms.map((term) => Number(term.percentual)));
 		if (installmentValues === null) throw new Error("Não é possível fechar o total em centavos mantendo valores iguais para percentuais iguais. Revise o total ou os percentuais da condição de pagamento.");
 		if (installmentValues.some((value) => value <= 0)) throw new Error("O total da nota é insuficiente para gerar todas as parcelas.");
-		const allocations = allocatePurchaseCosts(sumMoney([valorFrete, valorSeguro, outrasDespesas]), items.map((item) => purchaseItemTotal(item.quantidade, item.valorUnitario, item.valorDesconto)));
+		const allocations = allocatePurchaseCosts(sumMoney([valorFrete, valorSeguro, outrasDespesas]), items.map((item) => item.valorUnitario));
 
 		const produtos = await client.query<{ codproduto: number }>(
 			"select codproduto from public.produtos where codproduto = any($1::int[]) and ativo = 'S' order by codproduto for update",
@@ -303,9 +302,11 @@ export async function createCompraAction(formData: FormData) {
 
 			await client.query(
 				`update public.produtos
-				set quantidade_estoque = quantidade_estoque + $1, preco_custo = ($2::numeric + $4::numeric) / $1::numeric
+				set quantidade_estoque = quantidade_estoque + $1,
+					preco_custo = (quantidade_estoque * preco_custo + $1::numeric * $2::numeric + $4::numeric)
+						/ (quantidade_estoque + $1::numeric)
 				where codproduto = $3`,
-				[item.quantidade, itemTotal, item.codproduto, allocations[index]]
+				[item.quantidade, item.valorUnitario, item.codproduto, allocations[index]]
 			);
 		}
 

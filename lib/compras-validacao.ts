@@ -1,5 +1,21 @@
 export const MAX_PURCHASE_INTEGER = 2147483647;
+export const PURCHASE_QUANTITY_PATTERN = "[0-9]+(?:,[0-9]{1,2})?";
 export const PURCHASE_MONEY_PATTERN = "(?:[0-9]+|[0-9]{1,3}(?:\\.[0-9]{3})+)(?:,[0-9]{1,2})?";
+
+export function parsePurchaseQuantity(value: number | string) {
+	return Number(String(value).replace(",", "."));
+}
+
+export function validPurchaseQuantity(value: unknown) {
+	const pattern = typeof value === "number" ? /^[0-9]+(?:\.[0-9]{1,2})?$/ : new RegExp(`^${PURCHASE_QUANTITY_PATTERN}$`);
+	return (typeof value === "number" || typeof value === "string") && pattern.test(String(value)) &&
+		parsePurchaseQuantity(value) > 0 && parsePurchaseQuantity(value) <= MAX_PURCHASE_INTEGER;
+}
+
+export function canTypePurchaseQuantity(value: string) {
+	return value.length <= 13 && /^[0-9]{0,10}(?:,[0-9]{0,2})?$/.test(value) &&
+		parsePurchaseQuantity(value) <= MAX_PURCHASE_INTEGER;
+}
 
 export function validPurchaseDigits(value: unknown, maxLength: number) {
 	return typeof value === "string" && new RegExp(`^[0-9]{1,${maxLength}}$`).test(value);

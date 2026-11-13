@@ -24,6 +24,11 @@ for (const value of ['', '1', '1,', '1,2', '1,23', '1.', '1.2', '1.234,56']) ass
 for (const value of ['-10', 'a10', '1e2', '1,,2', '1,234', '1..000', '1 000']) assert.equal(validation.canTypePurchaseMoney(value), false, value);
 for (const value of ['1', '2147483647', 1]) assert.equal(validation.validPurchaseInteger(value), true);
 for (const value of ['0', '-1', '+1', '1.5', '1e2', '0x10', ' 1', '2147483648', true, [], {}]) assert.equal(validation.validPurchaseInteger(value), false);
+for (const value of ['1', '1,00', '1,25', '0,01', '2147483646,99', 1.25, 0.01]) assert.equal(validation.validPurchaseQuantity(value), true, String(value));
+for (const value of ['0', '0,00', '-1', '1.25', '1,234', '1,', '1e2', ' 1', '2147483647,01', 1.234, Infinity, null, {}]) assert.equal(validation.validPurchaseQuantity(value), false, String(value));
+for (const value of ['', '1', '1,', '1,2', '1,25', '0,01']) assert.equal(validation.canTypePurchaseQuantity(value), true, value);
+for (const value of ['-1', '1.25', '1,234', '1,,2', '2147483647,01']) assert.equal(validation.canTypePurchaseQuantity(value), false, value);
+assert.equal(validation.parsePurchaseQuantity('1,25'), 1.25);
 assert.equal(validation.validPurchaseDigits('001', 3), true);
 for (const value of ['A1', '-1', '1!', '1.0', '1234', '']) assert.equal(validation.validPurchaseDigits(value, 3), false);
 for (const value of ['0', '100.00333333333333333333333333333333']) assert.equal(validation.validPurchasePreciseCost(value), true);
@@ -61,6 +66,9 @@ async function invoke(overrides = {}) {
 	}
 }
 assert.equal(await invoke(), 'valid');
+for (const quantidade of ['1,25', '0,01', 1.25]) assert.equal(await invoke({ itens_json: JSON.stringify([{ ...item, quantidade }]) }), 'valid');
+for (const quantidade of ['1,234', '0,00', '2147483647,01']) assert.equal(await invoke({ itens_json: JSON.stringify([{ ...item, quantidade }]) }), 'invalid');
+assert.equal(await invoke({ itens_json: JSON.stringify([{ ...item, quantidade: '0,50', valor_unitario: '0,01', valor_desconto: '0,01' }, { ...item, codproduto: '2' }]) }), 'valid', 'Desconto total fracionado nao deve gerar total negativo');
 assert.equal(await invoke({ desconto_tipo: '' }), 'invalid', 'Formulario antigo deve pedir revisao do desconto');
 assert.equal(await invoke({ itens_json: JSON.stringify([{ ...item, valor_desconto: '100,01' }]) }), 'invalid', 'Desconto unitario acima do custo deve ser rejeitado mesmo abaixo do total bruto');
 assert.equal(await invoke({ itens_json: JSON.stringify([{ ...item, valor_desconto: '2,00' }]) }), 'valid');

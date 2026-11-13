@@ -34,6 +34,10 @@ async function expectInvalid(id) {
   assert.equal(await page.locator(`#${id}`).getAttribute('aria-invalid'), 'true', id);
 }
 
+async function expectMoney(id, value) {
+  assert.equal((await page.locator(`#${id}`).inputValue()).replace(/\s/g, ''), `R$${value}`, id);
+}
+
 try {
   await page.goto(`${base}/cadastro/compras?mode=create`);
   await stage(1);
@@ -106,6 +110,61 @@ try {
   await stage(3);
   await page.locator('#valor_frete').fill('0,00');
   await page.locator('#desconto-item-0').fill('0,00');
+
+  console.log('Verificando rateio pelo valor unitário e custo por unidade...');
+  await page.getByRole('button', { name: 'Adicionar item', exact: true }).click();
+  const secondTrigger = page.locator('[data-purchase-step="products"] button[id^="produto-"][id$="-trigger"]').nth(1);
+  const secondItemId = (await secondTrigger.getAttribute('id')).slice('produto-'.length, -'-trigger'.length);
+  await selectFirst(secondTrigger);
+  await page.locator('#unitario-item-0').fill('100,00');
+  await page.locator('#quantidade-item-0').fill('10');
+  await page.locator(`#unitario-${secondItemId}`).fill('200,00');
+  await page.locator('#valor_frete').fill('20,00');
+  await page.locator('#valor_seguro').fill('5,00');
+  await page.locator('#outras_despesas').fill('5,00');
+  await expectMoney('rateio-item-0', '1,00');
+  await expectMoney(`rateio-${secondItemId}`, '20,00');
+  await expectMoney('custo-unitario-item-0', '101,00');
+  await expectMoney(`custo-unitario-${secondItemId}`, '220,00');
+  await page.locator('#quantidade-item-0').fill('20');
+  await expectMoney('rateio-item-0', '0,50');
+  await expectMoney(`rateio-${secondItemId}`, '20,00');
+  await page.locator('#desconto-item-0').fill('10,00');
+  await expectMoney('rateio-item-0', '0,50');
+	await expectMoney('custo-unitario-item-0', '100,50');
+  await page.locator('#unitario-item-0').fill('200,00');
+  await expectMoney('rateio-item-0', '0,75');
+  await expectMoney(`rateio-${secondItemId}`, '15,00');
+	await expectMoney('custo-unitario-item-0', '200,75');
+
+  await page.getByRole('button', { name: 'Remover item 2', exact: true }).click();
+  await page.locator('#unitario-item-0').fill('100,00');
+  await page.locator('#desconto-item-0').fill('0,00');
+  await page.locator('#quantidade-item-0').fill('3');
+  await page.locator('#valor_frete').fill('0,01');
+  await page.locator('#valor_seguro').fill('0,00');
+  await page.locator('#outras_despesas').fill('0,00');
+  await expectMoney('rateio-item-0', '0,003333');
+  await expectMoney('custo-unitario-item-0', '100,003333');
+  assert.match(await page.locator('#rateio-item-0').getAttribute('title'), /Rateio total do item: R\$\s*0,01/);
+  await page.locator('#quantidade-item-0').fill('1,25');
+  await page.locator('#unitario-item-0').focus();
+  assert.equal(await page.locator('#quantidade-item-0').inputValue(), '1,25');
+  assert.equal(await page.locator('#quantidade-item-0-error').count(), 0);
+  await expectMoney('rateio-item-0', '0,008');
+  await expectMoney('custo-unitario-item-0', '100,008');
+  const items = JSON.parse(await page.locator('input[name="itens_json"]').inputValue());
+  assert.equal(items[0].quantidade, '1,25', 'Quantidade decimal deve ser enviada sem truncamento');
+  await page.locator('#quantidade-item-0').fill('');
+  await expectMoney('rateio-item-0', '0,00');
+  await expectMoney('custo-unitario-item-0', '0,00');
+  await page.locator('#quantidade-item-0').fill('2');
+  await page.locator('#unitario-item-0').fill('20,00');
+  assert.equal(await page.locator('#quantidade-item-0').inputValue(), '2,00', 'Ao sair do campo, exibir duas casas decimais');
+  await page.locator('#valor_frete').fill('0,00');
+  await expectMoney('rateio-item-0', '0,00');
+  await expectMoney('custo-unitario-item-0', '20,00');
+
   await page.locator('#outras_despesas').focus();
   await page.getByRole('status').filter({ hasText: 'Etapa 3 de 4:' }).click();
   await stage(3);

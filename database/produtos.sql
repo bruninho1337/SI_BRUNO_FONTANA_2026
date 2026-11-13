@@ -6,7 +6,7 @@ create table if not exists public.produtos (
 	codunidade_medida integer references public.unidades_medida(codunidade_medida),
 	valor numeric not null default 0 check (valor >= 0),
 	preco_custo numeric not null default 0 check (preco_custo >= 0),
-	quantidade_estoque integer not null default 0 check (quantidade_estoque >= 0),
+	quantidade_estoque numeric(14,2) not null default 0 check (quantidade_estoque >= 0),
 	valor_desconto numeric default 0 check (valor_desconto >= 0),
 	ativo char(1) not null default 'S' check (ativo in ('S', 'N')),
 	data_cadastro timestamp not null default current_timestamp,
