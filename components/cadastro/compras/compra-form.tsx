@@ -439,7 +439,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 
 						return (
 							<div key={item.id} className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-								<div className="grid items-start gap-4 md:grid-cols-12 md:[&_label]:block md:[&_label]:min-h-10">
+								<div className="grid items-start gap-4 md:grid-cols-14 md:[&_label]:block md:[&_label]:min-h-10">
 									<div className={`${fieldClass} md:col-span-1`}>
 										<Label htmlFor={`item-numero-${item.id}`} className="text-sm font-medium text-neutral-800">Item:</Label>
 										<Input id={`item-numero-${item.id}`} value={index + 1} readOnly className="h-11 rounded-xl border-neutral-300 bg-neutral-100 px-4 text-neutral-600" />
@@ -462,7 +462,7 @@ export function CompraForm({ fornecedores, condicoesPagamento, produtos, disable
 										value={item.codproduto}
 										onValueChange={(value) => updateItem(item.id, "codproduto", value)}
 										error={fieldError(`produto-${item.id}-trigger`)}
-										className="min-w-0 md:col-span-3"
+										className="min-w-0 md:col-span-5"
 										createHref={productsDisabled ? undefined : "/cadastro/produtos-servicos/produtos?mode=create"}
 										createLabel="Novo produto"
 									/>
